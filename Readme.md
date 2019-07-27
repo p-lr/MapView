@@ -18,6 +18,18 @@ val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight 
 mapView.configure(config)
 ```
 
+MapView shows only the visible part of a tiled map, and supports flinging, dragging, and scaling. It's also possible to
+add markers and paths.
+
+This project holds the source code of this library, but also a demo app (which is useful to get started).
+
+## Installation
+
+Add this to your module's build.gradle
+```groovy
+implementation 'com.peterlaurence:mapview:0.9.0'
+```
+
 ## Origin and motivation
 
 As a long time contributor to [TileView](https://github.com/moagrius/TileView), which is a reference in this area, I
