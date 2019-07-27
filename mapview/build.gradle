@@ -1,3 +1,4 @@
+apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -5,6 +6,15 @@ apply plugin: 'kotlinx-serialization'
 
 androidExtensions {
     experimental = true
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.9.1'
+    }
 }
 
 android {
@@ -51,4 +61,13 @@ dependencies {
 repositories {
     mavenCentral()
     maven { url "https://kotlin.bintray.com/kotlinx" }
+}
+
+publish {
+    userOrg = 'peterlaurence'
+    groupId = 'com.peterlaurence'
+    artifactId = 'mapview'
+    publishVersion = "0.9.0"
+    desc = 'Android Kotlin library to display tiled maps, with support of markers and paths'
+    website = 'https://github.com/peterLaurence/MapView'
 }

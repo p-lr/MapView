@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.*
-import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.fragment.app.Fragment
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
@@ -95,7 +95,7 @@ class MapMarkersFragment : Fragment() {
 /**
  * A custom [View] that serves as map marker. It bundles its own position and name.
  */
-class MapMarker(context: Context, val x: Double, val y: Double, val name: String) : ImageView(context)
+class MapMarker(context: Context, val x: Double, val y: Double, val name: String) : AppCompatImageView(context)
 
 /**
  * A view that will pop-pup when a marker is tapped.
