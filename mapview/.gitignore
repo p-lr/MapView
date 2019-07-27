@@ -1,0 +1,13 @@
+*.iml
+*.apk
+*.log
+.gradle
+.hgignore
+/local.properties
+.idea
+.hg
+.DS_Store
+build
+/app/src/main/assets/tiles
+/captures
+/app/release

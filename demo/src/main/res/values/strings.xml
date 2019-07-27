@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MapView</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">MapView</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="welcome">Welcome to MapView demo.\nUse the lateral menu to select between available demo.</string>
+
+    <string name="map_alone">Map demo</string>
+    <string name="map_markers">Map and markers demo</string>
+    <string name="map_paths">Map paths demo</string>
+</resources>

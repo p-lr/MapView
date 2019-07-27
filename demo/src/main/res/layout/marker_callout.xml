@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="140dp"
+                android:layout_height="80dp"
+                android:background="@drawable/marker_callout_shape"
+                android:elevation="10dp">
+
+    <TextView
+            android:id="@+id/callout_title"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryTextBlack"
+            android:text="Name" />
+
+    <TextView
+            android:id="@+id/callout_subtitle"
+            android:layout_below="@+id/callout_title"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:textStyle="normal"
+            android:textColor="@color/colorPrimaryTextBlack" />
+</RelativeLayout>
