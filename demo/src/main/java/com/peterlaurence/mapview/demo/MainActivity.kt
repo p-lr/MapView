@@ -17,7 +17,7 @@ import com.peterlaurence.mapview.demo.fragments.MapMarkersFragment
 import com.peterlaurence.mapview.demo.fragments.MapPathFragment
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG)
+    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +45,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+            removeFragments("")
+            showWelcomeMsg()
         }
     }
 
@@ -126,6 +127,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun hideWelcomeMsg() {
         val msg: TextView = findViewById(R.id.welcome_text)
         msg.visibility = View.GONE
+    }
+
+    private fun showWelcomeMsg() {
+        val msg: TextView = findViewById(R.id.welcome_text)
+        msg.visibility = View.VISIBLE
     }
 }
 
