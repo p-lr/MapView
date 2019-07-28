@@ -1,3 +1,5 @@
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=1.0.0) ](https://bintray.com/peterlaurence/maven/mapview/1.0.0/link)
+
 # MapView
 
 MapView is an android ViewGroup to display tiled maps with minimal effort.
@@ -27,7 +29,7 @@ This project holds the source code of this library, but also a demo app (which i
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:0.9.0'
+implementation 'com.peterlaurence:mapview:1.0.0'
 ```
 
 ## Origin and motivation
@@ -61,6 +63,10 @@ val mapView = MapView(context)
 ``` 
 2. Create a `TileStreamProvider`. See [below](#TOC-TileStreamProvider) for the details.
 3. Create a `MapViewConfiguration`. See [below](#TOC-MapViewConfiguration) for the details.
+4. Apply the configuration
+```kotlin
+mapView.configure(config)
+```
 
 ### Convention
 
@@ -69,6 +75,16 @@ Even though you don't have to be aware of the details, it's important to know th
 This convention allows for a simple configuration.
 
 ## Technical documentation
+
+This section explains in details the configuration. But once configured, you can do a lot of things with your `MapView`
+instance. There is just one thing to remember: `MapView` extends [ZoomPanLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/ZoomPanLayout.kt) and this last class has a ton of 
+features (the source code is well documented). You can:
+
+* add listeners to events like pan, fling, zoom..
+* programmatically scroll and center to a position
+* respond to various touch events by subclassing `MapView` and overload related methods declared in `ZoomPanLayout`
+
+This list isn't complete. A dedicated section will be added.
 
 ### <a name="TOC-MapViewConfiguration"></a> MapViewConfiguration
 
