@@ -46,7 +46,6 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
      * pool was empty, a new [Bitmap] is allocated from the calling thread. It's a simple way to
      * share data between coroutines in a thread safe way, using cold flows.
      */
-    @FlowPreview
     private val bitmapFlow: Flow<Bitmap> = flow {
         val bitmap = bitmapPool.getBitmap()
         emit(bitmap)

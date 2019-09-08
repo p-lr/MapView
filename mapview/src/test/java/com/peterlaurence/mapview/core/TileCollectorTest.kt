@@ -63,7 +63,6 @@ class TileCollectorTest {
             }
         }
 
-        @FlowPreview
         val bitmapFlow: Flow<Bitmap> = flow {
             val bitmap = pool.getBitmap()
             emit(bitmap)
