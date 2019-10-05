@@ -7,6 +7,14 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Returns a [SendChannel] which accepts messages of type [T].
+ * The provided [block] function is executed only if a particular timespan (here, [wait]) has passed
+ * without the [SendChannel] receiving an object.
+ * When [block] is executed, it's provided with the last [T] value sent to the channel.
+ *
+ * @author peterLaurence
+ */
 fun <T> CoroutineScope.debounce(
         wait: Long = 300,
         block: (T) -> Unit
