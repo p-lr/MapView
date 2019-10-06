@@ -11,25 +11,54 @@ import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
 import java.io.InputStream
 
+/**
+ * An example showing the simplest usage of [MapView].
+ */
 class MapAloneFragment : Fragment() {
     private lateinit var mapView: MapView
     private lateinit var parentView: ViewGroup
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    /**
+     * The [MapView] should always be added inside [onCreateView], to ensure state save/restore.
+     */
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_layout, container, false).also {
             parentView = it as ViewGroup
-            makeMapView()?.addToFragment()
+            context?.let { ctx ->
+                MapView(ctx).addToFragment()
+            }
         }
     }
 
-    private fun makeMapView(): MapView? {
-        val context = context ?: return null
-        val mapView = MapView(context)
+    /**
+     * Assign an id the the [MapView] (it's necessary to enable state save/restore).
+     * And keep a ref on the [MapView]
+     */
+    private fun MapView.addToFragment() {
+        this@MapAloneFragment.mapView = this
+
+        mapView.id = R.id.mapview_id
+        mapView.isSaveEnabled = true
+
+        parentView.addView(mapView, 0)
+    }
+
+    /**
+     * In this example, the configuration isn't done **immediately** after the [MapView] is added to
+     * the view hierarchy, in [onCreateView]. It's done in [onStart].
+     * But it's not mandatory, it could have been done right after the [MapView] creation.
+     */
+    override fun onStart() {
+        super.onStart()
 
         val tileStreamProvider = object : TileStreamProvider {
             override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
                 return try {
-                    context.assets.open("tiles/esp/$zoomLvl/$row/$col.jpg")
+                    context?.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
                 } catch (e: Exception) {
                     null
                 }
@@ -41,16 +70,5 @@ class MapAloneFragment : Fragment() {
         ).setMaxScale(2f).setPadding(tileSize * 2)
 
         mapView.configure(config)
-        return mapView
-    }
-
-    private fun MapView.addToFragment() {
-        this@MapAloneFragment.mapView = this
-
-        /* This is necessary to ensure state save/restore */
-        mapView.id = R.id.mapview_id
-        mapView.isSaveEnabled = true
-
-        parentView.addView(mapView, 0)
     }
 }

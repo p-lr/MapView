@@ -20,11 +20,23 @@ import com.peterlaurence.mapview.markers.addMarker
 import com.peterlaurence.mapview.markers.setMarkerTapListener
 import java.io.InputStream
 
+/**
+ * An example showing the usage of markers.
+ */
 class MapMarkersFragment : Fragment() {
-    private lateinit var mapView: MapView
     private lateinit var parentView: ViewGroup
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    /**
+     * The [MapView] should always be added inside [onCreateView], to ensure state save/restore.
+     * In this example, the configuration is done **immediately** after the [MapView] is added to
+     * the view hierarchy.
+     * But it's not mandatory, it could have been done later on.
+     */
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_layout, container, false).also {
             parentView = it as ViewGroup
             makeMapView()?.addToFragment()
@@ -73,14 +85,14 @@ class MapMarkersFragment : Fragment() {
         return mapView
     }
 
-    private fun MapView.addToFragment() {
-        this@MapMarkersFragment.mapView = this
+    /**
+     * Assign an id the the [MapView] (it's necessary to enable state save/restore).
+     */
+    private fun MapView.addToFragment() = apply {
+        id = R.id.mapview_id
+        isSaveEnabled = true
 
-        /* This is necessary to ensure state save/restore */
-        mapView.id = R.id.mapview_id
-        mapView.isSaveEnabled = true
-
-        parentView.addView(mapView, 0)
+        parentView.addView(this, 0)
     }
 
     private fun MapView.addNewMarker(x: Double, y: Double, name: String) {
@@ -95,7 +107,8 @@ class MapMarkersFragment : Fragment() {
 /**
  * A custom [View] that serves as map marker. It bundles its own position and name.
  */
-class MapMarker(context: Context, val x: Double, val y: Double, val name: String) : AppCompatImageView(context)
+class MapMarker(context: Context, val x: Double, val y: Double, val name: String) :
+    AppCompatImageView(context)
 
 /**
  * A view that will pop-pup when a marker is tapped.
@@ -114,7 +127,16 @@ class MarkerCallout(context: Context) : RelativeLayout(context) {
 
     fun transitionIn() {
         val scaleAnimation =
-            ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 1f)
+            ScaleAnimation(
+                0f,
+                1f,
+                0f,
+                1f,
+                Animation.RELATIVE_TO_SELF,
+                0.5f,
+                Animation.RELATIVE_TO_SELF,
+                1f
+            )
         scaleAnimation.interpolator = OvershootInterpolator(1.2f)
         scaleAnimation.duration = 250
 

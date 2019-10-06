@@ -65,6 +65,8 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private lateinit var throttledTask: SendChannel<Unit>
     private var shouldRelayoutChildren = false
     private val scaleChangeListeners = mutableListOf<ScaleChangeListener>()
+    private var savedState : SavedState? = null
+    private var isConfigured = false
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -104,6 +106,16 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         setStartScale(config.startScale)
 
         startInternals()
+        isConfigured = true
+
+        /* If we have a saved state (not null), it means we should restore it. It happens when the
+         * configuration is done after the framework restores the state. Typically, it happens when
+         * the MapView is added inside the parents's onCreateView() (as it should always be),
+         * and the configuration is done later on (in onStart for example).
+         */
+        savedState?.let {
+            restoreState(it)
+        }
     }
 
     /**
@@ -267,8 +279,19 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     override fun onRestoreInstanceState(state: Parcelable?) {
         super.onRestoreInstanceState(state)
 
-        val savedState = state as SavedState
+        savedState = state as? SavedState
 
+        /* If the configuration of MapView hasn't been done yet (because the user might configure it
+         * after the MapView is added to the view hierarchy), don't try to restore the state now.
+         * It will be restored at the end of the configuration using the saved state.
+         */
+        if (isConfigured) {
+            val savedState = savedState ?: return
+            restoreState(savedState)
+        }
+    }
+
+    private fun restoreState(savedState: SavedState) {
         scale = savedState.scale
         post {
             scrollToAndCenter(savedState.centerX, savedState.centerY)
