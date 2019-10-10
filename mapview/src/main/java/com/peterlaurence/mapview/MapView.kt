@@ -116,6 +116,11 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         savedState?.let {
             restoreState(it)
         }
+
+        /* Since various events that trigger a render (scale and layout change) may not happen right
+         * after the configuration, ask for a first render explicitly.
+         */
+        renderVisibleTilesThrottled()
     }
 
     /**

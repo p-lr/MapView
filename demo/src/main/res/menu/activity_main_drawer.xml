@@ -13,6 +13,10 @@
         <item
                 android:id="@+id/nav_map_paths"
                 android:title="@string/map_paths"/>
+
+        <item
+                android:id="@+id/nav_map_deferred_configuration"
+                android:title="@string/map_deferred_configuration"/>
     </group>
 
 </menu>

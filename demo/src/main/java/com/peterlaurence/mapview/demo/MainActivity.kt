@@ -12,12 +12,13 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.navigation.NavigationView
+import com.peterlaurence.mapview.demo.fragments.DeferredFragment
 import com.peterlaurence.mapview.demo.fragments.MapAloneFragment
 import com.peterlaurence.mapview.demo.fragments.MapMarkersFragment
 import com.peterlaurence.mapview.demo.fragments.MapPathFragment
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG)
+    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG, MAP_DEFERRED_TAG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
@@ -51,17 +52,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_map_alone -> {
-                showMapAloneFragment()
-            }
-            R.id.nav_map_markers -> {
-                showMapMarkersFragment()
-            }
-            R.id.nav_map_paths -> {
-                showMapPathsFragment()
-            }
+            R.id.nav_map_alone -> showMapAloneFragment()
+            R.id.nav_map_markers -> showMapMarkersFragment()
+            R.id.nav_map_paths -> showMapPathsFragment()
+            R.id.nav_map_deferred_configuration -> showDeferredConfigurationFragment()
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         drawerLayout.closeDrawer(GravityCompat.START)
@@ -69,48 +64,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun showMapAloneFragment() {
-        showFragment(MAP_ALONE_TAG) {
-            createMapAloneFragment(it)
+        showFragment(MAP_ALONE_TAG) { tr, tag ->
+            createFragment(tr, MapAloneFragment::class.java, tag)
         }
     }
 
     private fun showMapMarkersFragment() {
-        showFragment(MAP_MARKERS_TAG) {
-            createMapMarkersFragment(it)
+        showFragment(MAP_MARKERS_TAG) { tr, tag ->
+            createFragment(tr, MapMarkersFragment::class.java, tag)
         }
     }
 
     private fun showMapPathsFragment() {
-        showFragment(MAP_PATHS_TAG) {
-            createMapPathsFragment(it)
+        showFragment(MAP_PATHS_TAG) { tr, tag ->
+            createFragment(tr, MapPathFragment::class.java, tag)
         }
     }
 
-    private fun showFragment(tag: String, onCreate: (t: FragmentTransaction) -> Fragment) {
+    private fun showDeferredConfigurationFragment() {
+        showFragment(MAP_DEFERRED_TAG) { tr, tag ->
+            createFragment(tr, DeferredFragment::class.java, tag)
+        }
+    }
+
+    private fun showFragment(tag: String, onCreate: (t: FragmentTransaction, tag: String) -> Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         removeFragments(tag)
         hideWelcomeMsg()
-        val fragment = supportFragmentManager.findFragmentByTag(tag) ?: onCreate(transaction)
+        val fragment = supportFragmentManager.findFragmentByTag(tag) ?: onCreate(transaction, tag)
         transaction.show(fragment)
         transaction.commit()
     }
 
-    private fun createMapAloneFragment(transaction: FragmentTransaction): Fragment {
-        val fragment = MapAloneFragment()
-        transaction.add(R.id.content_frame, fragment, MAP_ALONE_TAG)
-        return fragment
-    }
-
-    private fun createMapMarkersFragment(transaction: FragmentTransaction): Fragment {
-        val fragment = MapMarkersFragment()
-        transaction.add(R.id.content_frame, fragment, MAP_MARKERS_TAG)
-        return fragment
-    }
-
-    private fun createMapPathsFragment(transaction: FragmentTransaction): Fragment {
-        val fragment = MapPathFragment()
-        transaction.add(R.id.content_frame, fragment, MAP_PATHS_TAG)
-        return fragment
+    private fun <T : Fragment> createFragment(transaction: FragmentTransaction, clazz: Class<T>, tag: String): Fragment {
+        val f = clazz.newInstance()
+        transaction.add(R.id.content_frame, f, tag)
+        return f
     }
 
     private fun removeFragments(tagExcept: String) {
@@ -138,3 +127,4 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 const val MAP_ALONE_TAG = "map_alone"
 const val MAP_MARKERS_TAG = "map_markers"
 const val MAP_PATHS_TAG = "map_paths"
+const val MAP_DEFERRED_TAG = "map_deferred"
