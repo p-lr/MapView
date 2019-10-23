@@ -36,7 +36,9 @@ implementation 'com.peterlaurence:mapview:1.0.3'
 
 As a long time contributor to [TileView](https://github.com/moagrius/TileView), which is a reference in this area, I
 wanted to see the performance we would have using Kotlin coroutines. The result was beyond my expectations and this is
-why I'm sharing it the world.
+why I'm sharing it the world. The overall design can be seen [here](https://github.com/peterLaurence/MapView/wiki/TileCollector-design).
+The focus has been on efficiency (no thread contention thanks to asynchronous programming, and the load on the main thread is low enough to maximize the fps).
+
 A special thanks goes to Mike (@moagrius), as this library wouldn't exist without his first contributions.
 
 ## Principles
