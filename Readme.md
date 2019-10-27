@@ -139,6 +139,9 @@ interface TileStreamProvider {
 Your implementation of this interface does the necessary coordinate translation (if required). This is where you do your
 HTTP request if you have remote tiles, or fetch from a local database (or file system).
 
+## Create a deep-zoom map
+
+If you don't have already such a map and you need to make one from a big image, follow this [tutorial](doc/libvips.md).
 
 
 
