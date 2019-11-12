@@ -50,9 +50,8 @@ class TileCollectorTest {
         val imageFile = File(assetsDir, "10.jpg")
         assertTrue(imageFile.exists())
 
-
         /* Setup the channels */
-        val visibleTileLocationsChannel = Channel<List<TileSpec>>(capacity = Channel.CONFLATED)
+        val visibleTileLocationsChannel = Channel<TileSpec>(capacity = Channel.RENDEZVOUS)
         val tilesOutput = Channel<Tile>(capacity = Channel.RENDEZVOUS)
 
         val pool = BitmapPool()
@@ -106,7 +105,9 @@ class TileCollectorTest {
                     TileSpec(0, 1, 1),
                     TileSpec(0, 2, 1)
             )
-            visibleTileLocationsChannel.send(locations1)
+            for (spec in locations1) {
+                visibleTileLocationsChannel.send(spec)
+            }
             delay(100)
             val locations2 = listOf(
                     TileSpec(1, 0, 0),
@@ -114,7 +115,9 @@ class TileCollectorTest {
                     TileSpec(1, 2, 1)
             )
             /* Bitmaps inside the pool should be used */
-            visibleTileLocationsChannel.send(locations2)
+            for (spec in locations2) {
+                visibleTileLocationsChannel.send(spec)
+            }
 
             // wait a little, then cancel the job
             delay(1000)

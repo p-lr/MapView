@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.peterlaurence.mapview.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
@@ -37,8 +38,9 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
 
     private val bitmapPool = BitmapPool()
     private val paintPool = PaintPool()
-    private val visibleTileLocationsChannel = Channel<List<TileSpec>>(capacity = Channel.CONFLATED)
+    private val visibleTileLocationsChannel = Channel<TileSpec>(capacity = Channel.RENDEZVOUS)
     private val tilesOutput = Channel<Tile>(capacity = Channel.RENDEZVOUS)
+    private var tileCollectionJob: Job? = null
 
     /**
      * A [Flow] of [Bitmap] that first collects from the [bitmapPool] on the Main thread. If the
@@ -90,7 +92,11 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
     }
 
     private fun setVisibleTiles(visibleTiles: VisibleTiles) {
-        collectNewTiles(visibleTiles)
+        /* Cancel the previous job, to avoid overwhelming the tile collector */
+        tileCollectionJob?.cancel()
+        tileCollectionJob = launch {
+            collectNewTiles(visibleTiles)
+        }
 
         lastVisible = visibleTiles
         lastVisibleCount = visibleTiles.getNumberOfTiles()
@@ -100,14 +106,19 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
         renderThrottled()
     }
 
-    private fun collectNewTiles(visibleTiles: VisibleTiles) {
+    private suspend fun collectNewTiles(visibleTiles: VisibleTiles) {
         val locations = visibleTiles.toTileSpecs()
         val locationWithoutTile = locations.filterNot { loc ->
             tilesToRender.any {
                 it.sameSpecAs(loc)
             }
         }
-        visibleTileLocationsChannel.offer(locationWithoutTile)
+
+        /* Here, we're leveraging built-in back pressure, as this will suspend when the tile collector
+         * is busy to the point it can't handshake the channel. */
+        for (tileSpec in locationWithoutTile) {
+            visibleTileLocationsChannel.send(tileSpec)
+        }
     }
 
     /**

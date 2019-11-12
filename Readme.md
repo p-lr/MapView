@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=1.0.3) ](https://bintray.com/peterlaurence/maven/mapview/1.0.3/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=1.0.4) ](https://bintray.com/peterlaurence/maven/mapview/1.0.4/link)
 
 # MapView
 
@@ -29,7 +29,7 @@ This project holds the source code of this library, but also a demo app (which i
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:1.0.3'
+implementation 'com.peterlaurence:mapview:1.0.4'
 ```
 
 ## Origin and motivation
