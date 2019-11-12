@@ -2,7 +2,7 @@
 
 # MapView
 
-MapView is an android ViewGroup to display tiled maps with minimal effort.
+MapView is a Fast, Memory Efficient android library to display tiled maps with minimal effort.
 
 ```kotlin
 val mapView = MapView(context)
@@ -23,7 +23,7 @@ mapView.configure(config)
 MapView shows only the visible part of a tiled map, and supports flinging, dragging, and scaling. It's also possible to
 add markers and paths.
 
-This project holds the source code of this library, but also a demo app (which is useful to get started).
+This project holds the source code of this library, plus a demo app (which is useful to get started).
 
 ## Installation
 
