@@ -10,5 +10,6 @@
     <string name="map_alone">Map demo</string>
     <string name="map_markers">Map and markers demo</string>
     <string name="map_paths">Map paths demo</string>
+    <string name="map_remote_http">Remote HTTP demo</string>
     <string name="map_deferred_configuration">Deferred config demo</string>
 </resources>

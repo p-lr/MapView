@@ -12,10 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.navigation.NavigationView
-import com.peterlaurence.mapview.demo.fragments.DeferredFragment
-import com.peterlaurence.mapview.demo.fragments.MapAloneFragment
-import com.peterlaurence.mapview.demo.fragments.MapMarkersFragment
-import com.peterlaurence.mapview.demo.fragments.MapPathFragment
+import com.peterlaurence.mapview.demo.fragments.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG, MAP_DEFERRED_TAG)
@@ -56,6 +53,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_map_alone -> showMapAloneFragment()
             R.id.nav_map_markers -> showMapMarkersFragment()
             R.id.nav_map_paths -> showMapPathsFragment()
+            R.id.nav_remote_http -> showRemoteHttpFragment()
             R.id.nav_map_deferred_configuration -> showDeferredConfigurationFragment()
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
@@ -78,6 +76,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun showMapPathsFragment() {
         showFragment(MAP_PATHS_TAG) { tr, tag ->
             createFragment(tr, MapPathFragment::class.java, tag)
+        }
+    }
+
+    private fun showRemoteHttpFragment() {
+        showFragment(MAP_REMOTE_HTTP_TAG) { tr, tag ->
+            createFragment(tr, RemoteHttpFragment::class.java, tag)
         }
     }
 
@@ -127,4 +131,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 const val MAP_ALONE_TAG = "map_alone"
 const val MAP_MARKERS_TAG = "map_markers"
 const val MAP_PATHS_TAG = "map_paths"
+const val MAP_REMOTE_HTTP_TAG = "map_remote_http"
 const val MAP_DEFERRED_TAG = "map_deferred"
