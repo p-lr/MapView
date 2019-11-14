@@ -2,8 +2,9 @@ package com.peterlaurence.mapview.core
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Process
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
@@ -11,6 +12,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -67,7 +72,7 @@ class TileCollector(private val workerCount: Int) {
                                       tilesDownloaded: SendChannel<TileSpec>,
                                       tilesOutput: SendChannel<Tile>,
                                       tileStreamProvider: TileStreamProvider,
-                                      bitmapFlow: Flow<Bitmap>) = launch(Dispatchers.IO) {
+                                      bitmapFlow: Flow<Bitmap>) = launch(dispatcher) {
 
         val bitmapLoadingOptions = BitmapFactory.Options()
         bitmapLoadingOptions.inPreferredConfig = Bitmap.Config.RGB_565
@@ -104,7 +109,7 @@ class TileCollector(private val workerCount: Int) {
 
     private fun CoroutineScope.tileCollectorKernel(tileSpecs: ReceiveChannel<TileSpec>,
                                                    tilesToDownload: SendChannel<TileSpec>,
-                                                   tilesDownloadedFromWorker: ReceiveChannel<TileSpec>) = launch(Dispatchers.Default) {
+                                                   tilesDownloadedFromWorker: ReceiveChannel<TileSpec>) = launch(dispatcher) {
 
         val tilesBeingProcessed = mutableListOf<TileSpec>()
 
@@ -125,4 +130,14 @@ class TileCollector(private val workerCount: Int) {
             }
         }
     }
+
+    private val dispatcher = ThreadPoolExecutor(0, workerCount + 1,
+            60L, TimeUnit.SECONDS,
+            SynchronousQueue<Runnable>(), ThreadFactory { r ->
+        Thread(r).apply {
+            isDaemon = true
+            priority = Thread.MIN_PRIORITY
+            Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST)
+        }
+    }).asCoroutineDispatcher()
 }

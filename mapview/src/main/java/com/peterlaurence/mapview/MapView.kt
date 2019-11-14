@@ -316,7 +316,11 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
  */
 data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val fullHeight: Int,
                                 val tileSize: Int, val tileStreamProvider: TileStreamProvider) {
-    var workerCount = 16 // good compromise between remote http and local usage
+    /**
+     * The maximum level of parallelism. For local tiles, a value of 2 is enough.
+     * For remote HTTP tiles, don't hesitate to raise this up to 60 (if the device is powerful enough).
+     */
+    var workerCount = 2 // appropriate for local usage. Don't hesitate to raise up to 60 for remote usage
         private set
 
     var minScale: Float? = null

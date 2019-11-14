@@ -15,7 +15,7 @@ import com.google.android.material.navigation.NavigationView
 import com.peterlaurence.mapview.demo.fragments.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG, MAP_DEFERRED_TAG)
+    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG, MAP_DEFERRED_TAG, MAP_REMOTE_HTTP_TAG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

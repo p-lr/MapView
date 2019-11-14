@@ -63,7 +63,6 @@ class RemoteHttpFragment : Fragment() {
                     connection.connect()
                     BufferedInputStream(connection.inputStream)
                 } catch (e: Exception) {
-                    e.printStackTrace()
                     null
                 }
             }
@@ -75,9 +74,17 @@ class RemoteHttpFragment : Fragment() {
             }
         }
         val tileSize = 256
+
+        /**
+         * Very important: for remote tiles, we have to raise the number of workers to be more
+         * efficient. Don't put a value greater than 60.
+         * Keep in mind that more workers will put more load onto the device, which can lead to
+         * stutters. It's a balance between device capability, distant server response time, and
+         * fluid experience.
+         */
         val config = MapViewConfiguration(
                 5, 8192, 8192, tileSize, tileStreamProvider
-        ).setMaxScale(2f).setPadding(tileSize * 2)
+        ).setMaxScale(2f).setPadding(tileSize * 2).setWorkerCount(16)
 
         mapView.configure(config)
     }
