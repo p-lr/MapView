@@ -79,8 +79,8 @@ class VisibleTilesResolver(private val levelCount: Int, private val fullWidth: I
         val relativeScale = scale / scaleAtLevel
 
         /* At the current level, row and col index have maximum values */
-        val maxCol = (fullWidth * scaleAtLevel / tileSize).toInt()
-        val maxRow = (fullHeight * scaleAtLevel / tileSize).toInt()
+        val maxCol = max(0.0, ceil(fullWidth * scaleAtLevel.toDouble() / tileSize) - 1).toInt()
+        val maxRow = max(0.0, ceil(fullHeight * scaleAtLevel.toDouble() / tileSize) - 1).toInt()
 
         fun Int.lowerThan(limit: Int): Int {
             return if (this <= limit) this else limit

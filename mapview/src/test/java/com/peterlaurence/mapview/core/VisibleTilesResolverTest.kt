@@ -62,13 +62,22 @@ class VisibleTilesResolverTest {
         assertEquals(1, visibleTiles.rowBottom)
 
         resolver.setScale(0.5f)
-        viewport = Viewport(0, 0, 200, 300)
+        viewport = Viewport(0, 0, 512, 512)
         visibleTiles = resolver.getVisibleTiles(viewport)
         assertEquals(1, visibleTiles.level)
         assertEquals(0, visibleTiles.colLeft)
         assertEquals(0, visibleTiles.rowTop)
-        assertEquals(0, visibleTiles.colRight)
+        assertEquals(1, visibleTiles.colRight)
         assertEquals(1, visibleTiles.rowBottom)
+
+        val resolver2 = VisibleTilesResolver(5, 8192, 8192)
+        val viewport2 = Viewport(0, 0,8192, 8192)
+        visibleTiles = resolver2.getVisibleTiles(viewport2)
+        assertEquals(4, visibleTiles.level)
+        assertEquals(0, visibleTiles.colLeft)
+        assertEquals(0, visibleTiles.rowTop)
+        assertEquals(31, visibleTiles.colRight)
+        assertEquals(31, visibleTiles.rowBottom)
     }
 
     @Test

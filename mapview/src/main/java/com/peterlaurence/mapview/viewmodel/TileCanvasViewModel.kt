@@ -31,7 +31,7 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
          * above others */
         tilesToRender.sortBy {
-            it.zoom == lastVisible.level
+            it.zoom == lastVisible.level && it.subSample == lastVisible.subSample
         }
         tilesToRenderLiveData.postValue(tilesToRender)
     }
