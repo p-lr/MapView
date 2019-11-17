@@ -59,6 +59,7 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         if (tilesToRender.isEmpty()) return
 
         var needsAnotherPass = false
+        val dest = Rect()
         for (tile in tilesToRender) {
             val scaleForLevel = visibleTilesResolver.getScaleForLevel(tile.zoom)
                     ?: continue
@@ -67,7 +68,7 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
             val t = tile.row * tileScaled
             val r = l + tileScaled
             val b = t + tileScaled
-            val dest = Rect(l, t, r, b)
+            dest.set(l, t, r, b)
 
             /* If a tile has a paint, compute only once the alphaProgress for this loop */
             val paint = tile.paint?.also {

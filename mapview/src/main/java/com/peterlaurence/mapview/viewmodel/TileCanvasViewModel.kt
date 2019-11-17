@@ -107,8 +107,8 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
     }
 
     private suspend fun collectNewTiles(visibleTiles: VisibleTiles) {
-        val locations = visibleTiles.toTileSpecs()
-        val locationWithoutTile = locations.filterNot { loc ->
+        val tileSpecs = visibleTiles.toTileSpecs()
+        val tileSpecsWithoutTile = tileSpecs.filterNot { loc ->
             tilesToRender.any {
                 it.sameSpecAs(loc)
             }
@@ -116,7 +116,7 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
 
         /* Here, we're leveraging built-in back pressure, as this will suspend when the tile collector
          * is busy to the point it can't handshake the channel. */
-        for (tileSpec in locationWithoutTile) {
+        for (tileSpec in tileSpecsWithoutTile) {
             visibleTileLocationsChannel.send(tileSpec)
         }
     }
