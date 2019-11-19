@@ -136,8 +136,10 @@ class TileCollector(private val workerCount: Int) {
             SynchronousQueue<Runnable>(), ThreadFactory { r ->
         Thread(r).apply {
             isDaemon = true
-            priority = Thread.MIN_PRIORITY
-            Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST)
+            /* Beware, using THREAD_PRIORITY_LOWEST leads to UI hang on some emulators, while
+             * THREAD_PRIORITY_BACKGROUND has similar positive impact on overall responsiveness on
+             * low-end devices while not having this side effect. */
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
         }
     }).asCoroutineDispatcher()
 }

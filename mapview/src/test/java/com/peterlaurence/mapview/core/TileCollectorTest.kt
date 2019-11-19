@@ -2,6 +2,7 @@ package com.peterlaurence.mapview.core
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -13,6 +14,7 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -26,6 +28,7 @@ import com.peterlaurence.mapview.core.TileStreamProvider as MapViewTileStreamPro
  * * The [Bitmap] of the [Tile]s produced should be consistent with the output of the flow
  */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 class TileCollectorTest {
 
     private val tileSize = 256
