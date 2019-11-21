@@ -6,13 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.InputStream
-import kotlin.coroutines.CoroutineContext
 
 /**
  * An example showing deferred configuration of [MapView]. In this example, a [MapView] is first
@@ -23,14 +24,10 @@ import kotlin.coroutines.CoroutineContext
  * [onCreateView] lifecycle callback to have its state saved and restored upon device rotation.
  * But inside [onCreateView] we may not have (yet) all information needed to call [MapView.configure].
  */
-class DeferredFragment : Fragment(), CoroutineScope {
+class DeferredFragment : Fragment() {
 
     private lateinit var mapView: MapView
     private lateinit var parentView: ViewGroup
-    private var job: Job? = null
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + Job().also { job = it }
 
     /**
      * The [MapView] should always be added inside [onCreateView], to ensure state save/restore.
@@ -83,15 +80,9 @@ class DeferredFragment : Fragment(), CoroutineScope {
             5, 8192, 8192, tileSize, tileStreamProvider
         ).setMaxScale(2f).setPadding(tileSize * 2)
 
-        launch {
+        lifecycleScope.launch {
             delay(500) // simulate delay
             mapView.configure(config)
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        job?.cancel()
     }
 }
