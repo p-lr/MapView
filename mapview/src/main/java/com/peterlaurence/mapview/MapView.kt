@@ -65,7 +65,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private lateinit var throttledTask: SendChannel<Unit>
     private var shouldRelayoutChildren = false
     private val scaleChangeListeners = mutableListOf<ScaleChangeListener>()
-    private var savedState : SavedState? = null
+    private var savedState: SavedState? = null
     private var isConfigured = false
 
     override val coroutineContext: CoroutineContext
@@ -90,6 +90,10 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
      * require dedicated method call right after the configuration.
      */
     fun configure(config: MapViewConfiguration) {
+        /* Safeguard - an existing instance should always be destroyed or we leak coroutines */
+        if (isConfigured) throw IllegalStateException("This MapView instance is already configured, " +
+                "either call destroy() on existing instance then re-create a MapView, or avoid a re-configure")
+
         /* Save the configuration */
         configuration = config
 

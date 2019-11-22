@@ -28,6 +28,7 @@ class DeferredFragment : Fragment() {
 
     private lateinit var mapView: MapView
     private lateinit var parentView: ViewGroup
+    private var isConfigured = false
 
     /**
      * The [MapView] should always be added inside [onCreateView], to ensure state save/restore.
@@ -61,10 +62,15 @@ class DeferredFragment : Fragment() {
     /**
      * In this example, the configuration isn't done **immediately** after the [MapView] is added to
      * the view hierarchy, in [onCreateView]. It's done in [onStart].
-     * But it's not mandatory, it could have been done right after the [MapView] creation.
+     * But it's not mandatory, it could have been done right after the [MapView] creation. Beware
+     * though to configure the [MapView] only once. Or, call [MapView.destroy] on the existing
+     * instance then create and configure a new instance.
      */
     override fun onStart() {
         super.onStart()
+
+        /* Safeguard, to prevent a re-configuration of an already configured instance */
+        if (isConfigured) return
 
         val tileStreamProvider = object : TileStreamProvider {
             override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
@@ -83,6 +89,23 @@ class DeferredFragment : Fragment() {
         lifecycleScope.launch {
             delay(500) // simulate delay
             mapView.configure(config)
+        }
+        isConfigured = true
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putBoolean(::isConfigured.name, isConfigured)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        if (savedInstanceState != null) {
+            val v = savedInstanceState[::isConfigured.name] as? Boolean
+            if (v != null) {
+                isConfigured = v
+            }
         }
     }
 }
