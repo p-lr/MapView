@@ -87,25 +87,25 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     private var mShouldLoopScale = true
 
     /**
-     * Whether the ZoomPanLayout is currently being flung.
+     * Whether the [GestureLayout] is currently being flung.
      */
     var isFlinging: Boolean = false
         private set
 
     /**
-     * Whether the ZoomPanLayout is currently being dragged.
+     * Whether the [GestureLayout] is currently being dragged.
      */
     var isDragging: Boolean = false
         private set
 
     /**
-     * Whether the ZoomPanLayout is currently scaling.
+     * Whether the [GestureLayout] is currently scaling.
      */
     var isScaling: Boolean = false
         private set
 
     /**
-     * Whether the layout is currently currently scrolling.
+     * Whether the [GestureLayout] is currently currently scrolling.
      */
     var isSliding: Boolean = false
         private set
@@ -230,7 +230,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Determines whether the ZoomPanLayout should go back to minimum scale after a double-tap at
+     * Determines whether the [GestureLayout] should go back to minimum scale after a double-tap at
      * maximum scale.
      *
      * @param shouldLoopScale True to allow going back to minimum scale, false otherwise.
@@ -240,12 +240,12 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Set minimum and maximum mScale values for this ZoomPanLayout.
+     * Set minimum and maximum mScale values for this layout.
      * Note that if minimumScaleMode is set to [MinimumScaleMode.FIT] or [MinimumScaleMode.FILL], the minimum value set here will be ignored
      * Default values are 0 and 1.
      *
-     * @param min Minimum scale the ZoomPanLayout should accept.
-     * @param max Maximum scale the ZoomPanLayout should accept.
+     * @param min Minimum scale the [GestureLayout] should accept.
+     * @param max Maximum scale the [GestureLayout] should accept.
      */
     fun setScaleLimits(min: Float, max: Float) {
         mMinScale = min
@@ -262,7 +262,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Sets the size (width and height) of the ZoomPanLayout
+     * Sets the size (width and height) of the [GestureLayout]
      * as it should be rendered at a scale of 1f (100%).
      *
      * @param width  Width of the underlying image, not the view or viewport.
@@ -289,7 +289,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Scrolls and centers the ZoomPanLayout to the x and y values provided.
+     * Scrolls and centers the [GestureLayout] to the x and y values provided.
      *
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
@@ -299,16 +299,14 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Set the scale of the ZoomPanLayout while maintaining the current center point.
-     *
-     * @param scale The new value of the ZoomPanLayout scale.
+     * Set the scale of the [GestureLayout] while maintaining the current center point.
      */
     fun setScaleFromCenter(scale: Float) {
         setScaleFromPosition(halfWidth, halfHeight, scale)
     }
 
     /**
-     * Scrolls the ZoomPanLayout to the x and y values provided using scrolling animation.
+     * Scrolls the [GestureLayout] to the x and y values provided using scrolling animation.
      *
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
@@ -318,7 +316,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Scrolls and centers the ZoomPanLayout to the x and y values provided using scrolling animation.
+     * Scrolls and centers the [GestureLayout] to the x and y values provided using scrolling animation.
      *
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
@@ -328,33 +326,33 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Animates the ZoomPanLayout to the scale provided, and centers the viewport to the position
+     * Animates the [GestureLayout] to the scale provided, and centers the viewport to the position
      * supplied.
      *
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
-     * @param scale The final scale value the ZoomPanLayout should animate to.
+     * @param scale The final scale value the layout should animate to.
      */
     fun slideToAndCenterWithScale(x: Int, y: Int, scale: Float) {
         animator.animateZoomPan(x - halfWidth, y - halfHeight, scale)
     }
 
     /**
-     * Scales the ZoomPanLayout with animated progress, without maintaining scroll position.
+     * Scales the [GestureLayout] with animated progress, without maintaining scroll position.
      *
-     * @param destination The final scale value the ZoomPanLayout should animate to.
+     * @param destination The final scale value the layout should animate to.
      */
     fun smoothScaleTo(destination: Float) {
         animator.animateZoom(destination)
     }
 
     /**
-     * Animates the ZoomPanLayout to the scale provided, while maintaining position determined by
+     * Animates the [GestureLayout] to the scale provided, while maintaining position determined by
      * the focal point provided.
      *
      * @param focusX The horizontal focal point to maintain, relative to the screen (as supplied by MotionEvent.getX).
      * @param focusY The vertical focal point to maintain, relative to the screen (as supplied by MotionEvent.getY).
-     * @param scale The final scale value the ZoomPanLayout should animate to.
+     * @param scale The final scale value the layout should animate to.
      */
     fun smoothScaleFromFocalPoint(focusX: Int, focusY: Int, scale: Float) {
         var scale = scale
@@ -368,9 +366,9 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     /**
-     * Animate the scale of the ZoomPanLayout while maintaining the current center point.
+     * Animate the scale of the [GestureLayout] while maintaining the current center point.
      *
-     * @param scale The final scale value the ZoomPanLayout should animate to.
+     * @param scale The final scale value the layout should animate to.
      */
     fun smoothScaleFromCenter(scale: Float) {
         smoothScaleFromFocalPoint(halfWidth, halfHeight, scale)
