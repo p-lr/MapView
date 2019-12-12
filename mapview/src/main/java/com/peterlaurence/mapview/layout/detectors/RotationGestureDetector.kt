@@ -1,7 +1,7 @@
-package com.peterlaurence.mapview.layout
+package com.peterlaurence.mapview.layout.detectors
 
 import android.view.MotionEvent
-import com.peterlaurence.mapview.layout.RotationGestureDetector.OnRotationGestureListener
+import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector.OnRotationGestureListener
 import kotlin.math.abs
 import kotlin.math.atan2
 

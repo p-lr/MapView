@@ -8,9 +8,10 @@ import android.view.*
 import android.view.animation.Interpolator
 import android.widget.Scroller
 import androidx.core.view.ViewCompat
+import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector
+import com.peterlaurence.mapview.layout.detectors.TouchUpGestureDetector
 import com.peterlaurence.mapview.util.scale
 import java.lang.ref.WeakReference
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -144,7 +145,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
             animator.duration = duration.toLong()
         }
 
-    private val mZoomPanListeners = HashSet<ZoomPanListener>()
     private val mScaleGestureDetector: ScaleGestureDetector
     private val mGestureDetector: GestureDetector
     private val mTouchUpGestureDetector: TouchUpGestureDetector
@@ -296,27 +296,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     fun setImagePadding(padding: Int) {
         mImagePadding = padding
         recalculateImagePadding()
-    }
-
-    /**
-     * Adds a ZoomPanListener to the ZoomPanLayout, which will receive notification of actions
-     * relating to zoom and pan events.
-     *
-     * @param zoomPanListener ZoomPanListener implementation to add.
-     * @return True when the listener set did not already contain the Listener, false otherwise.
-     */
-    fun addZoomPanListener(zoomPanListener: ZoomPanListener): Boolean {
-        return mZoomPanListeners.add(zoomPanListener)
-    }
-
-    /**
-     * Removes a ZoomPanListener from the ZoomPanLayout
-     *
-     * @param listener ZoomPanListener to remove.
-     * @return True if the Listener was removed, false otherwise.
-     */
-    fun removeZoomPanListener(listener: ZoomPanListener): Boolean {
-        return mZoomPanListeners.remove(listener)
     }
 
     /**
@@ -544,14 +523,10 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
             val endY = getConstrainedScrollY(scroller.currY)
             if (startX != endX || startY != endY) {
                 scrollTo(endX, endY)
-                if (isFlinging) {
-                    broadcastFlingUpdate()
-                }
             }
             if (scroller.isFinished) {
                 if (isFlinging) {
                     isFlinging = false
-                    broadcastFlingEnd()
                 }
             } else {
                 ViewCompat.postInvalidateOnAnimation(this)
@@ -559,101 +534,10 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
     }
 
-    private fun broadcastDragBegin() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanBegin(scrollX, scrollY, ZoomPanListener.Origination.DRAG)
-        }
-    }
-
-    private fun broadcastDragUpdate() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanUpdate(scrollX, scrollY, ZoomPanListener.Origination.DRAG)
-        }
-    }
-
-    private fun broadcastDragEnd() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanEnd(scrollX, scrollY, ZoomPanListener.Origination.DRAG)
-        }
-    }
-
-    private fun broadcastFlingBegin() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanBegin(scroller.startX, scroller.startY, ZoomPanListener.Origination.FLING)
-        }
-    }
-
-    private fun broadcastFlingUpdate() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanUpdate(scroller.currX, scroller.currY, ZoomPanListener.Origination.FLING)
-        }
-    }
-
-    private fun broadcastFlingEnd() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanEnd(scroller.finalX, scroller.finalY, ZoomPanListener.Origination.FLING)
-        }
-    }
-
-    private fun broadcastProgrammaticPanBegin() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanBegin(scrollX, scrollY, null)
-        }
-    }
-
-    private fun broadcastProgrammaticPanUpdate() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanUpdate(scrollX, scrollY, null)
-        }
-    }
-
-    private fun broadcastProgrammaticPanEnd() {
-        for (listener in mZoomPanListeners) {
-            listener.onPanEnd(scrollX, scrollY, null)
-        }
-    }
-
-    private fun broadcastPinchBegin() {
-        for (listener in mZoomPanListeners) {
-            listener.onZoomBegin(scale, ZoomPanListener.Origination.PINCH)
-        }
-    }
-
-    private fun broadcastPinchUpdate() {
-        for (listener in mZoomPanListeners) {
-            listener.onZoomUpdate(scale, ZoomPanListener.Origination.PINCH)
-        }
-    }
-
-    private fun broadcastPinchEnd() {
-        for (listener in mZoomPanListeners) {
-            listener.onZoomEnd(scale, ZoomPanListener.Origination.PINCH)
-        }
-    }
-
-    private fun broadcastProgrammaticZoomBegin() {
-        for (listener in mZoomPanListeners) {
-            listener.onZoomBegin(scale, null)
-        }
-    }
-
-    private fun broadcastProgrammaticZoomUpdate() {
-        for (listener in mZoomPanListeners) {
-            listener.onZoomUpdate(scale, null)
-        }
-    }
-
-    private fun broadcastProgrammaticZoomEnd() {
-        for (listener in mZoomPanListeners) {
-            listener.onZoomEnd(scale, null)
-        }
-    }
-
     override fun onDown(event: MotionEvent): Boolean {
         if (isFlinging && !scroller.isFinished) {
             scroller.forceFinished(true)
             isFlinging = false
-            broadcastFlingEnd()
         }
         return true
     }
@@ -664,7 +548,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
 
         isFlinging = true
         ViewCompat.postInvalidateOnAnimation(this)
-        broadcastFlingBegin()
         return true
     }
 
@@ -678,9 +561,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         scrollTo(scrollEndX, scrollEndY)
         if (!isDragging) {
             isDragging = true
-            broadcastDragBegin()
-        } else {
-            broadcastDragUpdate()
         }
         return true
     }
@@ -712,22 +592,17 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     override fun onTouchUp(event: MotionEvent): Boolean {
         if (isDragging) {
             isDragging = false
-            if (!isFlinging) {
-                broadcastDragEnd()
-            }
         }
         return true
     }
 
     override fun onScaleBegin(scaleGestureDetector: ScaleGestureDetector): Boolean {
         isScaling = true
-        broadcastPinchBegin()
         return true
     }
 
     override fun onScaleEnd(scaleGestureDetector: ScaleGestureDetector) {
         isScaling = false
-        broadcastPinchEnd()
     }
 
     override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
@@ -736,7 +611,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 scaleGestureDetector.focusX.toInt(),
                 scaleGestureDetector.focusY.toInt(),
                 currentScale)
-        broadcastPinchUpdate()
         return true
     }
 
@@ -830,13 +704,11 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 if (mHasPendingZoomUpdates) {
                     val scale = mStartState.scale + (mEndState.scale - mStartState.scale) * progress
                     zoomPanLayout.scale = scale
-                    zoomPanLayout.broadcastProgrammaticZoomUpdate()
                 }
                 if (mHasPendingPanUpdates) {
                     val x = (mStartState.x + (mEndState.x - mStartState.x) * progress).toInt()
                     val y = (mStartState.y + (mEndState.y - mStartState.y) * progress).toInt()
                     zoomPanLayout.scrollTo(x, y)
-                    zoomPanLayout.broadcastProgrammaticPanUpdate()
                 }
             }
         }
@@ -846,11 +718,9 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
             if (zoomPanLayout != null) {
                 if (mHasPendingZoomUpdates) {
                     zoomPanLayout.isScaling = true
-                    zoomPanLayout.broadcastProgrammaticZoomBegin()
                 }
                 if (mHasPendingPanUpdates) {
                     zoomPanLayout.isSliding = true
-                    zoomPanLayout.broadcastProgrammaticPanBegin()
                 }
             }
         }
@@ -861,12 +731,10 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 if (mHasPendingZoomUpdates) {
                     mHasPendingZoomUpdates = false
                     zoomPanLayout.isScaling = false
-                    zoomPanLayout.broadcastProgrammaticZoomEnd()
                 }
                 if (mHasPendingPanUpdates) {
                     mHasPendingPanUpdates = false
                     zoomPanLayout.isSliding = false
-                    zoomPanLayout.broadcastProgrammaticPanEnd()
                 }
             }
         }
@@ -890,21 +758,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 return (1 - Math.pow((1 - input).toDouble(), 8.0)).toFloat()
             }
         }
-    }
-
-    interface ZoomPanListener {
-        enum class Origination {
-            DRAG,
-            FLING,
-            PINCH
-        }
-
-        fun onPanBegin(x: Int, y: Int, origin: Origination?)
-        fun onPanUpdate(x: Int, y: Int, origin: Origination?)
-        fun onPanEnd(x: Int, y: Int, origin: Origination?)
-        fun onZoomBegin(scale: Float, origin: Origination?)
-        fun onZoomUpdate(scale: Float, origin: Origination?)
-        fun onZoomEnd(scale: Float, origin: Origination?)
     }
 
     enum class MinimumScaleMode {
@@ -931,21 +784,3 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 }
 
-/**
- * @author Mike Dunn, 10/6/15.
- */
-class TouchUpGestureDetector(private val mOnTouchUpListener: OnTouchUpListener?) {
-
-    fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.actionMasked == MotionEvent.ACTION_UP) {
-            if (mOnTouchUpListener != null) {
-                return mOnTouchUpListener.onTouchUp(event)
-            }
-        }
-        return true
-    }
-
-    interface OnTouchUpListener {
-        fun onTouchUp(event: MotionEvent): Boolean
-    }
-}
