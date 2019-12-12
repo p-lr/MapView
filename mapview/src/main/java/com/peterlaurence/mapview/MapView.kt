@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.peterlaurence.mapview.core.*
-import com.peterlaurence.mapview.layout.ZoomPanLayout
+import com.peterlaurence.mapview.layout.GestureLayout
 import com.peterlaurence.mapview.markers.MarkerLayout
 import com.peterlaurence.mapview.view.TileCanvasView
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
@@ -20,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.max
 
 /**
- * The [MapView] is a subclass of [ZoomPanLayout], specialized for displaying
+ * The [MapView] is a subclass of [GestureLayout], specialized for displaying
  * [deepzoom](https://geoservices.ign.fr/documentation/geoservices/wmts.html) maps.
  *
  * Typical usage consists in 3 steps:
@@ -47,7 +47,7 @@ import kotlin.math.max
  * @author peterLaurence on 31/05/2019
  */
 class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-        ZoomPanLayout(context, attrs, defStyleAttr), CoroutineScope {
+        GestureLayout(context, attrs, defStyleAttr), CoroutineScope {
 
     private lateinit var visibleTilesResolver: VisibleTilesResolver
     private var job = Job()
@@ -342,7 +342,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var padding: Int = 0
         private set
 
-    var minimumScaleMode = ZoomPanLayout.MinimumScaleMode.FIT
+    var minimumScaleMode = GestureLayout.MinimumScaleMode.FIT
         private set
 
     /**
@@ -356,7 +356,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     }
 
     /**
-     * Set the minimum scale. It must be at least 0, except when using [ZoomPanLayout.MinimumScaleMode.NONE] where the
+     * Set the minimum scale. It must be at least 0, except when using [GestureLayout.MinimumScaleMode.NONE] where the
      * min scale must be greater than 0.
      */
     fun setMinScale(scale: Float): MapViewConfiguration {
@@ -372,8 +372,8 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
 
     /**
      * Set the start scale of the [MapView]. Note that it will be constrained by the
-     * [ZoomPanLayout.MinimumScaleMode]. By default, the minimum scale mode is
-     * [ZoomPanLayout.MinimumScaleMode.FIT] and on startup, the [MapView] will try to set the scale
+     * [GestureLayout.MinimumScaleMode]. By default, the minimum scale mode is
+     * [GestureLayout.MinimumScaleMode.FIT] and on startup, the [MapView] will try to set the scale
      * which corresponds to the level 0, but constrained with the minimum scale mode. So by default,
      * the startup scale can be also the minimum scale.
      */
@@ -403,9 +403,9 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     }
 
     /**
-     * Set the minimum scale mode. See [ZoomPanLayout.MinimumScaleMode].
+     * Set the minimum scale mode. See [GestureLayout.MinimumScaleMode].
      */
-    fun setMinimumScaleMode(scaleMode: ZoomPanLayout.MinimumScaleMode): MapViewConfiguration {
+    fun setMinimumScaleMode(scaleMode: GestureLayout.MinimumScaleMode): MapViewConfiguration {
         minimumScaleMode = scaleMode
         return this
     }

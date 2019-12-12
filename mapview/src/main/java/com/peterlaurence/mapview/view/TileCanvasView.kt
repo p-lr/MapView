@@ -19,6 +19,7 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                      private val tileSize: Int,
                      private val visibleTilesResolver: VisibleTilesResolver) : View(ctx) {
     private var scale = 1f
+    private var angle = 0f
     private val alphaTick = 0.15f
 
     private var tilesToRender = listOf<Tile>()
@@ -37,6 +38,11 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         invalidate()
     }
 
+    fun setAngle(angle: Float) {
+        this.angle = angle
+        invalidate()
+    }
+
     fun shouldRequestLayout() {
         requestLayout()
     }
@@ -45,6 +51,9 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         super.onDraw(canvas)
         canvas.save()
         canvas.scale(scale, scale)
+        if (angle != 0f) {
+            canvas.rotate(angle, width / scale / 2f, height / scale / 2f)
+        }
         drawTiles(canvas)
         canvas.restore()
     }

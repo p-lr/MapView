@@ -1,6 +1,5 @@
 package com.peterlaurence.mapview.layout
 
-import com.peterlaurence.mapview.util.scale
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
@@ -9,21 +8,25 @@ import android.view.*
 import android.view.animation.Interpolator
 import android.widget.Scroller
 import androidx.core.view.ViewCompat
+import com.peterlaurence.mapview.util.scale
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
 /**
- * ZoomPanLayout extends ViewGroup to provide support for scrolling and zooming.
+ * GestureLayout extends ViewGroup to provide support for scrolling, zooming, and rotating.
  * Fling, drag, pinch and double-tap events are supported natively.
  *
- * Children of ZoomPanLayout are laid out to the sizes provided by setSize,
- * and will always be positioned at 0,0.
+ * Children are laid out to the sizes provided by setSize,
+ * and will always be positioned at 0,0 (top-left corner).
  *
- * @author Mike Dunn
+ * @author P.Laurence on 12/12/19
  */
-open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, TouchUpGestureDetector.OnTouchUpListener {
+open class GestureLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+        ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
+        TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener {
 
     /**
      * Returns the base (not scaled) width of the underlying composite image.
@@ -145,6 +148,9 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
     private val mScaleGestureDetector: ScaleGestureDetector
     private val mGestureDetector: GestureDetector
     private val mTouchUpGestureDetector: TouchUpGestureDetector
+    private val mRotationGestureDetector: RotationGestureDetector by lazy {
+        RotationGestureDetector(this)
+    }
     private var mMinimumScaleMode = MinimumScaleMode.FIT
 
     /**
@@ -467,7 +473,8 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         val gestureIntercept = mGestureDetector.onTouchEvent(event)
         val scaleIntercept = mScaleGestureDetector.onTouchEvent(event)
         val touchIntercept = mTouchUpGestureDetector.onTouchEvent(event)
-        return gestureIntercept || scaleIntercept || touchIntercept || super.onTouchEvent(event)
+        val rotationIntercept = mRotationGestureDetector.onTouchEvent(event)
+        return gestureIntercept || scaleIntercept || touchIntercept || super.onTouchEvent(event) || rotationIntercept
     }
 
     override fun scrollTo(x: Int, y: Int) {
@@ -502,9 +509,10 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
      *
      *
      * This strategy is used to avoid that a custom return value of [.getScrollMinX] (which
-     * default to 0) become the return value of this method which shifts the whole TileView.
+     * default to 0) become the return value of this method which shifts the whole layout.
      */
     protected fun getConstrainedScrollX(x: Int): Int {
+        // TODO: is this if condition really useful?
         if (scale < mMinimumScaleX && mEffectiveMinScale != mMinimumScaleX) {
             val scaleFactor = scale / (mMinimumScaleX - mEffectiveMinScale) + mEffectiveMinScale / (mEffectiveMinScale - mMinimumScaleX)
             return (scaleFactor * scrollX).toInt()
@@ -516,6 +524,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
      * See [.getConstrainedScrollX]
      */
     protected fun getConstrainedScrollY(y: Int): Int {
+        // TODO: is this if condition really useful?
         if (scale < mMinimumScaleY && mEffectiveMinScale != mMinimumScaleY) {
             val scaleFactor = scale / (mMinimumScaleY - mEffectiveMinScale) + mEffectiveMinScale / (mEffectiveMinScale - mMinimumScaleY)
             return (scaleFactor * scrollY).toInt()
@@ -731,9 +740,23 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         return true
     }
 
-    private class ZoomPanAnimator(zoomPanLayout: ZoomPanLayout) : ValueAnimator(), ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
+    override fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float): Boolean {
+        println("rotate $rotationDelta ($focusX ; $focusY)")
+        return true
+    }
 
-        private val mZoomPanLayoutWeakReference: WeakReference<ZoomPanLayout>
+    override fun onRotationBegin(): Boolean {
+        println("rotate start")
+        return true
+    }
+
+    override fun onRotationEnd() {
+        println("rotate end")
+    }
+
+    private class ZoomPanAnimator(gestureLayout: GestureLayout) : ValueAnimator(), ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
+
+        private val mGestureLayoutWeakReference: WeakReference<GestureLayout>
         private val mStartState = ZoomPanState()
         private val mEndState = ZoomPanState()
         private var mHasPendingZoomUpdates: Boolean = false
@@ -744,11 +767,11 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
             addListener(this)
             setFloatValues(0f, 1f)
             interpolator = FastEaseInInterpolator()
-            mZoomPanLayoutWeakReference = WeakReference(zoomPanLayout)
+            mGestureLayoutWeakReference = WeakReference(gestureLayout)
         }
 
         private fun setupPanAnimation(x: Int, y: Int): Boolean {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 mStartState.x = zoomPanLayout.scrollX
                 mStartState.y = zoomPanLayout.scrollY
@@ -760,7 +783,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         private fun setupZoomAnimation(scale: Float): Boolean {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 mStartState.scale = zoomPanLayout.scale
                 mEndState.scale = scale
@@ -770,7 +793,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         fun animateZoomPan(x: Int, y: Int, scale: Float) {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 mHasPendingZoomUpdates = setupZoomAnimation(scale)
                 mHasPendingPanUpdates = setupPanAnimation(x, y)
@@ -781,7 +804,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         fun animateZoom(scale: Float) {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 mHasPendingZoomUpdates = setupZoomAnimation(scale)
                 if (mHasPendingZoomUpdates) {
@@ -791,7 +814,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         fun animatePan(x: Int, y: Int) {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 mHasPendingPanUpdates = setupPanAnimation(x, y)
                 if (mHasPendingPanUpdates) {
@@ -801,7 +824,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         override fun onAnimationUpdate(animation: ValueAnimator) {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 val progress = animation.animatedValue as Float
                 if (mHasPendingZoomUpdates) {
@@ -819,7 +842,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         override fun onAnimationStart(animator: Animator) {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 if (mHasPendingZoomUpdates) {
                     zoomPanLayout.isScaling = true
@@ -833,7 +856,7 @@ open class ZoomPanLayout @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         override fun onAnimationEnd(animator: Animator) {
-            val zoomPanLayout = mZoomPanLayoutWeakReference.get()
+            val zoomPanLayout = mGestureLayoutWeakReference.get()
             if (zoomPanLayout != null) {
                 if (mHasPendingZoomUpdates) {
                     mHasPendingZoomUpdates = false
