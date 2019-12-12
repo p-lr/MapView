@@ -119,9 +119,15 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
             animator.duration = duration.toLong()
         }
 
-    private val scaleGestureDetector: ScaleGestureDetector
-    private val gestureDetector: GestureDetector
-    private val touchUpGestureDetector: TouchUpGestureDetector
+    private val scaleGestureDetector: ScaleGestureDetector by lazy {
+        ScaleGestureDetector(context, this)
+    }
+    private val gestureDetector: GestureDetector by lazy {
+        GestureDetector(context, this)
+    }
+    private val touchUpGestureDetector: TouchUpGestureDetector by lazy {
+        TouchUpGestureDetector(this)
+    }
     private val rotationGestureDetector: RotationGestureDetector by lazy {
         RotationGestureDetector(this)
     }
@@ -178,11 +184,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         get() = -mScaledImagePadding
 
     init {
-        setWillNotDraw(false)
         clipChildren = false
-        gestureDetector = GestureDetector(context, this)
-        scaleGestureDetector = ScaleGestureDetector(context, this)
-        touchUpGestureDetector = TouchUpGestureDetector(this)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
