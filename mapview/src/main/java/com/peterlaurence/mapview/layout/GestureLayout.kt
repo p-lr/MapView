@@ -6,6 +6,7 @@ import android.view.*
 import android.widget.Scroller
 import androidx.core.view.ViewCompat
 import com.peterlaurence.mapview.layout.animators.ZoomPanAnimator
+import com.peterlaurence.mapview.layout.controllers.ScaleController
 import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector
 import com.peterlaurence.mapview.layout.detectors.TouchUpGestureDetector
 import com.peterlaurence.mapview.util.scale
@@ -24,6 +25,9 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
         TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener {
+
+    /* Controllers */
+    val scaleController: ScaleController by lazy { ScaleController(this) }
 
     /**
      * The base (not scaled) width of the underlying composite image.
@@ -54,7 +58,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      */
     var scale = 1f
         set(scale) {
-            val scaleTmp = getConstrainedDestinationScale(scale)
+            val scaleTmp = scaleController.getConstrainedDestinationScale(scale)
             if (this.scale != scaleTmp) {
                 val previous = this.scale
                 field = scaleTmp
@@ -65,9 +69,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 invalidate()
             }
         }
-
-    private var mMinScale = Float.MIN_VALUE
-    private var mMaxScale = 1f
 
     /**
      * The horizontal distance children are offset if the content is scaled smaller than width.
@@ -80,11 +81,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      */
     var offsetY: Int = 0
         private set
-
-    private var mEffectiveMinScale = 0f
-    private var mMinimumScaleX: Float = 0.toFloat()
-    private var mMinimumScaleY: Float = 0.toFloat()
-    private var mShouldLoopScale = true
 
     /**
      * Whether the [GestureLayout] is currently being flung.
@@ -131,7 +127,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     private val rotationGestureDetector: RotationGestureDetector by lazy {
         RotationGestureDetector(this)
     }
-    private var minimumScaleMode = MinimumScaleMode.FIT
 
     /* The Scroller instance used to manage dragging and flinging */
     private val scroller: Scroller by lazy {
@@ -217,50 +212,8 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 child.layout(offsetX, offsetY, scaledWidth + offsetX, scaledHeight + offsetY)
             }
         }
-        calculateMinimumScaleToFit()
+        scaleController.notifyShapeChanged()
         constrainScrollToLimits()
-    }
-
-    /**
-     * Sets the minimum scale mode
-     *
-     * @param minimumScaleMode The minimum scale mode
-     */
-    protected fun setMinimumScaleMode(minimumScaleMode: MinimumScaleMode) {
-        this.minimumScaleMode = minimumScaleMode
-        calculateMinimumScaleToFit()
-    }
-
-    /**
-     * Determines whether the [GestureLayout] should go back to minimum scale after a double-tap at
-     * maximum scale.
-     *
-     * @param shouldLoopScale True to allow going back to minimum scale, false otherwise.
-     */
-    fun setShouldLoopScale(shouldLoopScale: Boolean) {
-        mShouldLoopScale = shouldLoopScale
-    }
-
-    /**
-     * Set minimum and maximum mScale values for this layout.
-     * Note that if minimumScaleMode is set to [MinimumScaleMode.FIT] or [MinimumScaleMode.FILL], the minimum value set here will be ignored
-     * Default values are 0 and 1.
-     *
-     * @param min Minimum scale the [GestureLayout] should accept.
-     * @param max Maximum scale the [GestureLayout] should accept.
-     */
-    fun setScaleLimits(min: Float, max: Float) {
-        mMinScale = min
-        mMaxScale = max
-        scale = scale
-    }
-
-    fun setMinScale(min: Float) {
-        mMinScale = min
-    }
-
-    fun setMaxScale(max: Float) {
-        mMaxScale = max
     }
 
     /**
@@ -274,7 +227,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         baseWidth = width
         baseHeight = height
         updateScaledDimensions()
-        calculateMinimumScaleToFit()
+        scaleController.notifyShapeChanged()
         constrainScrollToLimits()
         requestLayout()
     }
@@ -357,14 +310,13 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      * @param scale The final scale value the layout should animate to.
      */
     fun smoothScaleFromFocalPoint(focusX: Int, focusY: Int, scale: Float) {
-        var scale = scale
-        scale = getConstrainedDestinationScale(scale)
-        if (scale == this.scale) {
+        val scaleCst = scaleController.getConstrainedDestinationScale(scale)
+        if (scaleCst == this.scale) {
             return
         }
-        val x = getOffsetScrollXFromScale(focusX, scale, this.scale)
-        val y = getOffsetScrollYFromScale(focusY, scale, this.scale)
-        animator.animateZoomPan(x, y, scale)
+        val x = getOffsetScrollXFromScale(focusX, scaleCst, this.scale)
+        val y = getOffsetScrollYFromScale(focusY, scaleCst, this.scale)
+        animator.animateZoomPan(x, y, scaleCst)
     }
 
     /**
@@ -381,13 +333,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      */
     open fun onScaleChanged(currentScale: Float, previousScale: Float) {
         // noop
-    }
-
-    private fun getConstrainedDestinationScale(scale: Float): Float {
-        var scaleTmp = scale
-        scaleTmp = max(scaleTmp, mEffectiveMinScale)
-        scaleTmp = min(scaleTmp, mMaxScale)
-        return scaleTmp
     }
 
     private fun constrainScrollToLimits() {
@@ -418,7 +363,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun setScaleFromPosition(offsetX: Int, offsetY: Int, scale: Float) {
-        val scaleCst = getConstrainedDestinationScale(scale)
+        val scaleCst = scaleController.getConstrainedDestinationScale(scale)
         if (scaleCst == this.scale) {
             return
         }
@@ -450,54 +395,11 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         super.scrollTo(getConstrainedScrollX(x), getConstrainedScrollY(y))
     }
 
-    private fun calculateMinimumScaleToFit() {
-        mMinimumScaleX = width / baseWidth.toFloat()
-        mMinimumScaleY = height / baseHeight.toFloat()
-        val recalculatedMinScale = calculatedMinScale(mMinimumScaleX, mMinimumScaleY)
-        if (recalculatedMinScale != mEffectiveMinScale) {
-            mEffectiveMinScale = recalculatedMinScale
-            if (scale < mEffectiveMinScale) {
-                scale = mEffectiveMinScale
-            }
-        }
-    }
-
-    private fun calculatedMinScale(minimumScaleX: Float, minimumScaleY: Float): Float {
-        return when (minimumScaleMode) {
-            MinimumScaleMode.FILL -> max(minimumScaleX, minimumScaleY)
-            MinimumScaleMode.FIT -> min(minimumScaleX, minimumScaleY)
-            MinimumScaleMode.NONE -> mMinScale
-        }
-    }
-
-    /**
-     * When the scale is less than `mMinimumScaleX`, either because we are using
-     * [MinimumScaleMode.FIT] or [MinimumScaleMode.NONE], the scroll position takes a
-     * value between its starting value and 0. A linear interpolation between the
-     * `mMinimumScaleX` and the `mEffectiveMinScale` is used.
-     *
-     *
-     * This strategy is used to avoid that a custom return value of [.getScrollMinX] (which
-     * default to 0) become the return value of this method which shifts the whole layout.
-     */
     protected fun getConstrainedScrollX(x: Int): Int {
-        // TODO: is this if condition really useful?
-        if (scale < mMinimumScaleX && mEffectiveMinScale != mMinimumScaleX) {
-            val scaleFactor = scale / (mMinimumScaleX - mEffectiveMinScale) + mEffectiveMinScale / (mEffectiveMinScale - mMinimumScaleX)
-            return (scaleFactor * scrollX).toInt()
-        }
         return scrollMinX.coerceAtLeast(min(x, scrollLimitX))
     }
 
-    /**
-     * See [.getConstrainedScrollX]
-     */
     protected fun getConstrainedScrollY(y: Int): Int {
-        // TODO: is this if condition really useful?
-        if (scale < mMinimumScaleY && mEffectiveMinScale != mMinimumScaleY) {
-            val scaleFactor = scale / (mMinimumScaleY - mEffectiveMinScale) + mEffectiveMinScale / (mEffectiveMinScale - mMinimumScaleY)
-            return (scaleFactor * scrollY).toInt()
-        }
         return scrollMinY.coerceAtLeast(min(y, scrollLimitY))
     }
 
@@ -568,10 +470,9 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onDoubleTap(event: MotionEvent): Boolean {
-        var destination = 2.0.pow(floor(ln((scale * 2).toDouble()) / ln(2.0))).toFloat()
-        val effectiveDestination = if (mShouldLoopScale && scale >= mMaxScale) mMinScale else destination
-        destination = getConstrainedDestinationScale(effectiveDestination)
-        smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), destination)
+        val destination = 2.0.pow(floor(ln((scale * 2).toDouble()) / ln(2.0))).toFloat()
+        val scaleCst = scaleController.getDoubleTapDestinationScale(destination, scale)
+        smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst)
         return true
     }
 
@@ -616,25 +517,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun onRotationEnd() {
         println("rotate end")
-    }
-
-    enum class MinimumScaleMode {
-        /**
-         * Limit the minimum scale to no less than what
-         * would be required to fill the container
-         */
-        FILL,
-
-        /**
-         * Limit the minimum scale to no less than what
-         * would be required to fit inside the container
-         */
-        FIT,
-
-        /**
-         * Allow arbitrary minimum scale.
-         */
-        NONE
     }
 
     companion object {
