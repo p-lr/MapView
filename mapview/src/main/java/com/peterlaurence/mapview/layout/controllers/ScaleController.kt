@@ -4,13 +4,18 @@ import com.peterlaurence.mapview.layout.GestureLayout
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Controls anything which related to the scale of the [GestureLayout].
+ *
+ * @author P.Laurence on 13/12/19
+ */
 class ScaleController(private val layout: GestureLayout) {
-    private var mMinScale = Float.MIN_VALUE
-    private var mMaxScale = 1f
+    private var minScale = Float.MIN_VALUE
+    private var maxScale = 1f
     private var effectiveMinScale = 0f
     private var minimumScaleMode = MinimumScaleMode.FIT
 
-    private var mShouldLoopScale = true
+    private var shouldLoopScale = true
 
     /**
      * Determines whether the [GestureLayout] should go back to minimum scale after a double-tap at
@@ -19,7 +24,7 @@ class ScaleController(private val layout: GestureLayout) {
      * @param shouldLoopScale True to allow going back to minimum scale, false otherwise.
      */
     fun setShouldLoopScale(shouldLoopScale: Boolean) {
-        mShouldLoopScale = shouldLoopScale
+        this.shouldLoopScale = shouldLoopScale
     }
 
     /**
@@ -31,12 +36,12 @@ class ScaleController(private val layout: GestureLayout) {
      * @param max Maximum scale the [GestureLayout] should accept.
      */
     fun setScaleLimits(min: Float, max: Float) {
-        mMinScale = min
-        mMaxScale = max
+        minScale = min
+        maxScale = max
     }
 
     fun setMinScale(min: Float) {
-        mMinScale = min
+        minScale = min
     }
 
     fun setMinimumScaleMode(minimumScaleMode: MinimumScaleMode) {
@@ -47,12 +52,12 @@ class ScaleController(private val layout: GestureLayout) {
     fun getConstrainedDestinationScale(scale: Float): Float {
         var scaleTmp = scale
         scaleTmp = max(scaleTmp, effectiveMinScale)
-        scaleTmp = min(scaleTmp, mMaxScale)
+        scaleTmp = min(scaleTmp, maxScale)
         return scaleTmp
     }
 
     fun getDoubleTapDestinationScale(scaleDest: Float, scale: Float) : Float {
-        val effectiveDestination = if (mShouldLoopScale && scale >= mMaxScale) mMinScale else scaleDest
+        val effectiveDestination = if (shouldLoopScale && scale >= maxScale) minScale else scaleDest
         return getConstrainedDestinationScale(effectiveDestination)
     }
 
@@ -69,7 +74,7 @@ class ScaleController(private val layout: GestureLayout) {
         return when (minimumScaleMode) {
             MinimumScaleMode.FILL -> max(minimumScaleX, minimumScaleY)
             MinimumScaleMode.FIT -> min(minimumScaleX, minimumScaleY)
-            MinimumScaleMode.NONE -> mMinScale
+            MinimumScaleMode.NONE -> minScale
         }
     }
 
