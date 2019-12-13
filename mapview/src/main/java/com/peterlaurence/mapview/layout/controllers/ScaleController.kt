@@ -5,7 +5,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Controls anything which related to the scale of the [GestureLayout].
+ * Controls the scale of the [GestureLayout], and the scale configuration.
  *
  * @author P.Laurence on 13/12/19
  */
