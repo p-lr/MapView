@@ -4,6 +4,6 @@ import com.peterlaurence.mapview.core.InternalMapViewApi
 
 @InternalMapViewApi
 internal fun GestureLayout.setSize(width: Int, height: Int) {
-    scaleController.setSize(width, height)
+    gestureController.setSize(width, height)
 }
 

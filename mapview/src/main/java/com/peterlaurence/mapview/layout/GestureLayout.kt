@@ -6,7 +6,7 @@ import android.view.*
 import android.widget.Scroller
 import androidx.core.view.ViewCompat
 import com.peterlaurence.mapview.layout.animators.ZoomPanAnimator
-import com.peterlaurence.mapview.layout.controllers.ScaleController
+import com.peterlaurence.mapview.layout.controllers.GestureController
 import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector
 import com.peterlaurence.mapview.layout.detectors.TouchUpGestureDetector
 import com.peterlaurence.mapview.util.scale
@@ -22,16 +22,16 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
         TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener,
-        ScaleController.Scalable {
+        GestureController.Scalable {
 
     /* Controllers */
-    internal val scaleController: ScaleController by lazy { ScaleController(this) }
+    internal val gestureController: GestureController by lazy { GestureController(this) }
 
     private var basePadding: Int = 0
     private var scaledPadding: Int = 0
 
     override fun onMinScaleUpdateRequest() {
-        scaleController.calculateMinimumScaleToFit(width, height, scaleController.baseWidth, scaleController.baseHeight)
+        gestureController.calculateMinimumScaleToFit(width, height, gestureController.baseWidth, gestureController.baseHeight)
     }
 
     /**
@@ -39,9 +39,9 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      * Delegates to underlying controller.
      */
     var scale: Float
-        get() = scaleController.scale
+        get() = gestureController.scale
         set(value) {
-            scaleController.scale = value
+            gestureController.scale = value
         }
 
     /**
@@ -118,7 +118,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
             }
 
             override fun setScale(scale: Float) {
-                this@GestureLayout.scaleController.scale = scale
+                this@GestureLayout.gestureController.scale = scale
             }
 
             override fun scrollTo(x: Int, y: Int) {
@@ -127,7 +127,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
 
             override fun getScrollX(): Int = this@GestureLayout.scrollX
             override fun getScrollY(): Int = this@GestureLayout.scrollY
-            override fun getScale(): Float = this@GestureLayout.scaleController.scale
+            override fun getScale(): Float = this@GestureLayout.gestureController.scale
 
         })
         animator.duration = animationDuration.toLong()
@@ -141,10 +141,10 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         get() = scale(height, 0.5f)
 
     private val scrollLimitX: Int
-        get() = scaleController.scaledWidth - width + scaledPadding
+        get() = gestureController.scaledWidth - width + scaledPadding
 
     private val scrollLimitY: Int
-        get() = scaleController.scaledHeight - height + scaledPadding
+        get() = gestureController.scaledHeight - height + scaledPadding
 
     private val scrollMinX: Int
         get() = -scaledPadding
@@ -159,8 +159,8 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // the container's children should be the size provided by setSize
         // don't use measureChildren because that grabs the child's LayoutParams
-        val childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(scaleController.scaledWidth, MeasureSpec.EXACTLY)
-        val childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(scaleController.scaledHeight, MeasureSpec.EXACTLY)
+        val childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(gestureController.scaledWidth, MeasureSpec.EXACTLY)
+        val childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(gestureController.scaledHeight, MeasureSpec.EXACTLY)
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec)
@@ -177,8 +177,8 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         val width = width       // width of screen in pixels
         val height = height     // height on screen in pixels
 
-        val scaledWidth = scaleController.scaledWidth
-        val scaledHeight = scaleController.scaledHeight
+        val scaledWidth = gestureController.scaledWidth
+        val scaledHeight = gestureController.scaledHeight
 
         offsetX = if (scaledWidth >= width) 0 else width / 2 - scaledWidth / 2
         offsetY = if (scaledHeight >= height) 0 else height / 2 - scaledHeight / 2
@@ -283,12 +283,12 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      * @param scale The final scale value the layout should animate to.
      */
     fun smoothScaleFromFocalPoint(focusX: Int, focusY: Int, scale: Float) {
-        val scaleCst = scaleController.getConstrainedDestinationScale(scale)
-        if (scaleCst == scaleController.scale) {
+        val scaleCst = gestureController.getConstrainedDestinationScale(scale)
+        if (scaleCst == gestureController.scale) {
             return
         }
-        val x = getOffsetScrollXFromScale(focusX, scaleCst, scaleController.scale)
-        val y = getOffsetScrollYFromScale(focusY, scaleCst, scaleController.scale)
+        val x = getOffsetScrollXFromScale(focusX, scaleCst, gestureController.scale)
+        val y = getOffsetScrollYFromScale(focusY, scaleCst, gestureController.scale)
         animator.animateZoomPan(x, y, scaleCst)
     }
 
@@ -324,14 +324,14 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun setScaleFromPosition(offsetX: Int, offsetY: Int, scale: Float) {
-        val scaleCst = scaleController.getConstrainedDestinationScale(scale)
-        if (scaleCst == scaleController.scale) {
+        val scaleCst = gestureController.getConstrainedDestinationScale(scale)
+        if (scaleCst == gestureController.scale) {
             return
         }
-        var x = getOffsetScrollXFromScale(offsetX, scaleCst, scaleController.scale)
-        var y = getOffsetScrollYFromScale(offsetY, scaleCst, scaleController.scale)
+        var x = getOffsetScrollXFromScale(offsetX, scaleCst, gestureController.scale)
+        var y = getOffsetScrollYFromScale(offsetY, scaleCst, gestureController.scale)
 
-        this.scaleController.scale = scaleCst
+        this.gestureController.scale = scaleCst
 
         x = getConstrainedScrollX(x)
         y = getConstrainedScrollY(y)
@@ -356,16 +356,16 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         super.scrollTo(getConstrainedScrollX(x), getConstrainedScrollY(y))
     }
 
-    protected fun getConstrainedScrollX(x: Int): Int {
+    private fun getConstrainedScrollX(x: Int): Int {
         return scrollMinX.coerceAtLeast(min(x, scrollLimitX))
     }
 
-    protected fun getConstrainedScrollY(y: Int): Int {
+    private fun getConstrainedScrollY(y: Int): Int {
         return scrollMinY.coerceAtLeast(min(y, scrollLimitY))
     }
 
     private fun recalculateScaledPadding() {
-        scaledPadding = scale(basePadding, scaleController.scale)
+        scaledPadding = scale(basePadding, gestureController.scale)
     }
 
     override fun computeScroll() {
@@ -431,8 +431,8 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onDoubleTap(event: MotionEvent): Boolean {
-        val destination = 2.0.pow(floor(ln((scaleController.scale * 2).toDouble()) / ln(2.0))).toFloat()
-        val scaleCst = scaleController.getDoubleTapDestinationScale(destination, scaleController.scale)
+        val destination = 2.0.pow(floor(ln((gestureController.scale * 2).toDouble()) / ln(2.0))).toFloat()
+        val scaleCst = gestureController.getDoubleTapDestinationScale(destination, gestureController.scale)
         smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst)
         return true
     }
@@ -458,7 +458,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
-        val newScale = scaleController.scale * this.scaleGestureDetector.scaleFactor
+        val newScale = gestureController.scale * this.scaleGestureDetector.scaleFactor
         setScaleFromPosition(
                 scaleGestureDetector.focusX.toInt(),
                 scaleGestureDetector.focusY.toInt(),

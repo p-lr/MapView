@@ -179,7 +179,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     private fun setStartScale(startScale: Float?) {
-        scaleController.scale = startScale ?: (visibleTilesResolver.getScaleForLevel(0) ?: 1f)
+        gestureController.scale = startScale ?: (visibleTilesResolver.getScaleForLevel(0) ?: 1f)
     }
 
     private fun setScalePolicy(config: MapViewConfiguration) {
@@ -187,12 +187,12 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         if (config.minimumScaleMode == MinimumScaleMode.NONE) {
             config.minScale?.let {
                 if (it == 0f) error("Min scale must be greater than 0 when using MinimumScaleMode.NONE")
-                scaleController.setMinimumScaleMode(config.minimumScaleMode)
-                scaleController.setScaleLimits(it, config.maxScale)
+                gestureController.setMinimumScaleMode(config.minimumScaleMode)
+                gestureController.setScaleLimits(it, config.maxScale)
             } ?: error("A min scale greater than 0 must be set when using MinimumScaleMode.NONE")
         } else {
-            scaleController.setMinimumScaleMode(config.minimumScaleMode)
-            scaleController.setScaleLimits(config.minScale ?: 0f, config.maxScale)
+            gestureController.setMinimumScaleMode(config.minimumScaleMode)
+            gestureController.setScaleLimits(config.minScale ?: 0f, config.maxScale)
         }
     }
 
@@ -283,7 +283,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     private fun restoreState(savedState: SavedState) {
-        scaleController.scale = savedState.scale
+        gestureController.scale = savedState.scale
         post {
             scrollToAndCenter(savedState.centerX, savedState.centerY)
         }

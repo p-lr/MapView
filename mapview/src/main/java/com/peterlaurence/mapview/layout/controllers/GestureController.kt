@@ -10,7 +10,7 @@ import kotlin.math.min
  *
  * @author P.Laurence on 13/12/19
  */
-internal class ScaleController(private val scalable: Scalable) {
+internal class GestureController(private val scalable: Scalable) {
     private var minScale = Float.MIN_VALUE
     private var maxScale = 1f
     private var effectiveMinScale = 0f
@@ -42,7 +42,7 @@ internal class ScaleController(private val scalable: Scalable) {
 
     /**
      * Getter and setter of the scale property.
-     * The [ScaleController] is the actual owner of the scale.
+     * The [GestureController] is the actual owner of the scale.
      */
     var scale = 1f
         set(scale) {
