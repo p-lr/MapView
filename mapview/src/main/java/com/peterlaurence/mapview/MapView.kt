@@ -6,9 +6,10 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.peterlaurence.mapview.api.MinimumScaleMode
 import com.peterlaurence.mapview.core.*
 import com.peterlaurence.mapview.layout.GestureLayout
-import com.peterlaurence.mapview.layout.controllers.ScaleController
+import com.peterlaurence.mapview.layout.setSize
 import com.peterlaurence.mapview.markers.MarkerLayout
 import com.peterlaurence.mapview.view.TileCanvasView
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
@@ -98,7 +99,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         /* Save the configuration */
         configuration = config
 
-        super.setSize(config.fullWidth, config.fullHeight)
+        setSize(config.fullWidth, config.fullHeight)
         visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
                 magnifyingFactor = config.magnifyingFactor)
         tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
@@ -179,12 +180,12 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     private fun setStartScale(startScale: Float?) {
-        scale = startScale ?: (visibleTilesResolver.getScaleForLevel(0) ?: 1f)
+        scaleController.scale = startScale ?: (visibleTilesResolver.getScaleForLevel(0) ?: 1f)
     }
 
     private fun setScalePolicy(config: MapViewConfiguration) {
         /* Don't allow MinimumScaleMode.NONE when no min scale is set */
-        if (config.minimumScaleMode == ScaleController.MinimumScaleMode.NONE) {
+        if (config.minimumScaleMode == MinimumScaleMode.NONE) {
             config.minScale?.let {
                 if (it == 0f) error("Min scale must be greater than 0 when using MinimumScaleMode.NONE")
                 scaleController.setMinimumScaleMode(config.minimumScaleMode)
@@ -240,8 +241,6 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     override fun onScaleChanged(currentScale: Float, previousScale: Float) {
-        super.onScaleChanged(currentScale, previousScale)
-
         visibleTilesResolver.setScale(currentScale)
         tileCanvasView.setScale(currentScale)
         markerLayout.setScale(currentScale)
@@ -269,6 +268,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     /**
+     * TODO: is it really useful?
      * We only need a child view calling a [requestLayout] when either:
      * * the height of the viewport becomes greater than the scaled [baseHeight] of the MapView
      * * the width of the viewport becomes greater than the scaled [baseWidth] of the MapView
@@ -276,8 +276,9 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
      * itself, it impacts performance as it triggers too much computations.
      */
     private fun checkChildrenRelayout(viewportWidth: Int, viewportHeight: Int) {
+        val sc = scaleController
         shouldRelayoutChildren =
-                ((viewportHeight > baseHeight * scale) || (viewportWidth > baseWidth * scale))
+                ((viewportHeight > sc.baseHeight * scale) || (viewportWidth > sc.baseWidth * scale))
     }
 
     override fun onSaveInstanceState(): Parcelable? {
@@ -302,7 +303,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     private fun restoreState(savedState: SavedState) {
-        scale = savedState.scale
+        scaleController.scale = savedState.scale
         post {
             scrollToAndCenter(savedState.centerX, savedState.centerY)
         }
@@ -343,7 +344,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var padding: Int = 0
         private set
 
-    var minimumScaleMode = ScaleController.MinimumScaleMode.FIT
+    var minimumScaleMode: MinimumScaleMode = MinimumScaleMode.FIT
         private set
 
     /**
@@ -357,7 +358,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     }
 
     /**
-     * Set the minimum scale. It must be at least 0, except when using [ScaleController.MinimumScaleMode.NONE] where the
+     * Set the minimum scale. It must be at least 0, except when using [MinimumScaleMode.NONE] where the
      * min scale must be greater than 0.
      */
     fun setMinScale(scale: Float): MapViewConfiguration {
@@ -373,8 +374,8 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
 
     /**
      * Set the start scale of the [MapView]. Note that it will be constrained by the
-     * [ScaleController.MinimumScaleMode]. By default, the minimum scale mode is
-     * [ScaleController.MinimumScaleMode.FIT] and on startup, the [MapView] will try to set the scale
+     * [MinimumScaleMode]. By default, the minimum scale mode is
+     * [MinimumScaleMode.FIT] and on startup, the [MapView] will try to set the scale
      * which corresponds to the level 0, but constrained with the minimum scale mode. So by default,
      * the startup scale can be also the minimum scale.
      */
@@ -404,9 +405,9 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     }
 
     /**
-     * Set the minimum scale mode. See [ScaleController.MinimumScaleMode].
+     * Set the minimum scale mode. See [MinimumScaleMode].
      */
-    fun setMinimumScaleMode(scaleMode: ScaleController.MinimumScaleMode): MapViewConfiguration {
+    fun setMinimumScaleMode(scaleMode: MinimumScaleMode): MapViewConfiguration {
         minimumScaleMode = scaleMode
         return this
     }

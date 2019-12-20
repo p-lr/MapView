@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
+import com.peterlaurence.mapview.api.MinimumScaleMode
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
-import com.peterlaurence.mapview.layout.controllers.ScaleController
 import com.peterlaurence.mapview.paths.PathPoint
 import com.peterlaurence.mapview.paths.PathView
 import com.peterlaurence.mapview.paths.addPathView
@@ -56,7 +56,7 @@ class MapPathFragment : Fragment() {
         val config = MapViewConfiguration(
             5, 8192, 8192, 256, tileStreamProvider
         ).setMaxScale(2f).setMinScale(0.07f).setStartScale(0.4f)
-            .setMinimumScaleMode(ScaleController.MinimumScaleMode.NONE)
+            .setMinimumScaleMode(MinimumScaleMode.NONE)
 
         mapView.configure(config)
 

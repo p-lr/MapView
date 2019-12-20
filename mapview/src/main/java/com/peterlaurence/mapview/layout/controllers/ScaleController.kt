@@ -1,5 +1,7 @@
 package com.peterlaurence.mapview.layout.controllers
 
+import com.peterlaurence.mapview.api.MinimumScaleMode
+import com.peterlaurence.mapview.util.scale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -8,13 +10,73 @@ import kotlin.math.min
  *
  * @author P.Laurence on 13/12/19
  */
-class ScaleController(private val scalable: Scalable) {
+internal class ScaleController(private val scalable: Scalable) {
     private var minScale = Float.MIN_VALUE
     private var maxScale = 1f
     private var effectiveMinScale = 0f
     private var minimumScaleMode = MinimumScaleMode.FIT
 
     private var shouldLoopScale = true
+
+    /**
+     * The base (not scaled) width of the underlying composite image.
+     */
+    var baseWidth: Int = 0
+        private set
+    /**
+     * The base (not scaled) height of the underlying composite image.
+     */
+    var baseHeight: Int = 0
+        private set
+
+    /**
+     * The scaled width of the underlying composite image.
+     */
+    var scaledWidth: Int = 0
+        private set
+    /**
+     * The scaled height of the underlying composite image.
+     */
+    var scaledHeight: Int = 0
+        private set
+
+    /**
+     * Getter and setter of the scale of the layout.
+     */
+    var scale = 1f
+        set(scale) {
+            val scaleTmp = getConstrainedDestinationScale(scale)
+            if (this.scale != scaleTmp) {
+                val previous = this.scale
+                field = scaleTmp
+                updateScaledDimensions()
+                scalable.constrainScrollToLimits()
+                scalable.recalculateImagePadding()
+                scalable.onScaleChanged(scaleTmp, previous)
+                scalable.onContentChanged()
+            }
+        }
+
+    private fun updateScaledDimensions() {
+        scaledWidth = scale(baseWidth, scale)
+        scaledHeight = scale(baseHeight, scale)
+    }
+
+    /**
+     * Sets the size (width and height) of the layout as it should be rendered at a scale of
+     * 1f (100%).
+     *
+     * @param width  Width of the underlying image, not the view or viewport.
+     * @param height Height of the underlying image, not the view or viewport.
+     */
+    fun setSize(width: Int, height: Int) {
+        baseWidth = width
+        baseHeight = height
+        updateScaledDimensions()
+        scalable.onMinScaleUpdateRequest()
+        scalable.constrainScrollToLimits()
+        scalable.onLayoutChanged()
+    }
 
     /**
      * Determines whether the [Scalable] should go back to minimum scale after a double-tap at
@@ -45,7 +107,7 @@ class ScaleController(private val scalable: Scalable) {
 
     fun setMinimumScaleMode(minimumScaleMode: MinimumScaleMode) {
         this.minimumScaleMode = minimumScaleMode
-        scalable.onScaleUpdateRequest()
+        scalable.onMinScaleUpdateRequest()
     }
 
     fun getConstrainedDestinationScale(scale: Float): Float {
@@ -74,33 +136,18 @@ class ScaleController(private val scalable: Scalable) {
         val recalculatedMinScale = calculatedMinScale(mMinimumScaleX, mMinimumScaleY)
         if (recalculatedMinScale != effectiveMinScale) {
             effectiveMinScale = recalculatedMinScale
-            if (scalable.scale < effectiveMinScale) {
-                scalable.scale = effectiveMinScale
+            if (scale < effectiveMinScale) {
+                scale = effectiveMinScale
             }
         }
     }
 
-    enum class MinimumScaleMode {
-        /**
-         * Limit the minimum scale to no less than what
-         * would be required to fill the container
-         */
-        FILL,
-
-        /**
-         * Limit the minimum scale to no less than what
-         * would be required to fit inside the container
-         */
-        FIT,
-
-        /**
-         * Allow arbitrary minimum scale.
-         */
-        NONE
-    }
-
     interface Scalable {
-        var scale: Float
-        fun onScaleUpdateRequest()
+        fun onMinScaleUpdateRequest()
+        fun onLayoutChanged()
+        fun onContentChanged()
+        fun onScaleChanged(currentScale: Float, previousScale: Float)
+        fun constrainScrollToLimits()
+        fun recalculateImagePadding()
     }
 }
