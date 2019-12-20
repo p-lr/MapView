@@ -18,7 +18,7 @@ import kotlin.math.*
  *
  * @author P.Laurence on 12/12/19
  */
-abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+open class GestureLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
         TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener,
@@ -27,15 +27,16 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     /* Controllers */
     internal val scaleController: ScaleController by lazy { ScaleController(this) }
 
-    private var mImagePadding: Int = 0
-    private var mScaledImagePadding: Int = 0
+    private var basePadding: Int = 0
+    private var scaledPadding: Int = 0
 
     override fun onMinScaleUpdateRequest() {
         scaleController.calculateMinimumScaleToFit(width, height, scaleController.baseWidth, scaleController.baseHeight)
     }
 
     /**
-     * The [ScaleController] is the actual owner of the scale.
+     * Handle on the scale property.
+     * Delegates to underlying controller.
      */
     var scale: Float
         get() = scaleController.scale
@@ -140,16 +141,16 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         get() = scale(height, 0.5f)
 
     private val scrollLimitX: Int
-        get() = scaleController.scaledWidth - width + mScaledImagePadding
+        get() = scaleController.scaledWidth - width + scaledPadding
 
     private val scrollLimitY: Int
-        get() = scaleController.scaledHeight - height + mScaledImagePadding
+        get() = scaleController.scaledHeight - height + scaledPadding
 
     private val scrollMinX: Int
-        get() = -mScaledImagePadding
+        get() = -scaledPadding
 
     private val scrollMinY: Int
-        get() = -mScaledImagePadding
+        get() = -scaledPadding
 
     init {
         clipChildren = false
@@ -200,15 +201,19 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         invalidate()
     }
 
+    override fun onScaleChanged(currentScale: Float, previousScale: Float) {
+        recalculateScaledPadding()
+    }
+
     /**
-     * Adds extra padding around the tiled image, making it possible to scroll past the end of
-     * the border even when zoomed in.
+     * Adds extra padding around the map, making it possible to scroll past the end of the border
+     * even when zoomed in.
      *
-     * @param padding  Additional empty padding around the tiled image.
+     * @param padding  Additional empty padding in pixels when at scale 1f.
      */
-    fun setImagePadding(padding: Int) {
-        mImagePadding = padding
-        recalculateImagePadding()
+    fun setBasePadding(padding: Int) {
+        basePadding = padding
+        recalculateScaledPadding()
     }
 
     /**
@@ -359,8 +364,8 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         return scrollMinY.coerceAtLeast(min(y, scrollLimitY))
     }
 
-    override fun recalculateImagePadding() {
-        mScaledImagePadding = scale(mImagePadding, scaleController.scale)
+    private fun recalculateScaledPadding() {
+        scaledPadding = scale(basePadding, scaleController.scale)
     }
 
     override fun computeScroll() {
@@ -479,9 +484,3 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         private const val DEFAULT_ZOOM_PAN_ANIMATION_DURATION = 400
     }
 }
-
-
-fun GestureLayout.setSize(width: Int, height: Int) {
-    scaleController.setSize(width, height)
-}
-

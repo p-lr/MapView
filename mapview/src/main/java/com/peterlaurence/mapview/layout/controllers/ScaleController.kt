@@ -41,7 +41,8 @@ internal class ScaleController(private val scalable: Scalable) {
         private set
 
     /**
-     * Getter and setter of the scale of the layout.
+     * Getter and setter of the scale property.
+     * The [ScaleController] is the actual owner of the scale.
      */
     var scale = 1f
         set(scale) {
@@ -51,7 +52,6 @@ internal class ScaleController(private val scalable: Scalable) {
                 field = scaleTmp
                 updateScaledDimensions()
                 scalable.constrainScrollToLimits()
-                scalable.recalculateImagePadding()
                 scalable.onScaleChanged(scaleTmp, previous)
                 scalable.onContentChanged()
             }
@@ -148,6 +148,5 @@ internal class ScaleController(private val scalable: Scalable) {
         fun onContentChanged()
         fun onScaleChanged(currentScale: Float, previousScale: Float)
         fun constrainScrollToLimits()
-        fun recalculateImagePadding()
     }
 }

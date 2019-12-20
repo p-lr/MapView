@@ -65,7 +65,6 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private lateinit var configuration: MapViewConfiguration
 
     private lateinit var throttledTask: SendChannel<Unit>
-    private var shouldRelayoutChildren = false
     private val scaleChangeListeners = mutableListOf<ScaleChangeListener>()
     private var savedState: SavedState? = null
     private var isConfigured = false
@@ -212,8 +211,6 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private fun updateViewport() {
         val viewport = getCurrentViewport()
         tileCanvasViewModel.setViewport(viewport)
-
-        checkChildrenRelayout(viewport.right - viewport.left, viewport.bottom - viewport.top)
     }
 
 
@@ -249,9 +246,6 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
             it.onScaleChanged(currentScale)
         }
 
-        if (shouldRelayoutChildren) {
-            tileCanvasView.shouldRequestLayout()
-        }
         renderVisibleTilesThrottled()
     }
 
@@ -265,20 +259,6 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         val y = scrollY + event.y.toInt() - offsetY
         markerLayout.processHit(x, y)
         return super.onSingleTapConfirmed(event)
-    }
-
-    /**
-     * TODO: is it really useful?
-     * We only need a child view calling a [requestLayout] when either:
-     * * the height of the viewport becomes greater than the scaled [baseHeight] of the MapView
-     * * the width of the viewport becomes greater than the scaled [baseWidth] of the MapView
-     * The [requestLayout] has to be called from child view. If it's done from the MapView
-     * itself, it impacts performance as it triggers too much computations.
-     */
-    private fun checkChildrenRelayout(viewportWidth: Int, viewportHeight: Int) {
-        val sc = scaleController
-        shouldRelayoutChildren =
-                ((viewportHeight > sc.baseHeight * scale) || (viewportWidth > sc.baseWidth * scale))
     }
 
     override fun onSaveInstanceState(): Parcelable? {
