@@ -27,9 +27,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     /* Controllers */
     internal val gestureController: GestureController by lazy { GestureController(this) }
 
-    private var basePadding: Int = 0
-    private var scaledPadding: Int = 0
-
     override fun onMinScaleUpdateRequest() {
         gestureController.calculateMinimumScaleToFit(width, height, gestureController.baseWidth, gestureController.baseHeight)
     }
@@ -140,17 +137,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     val halfHeight: Int
         get() = scale(height, 0.5f)
 
-    private val scrollLimitX: Int
-        get() = gestureController.scaledWidth - width + scaledPadding
-
-    private val scrollLimitY: Int
-        get() = gestureController.scaledHeight - height + scaledPadding
-
-    private val scrollMinX: Int
-        get() = -scaledPadding
-
-    private val scrollMinY: Int
-        get() = -scaledPadding
 
     init {
         clipChildren = false
@@ -177,6 +163,8 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         val width = width       // width of screen in pixels
         val height = height     // height on screen in pixels
 
+        gestureController.setScreenDimensions(width, height)
+
         val scaledWidth = gestureController.scaledWidth
         val scaledHeight = gestureController.scaledHeight
 
@@ -202,18 +190,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onScaleChanged(currentScale: Float, previousScale: Float) {
-        recalculateScaledPadding()
-    }
 
-    /**
-     * Adds extra padding around the map, making it possible to scroll past the end of the border
-     * even when zoomed in.
-     *
-     * @param padding  Additional empty padding in pixels when at scale 1f.
-     */
-    fun setBasePadding(padding: Int) {
-        basePadding = padding
-        recalculateScaledPadding()
     }
 
     /**
@@ -304,8 +281,8 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     override fun constrainScrollToLimits() {
         val x = scrollX
         val y = scrollY
-        val constrainedX = getConstrainedScrollX(x)
-        val constrainedY = getConstrainedScrollY(y)
+        val constrainedX = gestureController.getConstrainedScrollX(x)
+        val constrainedY = gestureController.getConstrainedScrollY(y)
         if (x != constrainedX || y != constrainedY) {
             scrollTo(constrainedX, constrainedY)
         }
@@ -323,7 +300,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         return (scrollY * deltaScale).toInt() - offsetY
     }
 
-    fun setScaleFromPosition(offsetX: Int, offsetY: Int, scale: Float) {
+    private fun setScaleFromPosition(offsetX: Int, offsetY: Int, scale: Float) {
         val scaleCst = gestureController.getConstrainedDestinationScale(scale)
         if (scaleCst == gestureController.scale) {
             return
@@ -333,16 +310,16 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
 
         this.gestureController.scale = scaleCst
 
-        x = getConstrainedScrollX(x)
-        y = getConstrainedScrollY(y)
+        x = gestureController.getConstrainedScrollX(x)
+        y = gestureController.getConstrainedScrollY(y)
 
         scrollTo(x, y)
     }
 
-    override fun canScrollHorizontally(direction: Int): Boolean {
-        val position = scrollX
-        return if (direction > 0) position < scrollLimitX else direction < 0 && position > 0
-    }
+//    override fun canScrollHorizontally(direction: Int): Boolean {
+//        val position = scrollX
+//        return if (direction > 0) position < scrollLimitX else direction < 0 && position > 0
+//    }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val gestureIntercept = gestureDetector.onTouchEvent(event)
@@ -353,27 +330,15 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun scrollTo(x: Int, y: Int) {
-        super.scrollTo(getConstrainedScrollX(x), getConstrainedScrollY(y))
-    }
-
-    private fun getConstrainedScrollX(x: Int): Int {
-        return scrollMinX.coerceAtLeast(min(x, scrollLimitX))
-    }
-
-    private fun getConstrainedScrollY(y: Int): Int {
-        return scrollMinY.coerceAtLeast(min(y, scrollLimitY))
-    }
-
-    private fun recalculateScaledPadding() {
-        scaledPadding = scale(basePadding, gestureController.scale)
+        super.scrollTo(gestureController.getConstrainedScrollX(x), gestureController.getConstrainedScrollY(y))
     }
 
     override fun computeScroll() {
         if (scroller.computeScrollOffset()) {
             val startX = scrollX
             val startY = scrollY
-            val endX = getConstrainedScrollX(scroller.currX)
-            val endY = getConstrainedScrollY(scroller.currY)
+            val endX = gestureController.getConstrainedScrollX(scroller.currX)
+            val endY = gestureController.getConstrainedScrollY(scroller.currY)
             if (startX != endX || startY != endY) {
                 scrollTo(endX, endY)
             }
@@ -396,8 +361,9 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onFling(event1: MotionEvent, event2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        val c = gestureController
         scroller.fling(scrollX, scrollY, (-velocityX).toInt(), (-velocityY).toInt(),
-                scrollMinX, scrollLimitX, scrollMinY, scrollLimitY)
+                c.scrollMinX, c.scrollLimitX, c.scrollMinY, c.scrollLimitY)
 
         isFlinging = true
         ViewCompat.postInvalidateOnAnimation(this)

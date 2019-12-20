@@ -18,6 +18,24 @@ internal class GestureController(private val scalable: Scalable) {
 
     private var shouldLoopScale = true
 
+    private var screenWidth: Int = 0
+    private var screenHeight: Int = 0
+
+    private var basePadding: Int = 0
+    private var scaledPadding: Int = 0
+
+    internal val scrollLimitX: Int
+        get() = scaledWidth - screenWidth + scaledPadding
+
+    internal val scrollLimitY: Int
+        get() = scaledHeight - screenHeight + scaledPadding
+
+    internal val scrollMinX: Int
+        get() = -scaledPadding
+
+    internal val scrollMinY: Int
+        get() = -scaledPadding
+
     /**
      * The base (not scaled) width of the underlying composite image.
      */
@@ -52,6 +70,7 @@ internal class GestureController(private val scalable: Scalable) {
                 field = scaleTmp
                 updateScaledDimensions()
                 scalable.constrainScrollToLimits()
+                recalculateScaledPadding()
                 scalable.onScaleChanged(scaleTmp, previous)
                 scalable.onContentChanged()
             }
@@ -140,6 +159,32 @@ internal class GestureController(private val scalable: Scalable) {
                 scale = effectiveMinScale
             }
         }
+    }
+
+    fun getConstrainedScrollX(x: Int): Int {
+        return scrollMinX.coerceAtLeast(min(x, scrollLimitX))
+    }
+
+    fun getConstrainedScrollY(y: Int): Int {
+        return scrollMinY.coerceAtLeast(min(y, scrollLimitY))
+    }
+
+    /**
+     * Adds extra padding around the map, making it possible to scroll past the end of the border
+     * even when zoomed in.
+     */
+    fun setBasePadding(padding: Int) {
+        basePadding = padding
+        recalculateScaledPadding()
+    }
+
+    fun setScreenDimensions(width: Int, height: Int) {
+        screenWidth = width
+        screenHeight = height
+    }
+
+    private fun recalculateScaledPadding() {
+        scaledPadding = scale(basePadding, scale)
     }
 
     interface Scalable {
