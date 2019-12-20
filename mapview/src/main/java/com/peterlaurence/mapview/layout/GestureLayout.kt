@@ -24,7 +24,8 @@ import kotlin.math.*
 open class GestureLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
-        TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener {
+        TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener,
+        ScaleController.Scalable {
 
     /* Controllers */
     val scaleController: ScaleController by lazy { ScaleController(this) }
@@ -56,7 +57,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     /**
      * Getter and setter of the scale of the layout.
      */
-    var scale = 1f
+    override var scale = 1f
         set(scale) {
             val scaleTmp = scaleController.getConstrainedDestinationScale(scale)
             if (this.scale != scaleTmp) {
@@ -69,6 +70,10 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 invalidate()
             }
         }
+
+    override fun onScaleUpdateRequest() {
+        scaleController.calculateMinimumScaleToFit(width, height, baseWidth, baseHeight)
+    }
 
     /**
      * The horizontal distance children are offset if the content is scaled smaller than width.
@@ -212,7 +217,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
                 child.layout(offsetX, offsetY, scaledWidth + offsetX, scaledHeight + offsetY)
             }
         }
-        scaleController.notifyShapeChanged()
+        onScaleUpdateRequest()
         constrainScrollToLimits()
     }
 
@@ -227,7 +232,7 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
         baseWidth = width
         baseHeight = height
         updateScaledDimensions()
-        scaleController.notifyShapeChanged()
+        onScaleUpdateRequest()
         constrainScrollToLimits()
         requestLayout()
     }
