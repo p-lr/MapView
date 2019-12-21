@@ -133,6 +133,7 @@ class RotationGestureDetector(private val listener: OnRotationGestureListener,
     interface OnRotationGestureListener {
         /**
          * Reports back the [rotationDelta], [focusX] and [focusY]
+         * @param rotationDelta in degrees
          *
          * @return Whether or not the detector should consider this event as handled. If an event
          * was not handled, the detector will continue to accumulate movement until an event is
