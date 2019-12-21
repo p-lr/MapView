@@ -10,7 +10,9 @@ import com.peterlaurence.mapview.layout.controllers.GestureController
 import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector
 import com.peterlaurence.mapview.layout.detectors.TouchUpGestureDetector
 import com.peterlaurence.mapview.util.scale
-import kotlin.math.*
+import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.pow
 
 /**
  * GestureLayout provides support for scrolling, zooming, and rotating.
@@ -260,12 +262,10 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
      * @param scale The final scale value the layout should animate to.
      */
     fun smoothScaleFromFocalPoint(focusX: Int, focusY: Int, scale: Float) {
-        val scaleCst = gestureController.getConstrainedDestinationScale(scale)
+        val (x, y, scaleCst) = gestureController.getOffsetDestination(focusX, focusY, scale)
         if (scaleCst == gestureController.scale) {
             return
         }
-        val x = getOffsetScrollXFromScale(focusX, scaleCst, gestureController.scale)
-        val y = getOffsetScrollYFromScale(focusY, scaleCst, gestureController.scale)
         animator.animateZoomPan(x, y, scaleCst)
     }
 
@@ -281,45 +281,22 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     override fun constrainScrollToLimits() {
         val x = scrollX
         val y = scrollY
-        val constrainedX = gestureController.getConstrainedScrollX(x)
-        val constrainedY = gestureController.getConstrainedScrollY(y)
+        val (constrainedX, constrainedY) = gestureController.getConstrainedScroll(x, y)
         if (x != constrainedX || y != constrainedY) {
-            scrollTo(constrainedX, constrainedY)
+            super.scrollTo(constrainedX, constrainedY)
         }
-    }
-
-    private fun getOffsetScrollXFromScale(offsetX: Int, destinationScale: Float, currentScale: Float): Int {
-        val scrollX = scrollX + offsetX
-        val deltaScale = destinationScale / currentScale
-        return (scrollX * deltaScale).toInt() - offsetX
-    }
-
-    private fun getOffsetScrollYFromScale(offsetY: Int, destinationScale: Float, currentScale: Float): Int {
-        val scrollY = scrollY + offsetY
-        val deltaScale = destinationScale / currentScale
-        return (scrollY * deltaScale).toInt() - offsetY
     }
 
     private fun setScaleFromPosition(offsetX: Int, offsetY: Int, scale: Float) {
-        val scaleCst = gestureController.getConstrainedDestinationScale(scale)
+        val (x, y, scaleCst) = gestureController.getOffsetDestination(offsetX, offsetY, scale)
         if (scaleCst == gestureController.scale) {
             return
         }
-        var x = getOffsetScrollXFromScale(offsetX, scaleCst, gestureController.scale)
-        var y = getOffsetScrollYFromScale(offsetY, scaleCst, gestureController.scale)
 
         this.gestureController.scale = scaleCst
 
-        x = gestureController.getConstrainedScrollX(x)
-        y = gestureController.getConstrainedScrollY(y)
-
         scrollTo(x, y)
     }
-
-//    override fun canScrollHorizontally(direction: Int): Boolean {
-//        val position = scrollX
-//        return if (direction > 0) position < scrollLimitX else direction < 0 && position > 0
-//    }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val gestureIntercept = gestureDetector.onTouchEvent(event)
@@ -330,15 +307,15 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun scrollTo(x: Int, y: Int) {
-        super.scrollTo(gestureController.getConstrainedScrollX(x), gestureController.getConstrainedScrollY(y))
+        val (constrainedX, constrainedY) = gestureController.getConstrainedScroll(x, y)
+        super.scrollTo(constrainedX, constrainedY)
     }
 
     override fun computeScroll() {
         if (scroller.computeScrollOffset()) {
             val startX = scrollX
             val startY = scrollY
-            val endX = gestureController.getConstrainedScrollX(scroller.currX)
-            val endY = gestureController.getConstrainedScrollY(scroller.currY)
+            val (endX, endY) = gestureController.getConstrainedScroll(scroller.currX, scroller.currY)
             if (startX != endX || startY != endY) {
                 scrollTo(endX, endY)
             }

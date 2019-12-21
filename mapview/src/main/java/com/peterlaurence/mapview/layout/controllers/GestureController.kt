@@ -1,6 +1,7 @@
 package com.peterlaurence.mapview.layout.controllers
 
 import com.peterlaurence.mapview.api.MinimumScaleMode
+import com.peterlaurence.mapview.layout.controllers.GestureController.Scalable
 import com.peterlaurence.mapview.util.scale
 import kotlin.math.max
 import kotlin.math.min
@@ -35,6 +36,9 @@ internal class GestureController(private val scalable: Scalable) {
 
     internal val scrollMinY: Int
         get() = -scaledPadding
+
+    private val scrollPosition = ScrollPosition(0, 0)
+    private val offsetDestination = OffsetDestination(0, 0, 0f)
 
     /**
      * The base (not scaled) width of the underlying composite image.
@@ -161,12 +165,23 @@ internal class GestureController(private val scalable: Scalable) {
         }
     }
 
-    fun getConstrainedScrollX(x: Int): Int {
-        return scrollMinX.coerceAtLeast(min(x, scrollLimitX))
+    fun getConstrainedScroll(x: Int, y: Int): ScrollPosition {
+        scrollPosition.x = scrollMinX.coerceAtLeast(min(x, scrollLimitX))
+        scrollPosition.y = scrollMinY.coerceAtLeast(min(y, scrollLimitY))
+        return scrollPosition
     }
 
-    fun getConstrainedScrollY(y: Int): Int {
-        return scrollMinY.coerceAtLeast(min(y, scrollLimitY))
+    fun getOffsetDestination(offsetX: Int, offsetY: Int, destScale: Float): OffsetDestination {
+        val destScaleCst = getConstrainedDestinationScale(destScale)
+        val deltaScale = destScaleCst / scale
+        offsetDestination.scale = destScaleCst
+
+        val scrollX = scrollPosition.x + offsetX
+        offsetDestination.x = (scrollX * deltaScale).toInt() - offsetX
+
+        val scrollY = scrollPosition.y + offsetY
+        offsetDestination.y = (scrollY * deltaScale).toInt() - offsetY
+        return offsetDestination
     }
 
     /**
@@ -194,4 +209,12 @@ internal class GestureController(private val scalable: Scalable) {
         fun onScaleChanged(currentScale: Float, previousScale: Float)
         fun constrainScrollToLimits()
     }
+
+    /**
+     * The scroll position is meant to be unique. To avoid creating a lot of objects of this type,
+     * we use mutable properties. The usage of this class is meant to be confined to the UI thread.
+     */
+    data class ScrollPosition(var x: Int, var y: Int)
+
+    data class OffsetDestination(var x: Int, var y: Int, var scale: Float)
 }
