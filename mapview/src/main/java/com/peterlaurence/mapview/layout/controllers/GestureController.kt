@@ -3,8 +3,11 @@ package com.peterlaurence.mapview.layout.controllers
 import com.peterlaurence.mapview.api.MinimumScaleMode
 import com.peterlaurence.mapview.layout.controllers.GestureController.Scalable
 import com.peterlaurence.mapview.util.scale
+import com.peterlaurence.mapview.util.toRad
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 
 /**
  * Controls the scale of the [Scalable], and the scale configuration.
@@ -80,6 +83,15 @@ internal class GestureController(private val scalable: Scalable) {
             }
         }
 
+    private var visibleArea = VisibleArea(VisibleArea.Corner(0f, 0f), 0, 0)
+
+    fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float) {
+        visibleArea.rotate(rotationDelta, focusX, focusY)
+
+        println("rotate $rotationDelta ($focusX ; $focusY)")
+        println("rect: ${visibleArea.getRect()}")
+    }
+
     private fun updateScaledDimensions() {
         scaledWidth = scale(baseWidth, scale)
         scaledHeight = scale(baseHeight, scale)
@@ -140,7 +152,7 @@ internal class GestureController(private val scalable: Scalable) {
         return scaleTmp
     }
 
-    fun getDoubleTapDestinationScale(scaleDest: Float, scale: Float) : Float {
+    fun getDoubleTapDestinationScale(scaleDest: Float, scale: Float): Float {
         val effectiveDestination = if (shouldLoopScale && scale >= maxScale) minScale else scaleDest
         return getConstrainedDestinationScale(effectiveDestination)
     }
@@ -217,4 +229,64 @@ internal class GestureController(private val scalable: Scalable) {
     data class ScrollPosition(var x: Int, var y: Int)
 
     data class OffsetDestination(var x: Int, var y: Int, var scale: Float)
+}
+
+/**
+ * Expected invariant: [angle] should always have values between 0f anf 180f.
+ */
+internal class VisibleArea(topLeftCorner: Corner, screenWidth: Int, screenHeight: Int) {
+    internal data class Corner(var x: Float, var y: Float)
+    internal data class Rectangle(val corner1: Corner, val corner2: Corner, val corner3: Corner, val corner4: Corner)
+
+    private var angle: AngleDegree = 0f
+
+    private val rect = Rectangle(
+            topLeftCorner,
+            Corner(topLeftCorner.x + screenWidth, topLeftCorner.y),
+            Corner(topLeftCorner.x + screenWidth, topLeftCorner.y + screenHeight),
+            Corner(topLeftCorner.x, topLeftCorner.y + screenHeight))
+
+//    fun moveTo(x: Int, y: Int) {
+//        rect.corner1.shift(x.toFloat(), y.toFloat())
+//        rect.corner2.shift(x.toFloat(), y.toFloat())
+//        rect.corner3.shift(x.toFloat(), y.toFloat())
+//        rect.corner4.shift(x.toFloat(), y.toFloat())
+//    }
+
+    fun rotate(angleDelta: AngleDegree, focusX: Float, focusY: Float) {
+        this.angle.addModulo(angleDelta)
+        val angleRad = angleDelta.toRad()
+        localRefRotation(angleRad)
+        shiftRef(focusX, focusY, angleRad)
+    }
+
+    private fun localRefRotation(angle: AngleRad) {
+        rect.corner1.rotate(angle)
+        rect.corner2.rotate(angle)
+        rect.corner3.rotate(angle)
+        rect.corner4.rotate(angle)
+    }
+
+    private fun shiftRef(focusX: Float, focusY: Float, angle: AngleRad) {
+        val shiftX = focusX * cos(angle) - focusY * sin(angle)
+        val shiftY = focusX * sin(angle) + focusY * cos(angle)
+        rect.corner1.shift(focusX - shiftX, focusY - shiftY)
+        rect.corner2.shift(focusX - shiftX, focusY - shiftY)
+        rect.corner3.shift(focusX - shiftX, focusY - shiftY)
+        rect.corner4.shift(focusX - shiftX, focusY - shiftY)
+    }
+
+    private fun Corner.rotate(angle: AngleRad) = apply {
+        val newX = x * cos(angle) - y * sin(angle)
+        val newY = x * sin(angle) + y * cos(angle)
+        x = newX
+        y = newY
+    }
+
+    private fun Corner.shift(shiftX: Float, shiftY: Float) = apply {
+        x += shiftX
+        y += shiftY
+    }
+
+    fun getRect(): Rectangle = rect
 }

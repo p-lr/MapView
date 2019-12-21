@@ -410,17 +410,15 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float): Boolean {
-        println("rotate $rotationDelta ($focusX ; $focusY)")
+        gestureController.onRotate(rotationDelta, focusX, focusY)
         return true
     }
 
     override fun onRotationBegin(): Boolean {
-        println("rotate start")
         return true
     }
 
     override fun onRotationEnd() {
-        println("rotate end")
     }
 
     companion object {
