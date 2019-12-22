@@ -83,13 +83,17 @@ internal class GestureController(private val scalable: Scalable) {
             }
         }
 
+    var angle: AngleDegree = 0f
+
     private var visibleArea = VisibleArea(VisibleArea.Corner(0f, 0f), 0, 0)
 
     fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float) {
+        angle = angle.addModulo(rotationDelta)
+
+        scalable.onRotationChanged(angle, scrollPosition.x + focusX, scrollPosition.y + focusY)
         visibleArea.rotate(rotationDelta, focusX, focusY)
 
-        println("rotate $rotationDelta ($focusX ; $focusY)")
-        println("rect: ${visibleArea.getRect()}")
+        println("rotate $angle ($focusX ; $focusY)")
     }
 
     private fun updateScaledDimensions() {
@@ -219,6 +223,7 @@ internal class GestureController(private val scalable: Scalable) {
         fun onLayoutChanged()
         fun onContentChanged()
         fun onScaleChanged(currentScale: Float, previousScale: Float)
+        fun onRotationChanged(angle: AngleDegree, centerX: Float, centerY: Float)
         fun constrainScrollToLimits()
     }
 
@@ -238,8 +243,6 @@ internal class VisibleArea(topLeftCorner: Corner, screenWidth: Int, screenHeight
     internal data class Corner(var x: Float, var y: Float)
     internal data class Rectangle(val corner1: Corner, val corner2: Corner, val corner3: Corner, val corner4: Corner)
 
-    private var angle: AngleDegree = 0f
-
     private val rect = Rectangle(
             topLeftCorner,
             Corner(topLeftCorner.x + screenWidth, topLeftCorner.y),
@@ -254,7 +257,6 @@ internal class VisibleArea(topLeftCorner: Corner, screenWidth: Int, screenHeight
 //    }
 
     fun rotate(angleDelta: AngleDegree, focusX: Float, focusY: Float) {
-        this.angle.addModulo(angleDelta)
         val angleRad = angleDelta.toRad()
         localRefRotation(angleRad)
         shiftRef(focusX, focusY, angleRad)

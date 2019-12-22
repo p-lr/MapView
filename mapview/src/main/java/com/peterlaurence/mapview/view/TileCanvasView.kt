@@ -20,6 +20,8 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                      private val visibleTilesResolver: VisibleTilesResolver) : View(ctx) {
     private var scale = 1f
     private var angle = 0f
+    private var centerX = 0f
+    private var centerY = 0f
     private val alphaTick = 0.15f
 
     private var tilesToRender = listOf<Tile>()
@@ -38,18 +40,20 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         invalidate()
     }
 
-    fun setAngle(angle: Float) {
+    fun rotate(angle: Float, centerX: Float, centerY: Float) {
         this.angle = angle
+        this.centerX = centerX
+        this.centerY = centerY
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.save()
-        canvas.scale(scale, scale)
         if (angle != 0f) {
-            canvas.rotate(angle, width / scale / 2f, height / scale / 2f)
+            canvas.rotate(angle, width  / 2f, height / 2f)
         }
+        canvas.scale(scale, scale)
         drawTiles(canvas)
         canvas.restore()
     }

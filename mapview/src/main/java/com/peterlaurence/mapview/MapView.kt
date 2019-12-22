@@ -9,6 +9,7 @@ import android.view.View
 import com.peterlaurence.mapview.api.MinimumScaleMode
 import com.peterlaurence.mapview.core.*
 import com.peterlaurence.mapview.layout.GestureLayout
+import com.peterlaurence.mapview.layout.controllers.AngleDegree
 import com.peterlaurence.mapview.layout.setSize
 import com.peterlaurence.mapview.markers.MarkerLayout
 import com.peterlaurence.mapview.view.TileCanvasView
@@ -247,6 +248,10 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         }
 
         renderVisibleTilesThrottled()
+    }
+
+    override fun onRotationChanged(angle: AngleDegree, centerX: Float, centerY: Float) {
+        tileCanvasView.rotate(angle, centerX, centerY)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

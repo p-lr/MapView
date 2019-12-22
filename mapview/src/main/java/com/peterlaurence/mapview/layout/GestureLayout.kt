@@ -20,7 +20,7 @@ import kotlin.math.pow
  *
  * @author P.Laurence on 12/12/19
  */
-open class GestureLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
         TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener,
@@ -189,10 +189,6 @@ open class GestureLayout @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun onContentChanged() {
         invalidate()
-    }
-
-    override fun onScaleChanged(currentScale: Float, previousScale: Float) {
-
     }
 
     /**
