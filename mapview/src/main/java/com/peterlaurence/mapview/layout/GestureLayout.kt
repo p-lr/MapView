@@ -377,7 +377,10 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     override fun onDoubleTap(event: MotionEvent): Boolean {
         val destination = 2.0.pow(floor(ln((gestureController.scale * 2).toDouble()) / ln(2.0))).toFloat()
         val scaleCst = gestureController.getDoubleTapDestinationScale(destination, gestureController.scale)
-        smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst)
+        val angleRad = -gestureController.angle.toRad()
+        val eventRx = (height / 2 * sin(angleRad) + width / 2 * (1 - cos(angleRad)) + event.x * cos(angleRad) - event.y * sin(angleRad)).toInt()
+        val eventRy = (height / 2 * (1 - cos(angleRad)) - width / 2 * sin(angleRad) + event.x * sin(angleRad) + event.y * cos(angleRad)).toInt()
+        smoothScaleFromFocalPoint(eventRx, eventRy, scaleCst)
         return true
     }
 
