@@ -10,9 +10,8 @@ import com.peterlaurence.mapview.layout.controllers.GestureController
 import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector
 import com.peterlaurence.mapview.layout.detectors.TouchUpGestureDetector
 import com.peterlaurence.mapview.util.scale
-import kotlin.math.floor
-import kotlin.math.ln
-import kotlin.math.pow
+import com.peterlaurence.mapview.util.toRad
+import kotlin.math.*
 
 /**
  * GestureLayout provides support for scrolling, zooming, and rotating.
@@ -277,7 +276,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     override fun constrainScrollToLimits() {
         val x = scrollX
         val y = scrollY
-        val (constrainedX, constrainedY) = gestureController.getConstrainedScroll(x, y)
+        val (constrainedX, constrainedY) = gestureController.setConstrainedScroll(x, y)
         if (x != constrainedX || y != constrainedY) {
             super.scrollTo(constrainedX, constrainedY)
         }
@@ -303,7 +302,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     }
 
     override fun scrollTo(x: Int, y: Int) {
-        val (constrainedX, constrainedY) = gestureController.getConstrainedScroll(x, y)
+        val (constrainedX, constrainedY) = gestureController.setConstrainedScroll(x, y)
         super.scrollTo(constrainedX, constrainedY)
     }
 
@@ -311,7 +310,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         if (scroller.computeScrollOffset()) {
             val startX = scrollX
             val startY = scrollY
-            val (endX, endY) = gestureController.getConstrainedScroll(scroller.currX, scroller.currY)
+            val (endX, endY) = gestureController.setConstrainedScroll(scroller.currX, scroller.currY)
             if (startX != endX || startY != endY) {
                 scrollTo(endX, endY)
             }
@@ -335,7 +334,10 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
 
     override fun onFling(event1: MotionEvent, event2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         val c = gestureController
-        scroller.fling(scrollX, scrollY, (-velocityX).toInt(), (-velocityY).toInt(),
+        val angleRad = -gestureController.angle.toRad()
+        val velocityXr = velocityX * cos(angleRad) - velocityY * sin(angleRad)
+        val velocityYr = velocityX * sin(angleRad) + velocityY * cos(angleRad)
+        scroller.fling(scrollX, scrollY, (-velocityXr).toInt(), (-velocityYr).toInt(),
                 c.scrollMinX, c.scrollLimitX, c.scrollMinY, c.scrollLimitY)
 
         isFlinging = true
@@ -348,8 +350,11 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     }
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-        val scrollEndX = scrollX + distanceX.toInt()
-        val scrollEndY = scrollY + distanceY.toInt()
+        val angleRad = -gestureController.angle.toRad()
+        val distanceXr = distanceX * cos(angleRad) - distanceY * sin(angleRad)
+        val distanceYr = distanceX * sin(angleRad) + distanceY * cos(angleRad)
+        val scrollEndX = scrollX + distanceXr.toInt()
+        val scrollEndY = scrollY + distanceYr.toInt()
         scrollTo(scrollEndX, scrollEndY)
         if (!isDragging) {
             isDragging = true

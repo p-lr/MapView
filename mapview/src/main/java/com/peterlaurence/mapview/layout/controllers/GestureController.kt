@@ -42,6 +42,7 @@ internal class GestureController(private val scalable: Scalable) {
 
     private val scrollPosition = ScrollPosition(0, 0)
     private val offsetDestination = OffsetDestination(0, 0, 0f)
+    private val viewportCenter = ViewportCenter(0.0, 0.0)
 
     /**
      * The base (not scaled) width of the underlying composite image.
@@ -89,11 +90,15 @@ internal class GestureController(private val scalable: Scalable) {
 
     fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float) {
         angle = angle.addModulo(rotationDelta)
-
-        scalable.onRotationChanged(angle, scrollPosition.x + focusX, scrollPosition.y + focusY)
+        val (centerX, centerY) = getViewportCenter()
+        scalable.onRotationChanged(angle, centerX, centerY)
         visibleArea.rotate(rotationDelta, focusX, focusY)
+    }
 
-        println("rotate $angle ($focusX ; $focusY)")
+    fun getViewportCenter(): ViewportCenter {
+        viewportCenter.x = (scrollPosition.x + min(screenWidth / 2, scaledWidth / 2)).toDouble() / scaledWidth
+        viewportCenter.y = (scrollPosition.y + min(screenHeight / 2, scaledHeight / 2)).toDouble() / scaledHeight
+        return viewportCenter
     }
 
     private fun updateScaledDimensions() {
@@ -181,7 +186,7 @@ internal class GestureController(private val scalable: Scalable) {
         }
     }
 
-    fun getConstrainedScroll(x: Int, y: Int): ScrollPosition {
+    fun setConstrainedScroll(x: Int, y: Int): ScrollPosition {
         scrollPosition.x = scrollMinX.coerceAtLeast(min(x, scrollLimitX))
         scrollPosition.y = scrollMinY.coerceAtLeast(min(y, scrollLimitY))
         return scrollPosition
@@ -223,7 +228,7 @@ internal class GestureController(private val scalable: Scalable) {
         fun onLayoutChanged()
         fun onContentChanged()
         fun onScaleChanged(currentScale: Float, previousScale: Float)
-        fun onRotationChanged(angle: AngleDegree, centerX: Float, centerY: Float)
+        fun onRotationChanged(angle: AngleDegree, centerX: Double, centerY: Double)
         fun constrainScrollToLimits()
     }
 
@@ -234,6 +239,13 @@ internal class GestureController(private val scalable: Scalable) {
     data class ScrollPosition(var x: Int, var y: Int)
 
     data class OffsetDestination(var x: Int, var y: Int, var scale: Float)
+
+    /**
+     * The relative coordinates of the center of the view port.
+     * This doesn't depend on the scale. For example, if x=0.5 and y=0.3, the center of the viewport
+     * is at 50% of [scaledWidth] and at 30% of [scaledHeight].
+     */
+    data class ViewportCenter(var x: Double, var y: Double)
 }
 
 /**

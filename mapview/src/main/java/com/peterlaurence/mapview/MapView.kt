@@ -235,6 +235,8 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
+        val (x, y) = gestureController.getViewportCenter()
+        tileCanvasView.setCenter(x, y)
         renderVisibleTilesThrottled()
     }
 
@@ -250,7 +252,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         renderVisibleTilesThrottled()
     }
 
-    override fun onRotationChanged(angle: AngleDegree, centerX: Float, centerY: Float) {
+    override fun onRotationChanged(angle: AngleDegree, centerX: Double, centerY: Double) {
         tileCanvasView.rotate(angle, centerX, centerY)
     }
 
