@@ -69,6 +69,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private val scaleChangeListeners = mutableListOf<ScaleChangeListener>()
     private var savedState: SavedState? = null
     private var isConfigured = false
+    private var rotationData = RotationData()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -239,7 +240,19 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
         val (x, y) = gestureController.getViewportCenter()
-        tileCanvasView.setCenter(x, y)
+
+        /* This is very specific to the map rotating feature. A RotationData must be supplied on
+         * each angle change (of course) AND on each scroll change, because the rendering involves
+         * a rotation around the center of the screen.
+         */
+        if (gestureController.rotationEnabled) {
+            rotationData.apply {
+                centerX = x
+                centerY = y
+            }
+            tileCanvasView.setRotationData(rotationData)
+        }
+
         renderVisibleTilesThrottled()
     }
 
@@ -256,7 +269,13 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     override fun onRotationChanged(angle: AngleDegree, centerX: Double, centerY: Double) {
-        tileCanvasView.rotate(angle, centerX, centerY)
+        /* If this is called, the rotation must have been enabled */
+        rotationData.apply {
+            this.angle = angle
+            this.centerX = centerX
+            this.centerY = centerY
+        }
+        tileCanvasView.setRotationData(rotationData)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -274,7 +293,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     override fun onSaveInstanceState(): Parcelable? {
         val parentState = super.onSaveInstanceState() ?: Bundle()
         return SavedState(parentState, scale, centerX = scrollX + halfWidth,
-                centerY = scrollY + halfHeight)
+                centerY = scrollY + halfHeight, rotationData = rotationData)
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
@@ -294,11 +313,20 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     private fun restoreState(savedState: SavedState) {
         gestureController.scale = savedState.scale
+        gestureController.angle = savedState.rotationData.angle
+        rotationData = savedState.rotationData
+
         post {
             scrollToAndCenter(savedState.centerX, savedState.centerY)
         }
     }
 }
+
+@Parcelize
+internal data class RotationData(var rotationEnabled: Boolean = true,
+                                 var angle: AngleDegree = 0f,
+                                 var centerX: Double = 0.0,
+                                 var centerY: Double = 0.0) : Parcelable
 
 /**
  * The set of parameters of the [MapView]. Some of them are mandatory:
@@ -421,7 +449,8 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
 }
 
 @Parcelize
-data class SavedState(val parcelable: Parcelable, val scale: Float, val centerX: Int, val centerY: Int) : View.BaseSavedState(parcelable)
+internal data class SavedState(val parcelable: Parcelable, val scale: Float, val centerX: Int, val centerY: Int,
+                               val rotationData: RotationData) : View.BaseSavedState(parcelable)
 
 interface ScaleChangeListener {
     fun onScaleChanged(scale: Float)

@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
+import com.peterlaurence.mapview.RotationData
 import com.peterlaurence.mapview.core.Tile
 import com.peterlaurence.mapview.core.VisibleTilesResolver
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
@@ -15,13 +16,11 @@ import kotlin.math.min
  *
  * @author peterLaurence on 02/06/2019
  */
-class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
-                     private val tileSize: Int,
-                     private val visibleTilesResolver: VisibleTilesResolver) : View(ctx) {
+internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
+                              private val tileSize: Int,
+                              private val visibleTilesResolver: VisibleTilesResolver) : View(ctx) {
     private var scale = 1f
-    private var angle = 0f
-    private var centerX = 0.0
-    private var centerY = 0.0
+    private var rotationData: RotationData? = null
     private val alphaTick = 0.15f
 
     private var tilesToRender = listOf<Tile>()
@@ -40,24 +39,20 @@ class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         invalidate()
     }
 
-    fun setCenter(centerX: Double, centerY: Double) {
-        this.centerX = centerX
-        this.centerY = centerY
-        invalidate()
-    }
-
-    fun rotate(angle: Float, centerX: Double, centerY: Double) {
-        this.angle = angle
-        this.centerX = centerX
-        this.centerY = centerY
+    fun setRotationData(rotationData: RotationData) {
+        this.rotationData = rotationData
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.save()
-        if (angle != 0f) {
-            canvas.rotate(angle, (width * centerX).toFloat(), (height * centerY).toFloat())
+
+        /* If there is rotation data, take it into account */
+        rotationData?.apply {
+            if (rotationEnabled) {
+                canvas.rotate(angle, (width * centerX).toFloat(), (height * centerY).toFloat())
+            }
         }
         canvas.scale(scale, scale)
         drawTiles(canvas)
