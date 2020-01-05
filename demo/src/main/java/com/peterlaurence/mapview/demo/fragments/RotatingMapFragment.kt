@@ -18,9 +18,9 @@ import com.peterlaurence.mapview.markers.setMarkerTapListener
 import java.io.InputStream
 
 /**
- * An example showing the usage of markers.
+ * An example showing the usage of a rotating map. It features markers and paths.
  */
-class MapMarkersFragment : Fragment() {
+class RotatingMapFragment : Fragment() {
     private lateinit var parentView: ViewGroup
 
     /**
@@ -56,7 +56,7 @@ class MapMarkersFragment : Fragment() {
         val tileSize = 256
         val config = MapViewConfiguration(
                 5, 8192, 8192, tileSize, tileStreamProvider
-        ).setMaxScale(2f).setPadding(tileSize * 2)
+        ).setMaxScale(2f).setPadding(tileSize * 2).enableRotation()
 
         mapView.configure(config)
 
@@ -100,4 +100,3 @@ class MapMarkersFragment : Fragment() {
         addMarker(marker, x, y)
     }
 }
-

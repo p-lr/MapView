@@ -99,12 +99,15 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         /* Save the configuration */
         configuration = config
 
+        /* Apply the configuration */
         setSize(config.fullWidth, config.fullHeight)
         visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
                 magnifyingFactor = config.magnifyingFactor)
         tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
                 config.tileStreamProvider, config.workerCount)
         this.tileSize = config.tileSize
+        gestureController.rotationEnabled = config.rotationEnabled
+        gestureController.handleRotationGesture = config.handleRotationGesture
 
         initChildViews()
 
@@ -334,6 +337,12 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var minimumScaleMode: MinimumScaleMode = MinimumScaleMode.FIT
         private set
 
+    var rotationEnabled: Boolean = false
+        private set
+
+    var handleRotationGesture: Boolean = true
+        private set
+
     /**
      * Define the size of the thread pool that will handle tile decoding. In some situations, a pool
      * of several times the numbers of cores is suitable. Whereas sometimes we want to limit to just
@@ -396,6 +405,17 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
      */
     fun setMinimumScaleMode(scaleMode: MinimumScaleMode): MapViewConfiguration {
         minimumScaleMode = scaleMode
+        return this
+    }
+
+    /**
+     * Enables rotating the map, either with gestures (the default), or via APIs.
+     * @param handleRotationGesture Whether or not rotation gesture should be handled by the MapView.
+     * Default is `true`.
+     */
+    fun enableRotation(handleRotationGesture: Boolean = true): MapViewConfiguration {
+        rotationEnabled = true
+        this.handleRotationGesture = handleRotationGesture
         return this
     }
 }

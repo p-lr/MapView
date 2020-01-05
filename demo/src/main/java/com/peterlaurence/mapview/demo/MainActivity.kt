@@ -15,7 +15,8 @@ import com.google.android.material.navigation.NavigationView
 import com.peterlaurence.mapview.demo.fragments.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG, MAP_DEFERRED_TAG, MAP_REMOTE_HTTP_TAG)
+    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG,
+            MAP_DEFERRED_TAG, MAP_REMOTE_HTTP_TAG, MAP_ROTATING_TAG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,44 +51,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_map_alone -> showMapAloneFragment()
-            R.id.nav_map_markers -> showMapMarkersFragment()
-            R.id.nav_map_paths -> showMapPathsFragment()
-            R.id.nav_remote_http -> showRemoteHttpFragment()
-            R.id.nav_map_deferred_configuration -> showDeferredConfigurationFragment()
+            R.id.nav_map_alone -> createAndShowFragment<MapAloneFragment>(MAP_ALONE_TAG)
+            R.id.nav_map_markers -> createAndShowFragment<MapMarkersFragment>(MAP_MARKERS_TAG)
+            R.id.nav_map_paths -> createAndShowFragment<MapPathFragment>(MAP_PATHS_TAG)
+            R.id.nav_remote_http -> createAndShowFragment<RemoteHttpFragment>(MAP_REMOTE_HTTP_TAG)
+            R.id.nav_map_deferred_configuration -> createAndShowFragment<DeferredFragment>(MAP_DEFERRED_TAG)
+            R.id.nav_map_rotating -> createAndShowFragment<RotatingMapFragment>(MAP_ROTATING_TAG)
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 
-    private fun showMapAloneFragment() {
-        showFragment(MAP_ALONE_TAG) { tr, tag ->
-            createFragment(tr, MapAloneFragment::class.java, tag)
-        }
-    }
-
-    private fun showMapMarkersFragment() {
-        showFragment(MAP_MARKERS_TAG) { tr, tag ->
-            createFragment(tr, MapMarkersFragment::class.java, tag)
-        }
-    }
-
-    private fun showMapPathsFragment() {
-        showFragment(MAP_PATHS_TAG) { tr, tag ->
-            createFragment(tr, MapPathFragment::class.java, tag)
-        }
-    }
-
-    private fun showRemoteHttpFragment() {
-        showFragment(MAP_REMOTE_HTTP_TAG) { tr, tag ->
-            createFragment(tr, RemoteHttpFragment::class.java, tag)
-        }
-    }
-
-    private fun showDeferredConfigurationFragment() {
-        showFragment(MAP_DEFERRED_TAG) { tr, tag ->
-            createFragment(tr, DeferredFragment::class.java, tag)
+    private inline fun <reified T : Fragment> createAndShowFragment(tag: String) {
+        showFragment(tag) { tr, _ ->
+            createFragment(tr, T::class.java, tag)
         }
     }
 
@@ -133,3 +111,4 @@ const val MAP_MARKERS_TAG = "map_markers"
 const val MAP_PATHS_TAG = "map_paths"
 const val MAP_REMOTE_HTTP_TAG = "map_remote_http"
 const val MAP_DEFERRED_TAG = "map_deferred"
+const val MAP_ROTATING_TAG = "map_rotating"

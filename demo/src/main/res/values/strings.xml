@@ -12,4 +12,5 @@
     <string name="map_paths">Map paths demo</string>
     <string name="map_remote_http">Remote HTTP demo</string>
     <string name="map_deferred_configuration">Deferred config demo</string>
+    <string name="map_rotating">Rotating map demo</string>
 </resources>

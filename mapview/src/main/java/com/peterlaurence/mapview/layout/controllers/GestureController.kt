@@ -84,6 +84,8 @@ internal class GestureController(private val scalable: Scalable) {
             }
         }
 
+    var rotationEnabled = false
+    var handleRotationGesture = true
     var angle: AngleDegree = 0f
 
     private var visibleArea = VisibleArea(VisibleArea.Corner(0f, 0f), 0, 0)

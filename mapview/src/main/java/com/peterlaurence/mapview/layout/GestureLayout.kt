@@ -297,7 +297,9 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         val gestureIntercept = gestureDetector.onTouchEvent(event)
         val scaleIntercept = scaleGestureDetector.onTouchEvent(event)
         val touchIntercept = touchUpGestureDetector.onTouchEvent(event)
-        val rotationIntercept = rotationGestureDetector.onTouchEvent(event)
+        val rotationIntercept = if (gestureController.rotationEnabled && gestureController.handleRotationGesture) {
+            rotationGestureDetector.onTouchEvent(event)
+        } else false
         return gestureIntercept || scaleIntercept || touchIntercept || super.onTouchEvent(event) || rotationIntercept
     }
 
