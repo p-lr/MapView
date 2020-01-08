@@ -92,20 +92,4 @@ class DeferredFragment : Fragment() {
         }
         isConfigured = true
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putBoolean(::isConfigured.name, isConfigured)
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        if (savedInstanceState != null) {
-            val v = savedInstanceState[::isConfigured.name] as? Boolean
-            if (v != null) {
-                isConfigured = v
-            }
-        }
-    }
 }
