@@ -8,6 +8,8 @@ import android.graphics.Path
 import android.util.TypedValue
 import android.view.View
 import com.peterlaurence.mapview.MapView
+import com.peterlaurence.mapview.Rotatable
+import com.peterlaurence.mapview.RotationData
 import com.peterlaurence.mapview.ScaleChangeListener
 
 /**
@@ -17,8 +19,14 @@ import com.peterlaurence.mapview.ScaleChangeListener
  *
  * @author peterLaurence on 19/02/17 -- Converted to Kotlin on 26/07/19
  */
-class PathView(context: Context) : View(context), ScaleChangeListener {
+class PathView(context: Context) : View(context), ScaleChangeListener, Rotatable {
     private val strokeWidthDefault: Float
+
+    override var rotationData: RotationData? = null
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     var scale = 1f
         set(scale) {
@@ -47,7 +55,7 @@ class PathView(context: Context) : View(context), ScaleChangeListener {
 
         val metrics = resources.displayMetrics
         strokeWidthDefault =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_STROKE_WIDTH_DP.toFloat(), metrics)
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_STROKE_WIDTH_DP.toFloat(), metrics)
 
         defaultPaint.style = Paint.Style.STROKE
         defaultPaint.color = DEFAULT_STROKE_COLOR
@@ -75,6 +83,14 @@ class PathView(context: Context) : View(context), ScaleChangeListener {
     public override fun onDraw(canvas: Canvas) {
         val pathList = this.pathList
         if (shouldDraw && pathList != null) {
+
+            /* If there is rotation data, take it into account */
+            rotationData?.apply {
+                if (rotationEnabled) {
+                    canvas.rotate(angle, (width * centerX).toFloat(), (height * centerY).toFloat())
+                }
+            }
+
             canvas.scale(scale, scale)
             for (path in pathList) {
                 /* If no Paint is defined, take the default one */
@@ -165,6 +181,7 @@ fun List<PathPoint>.toFloatArray(mapView: MapView): FloatArray? {
 fun MapView.addPathView(pathView: PathView) {
     addView(pathView, 1)
     addScaleChangeListener(pathView)
+    addRotatable(pathView)
     pathView.scale = scale
 }
 
@@ -174,4 +191,5 @@ fun MapView.addPathView(pathView: PathView) {
 fun MapView.removePathView(pathView: PathView) {
     removeView(pathView)
     removeScaleChangeListener(pathView)
+    removeRotatable(pathView)
 }

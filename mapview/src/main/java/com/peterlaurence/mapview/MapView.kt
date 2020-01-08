@@ -67,6 +67,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     private lateinit var throttledTask: SendChannel<Unit>
     private val scaleChangeListeners = mutableListOf<ScaleChangeListener>()
+    private val rotatableList = mutableListOf<Rotatable>()
     private var savedState: SavedState? = null
     private var isConfigured = false
     private var rotationData = RotationData()
@@ -157,6 +158,14 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     fun removeScaleChangeListener(listener: ScaleChangeListener) {
         scaleChangeListeners.remove(listener)
+    }
+
+    fun addRotatable(rotatable: Rotatable) {
+        rotatableList.add(rotatable)
+    }
+
+    fun removeRotatable(rotatable: Rotatable) {
+        rotatableList.remove(rotatable)
     }
 
     /**
@@ -250,8 +259,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
                 centerX = x
                 centerY = y
             }
-            tileCanvasView.setRotationData(rotationData)
-            markerLayout.setRotationData(rotationData)
+            updateAllRotatable()
         }
 
         renderVisibleTilesThrottled()
@@ -276,8 +284,16 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
             this.centerX = centerX
             this.centerY = centerY
         }
-        tileCanvasView.setRotationData(rotationData)
-        markerLayout.setRotationData(rotationData)
+        updateAllRotatable()
+    }
+
+    private fun updateAllRotatable() {
+        tileCanvasView.rotationData = this.rotationData
+        markerLayout.rotationData = this.rotationData
+
+        rotatableList.forEach {
+            it.rotationData = this.rotationData
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -325,10 +341,10 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 }
 
 @Parcelize
-internal data class RotationData(var rotationEnabled: Boolean = true,
-                                 var angle: AngleDegree = 0f,
-                                 var centerX: Double = 0.0,
-                                 var centerY: Double = 0.0) : Parcelable
+data class RotationData(var rotationEnabled: Boolean = true,
+                        var angle: AngleDegree = 0f,
+                        var centerX: Double = 0.0,
+                        var centerY: Double = 0.0) : Parcelable
 
 /**
  * The set of parameters of the [MapView]. Some of them are mandatory:
@@ -456,4 +472,8 @@ internal data class SavedState(val parcelable: Parcelable, val scale: Float, val
 
 interface ScaleChangeListener {
     fun onScaleChanged(scale: Float)
+}
+
+interface Rotatable {
+    var rotationData: RotationData?
 }

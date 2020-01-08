@@ -1,5 +1,6 @@
 package com.peterlaurence.mapview.demo.fragments
 
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,10 @@ import com.peterlaurence.mapview.markers.MarkerTapListener
 import com.peterlaurence.mapview.markers.addCallout
 import com.peterlaurence.mapview.markers.addMarker
 import com.peterlaurence.mapview.markers.setMarkerTapListener
+import com.peterlaurence.mapview.paths.PathPoint
+import com.peterlaurence.mapview.paths.PathView
+import com.peterlaurence.mapview.paths.addPathView
+import com.peterlaurence.mapview.paths.toFloatArray
 import java.io.InputStream
 
 /**
@@ -79,6 +84,30 @@ class RotatingMapFragment : Fragment() {
                 }
             }
         })
+
+        val pathView = PathView(context)
+        mapView.addPathView(pathView)
+
+        val pathList = listOfNotNull(
+                listOf(
+                        PathPoint(0.2, 0.3), PathPoint(0.25, 0.15), PathPoint(0.32, 0.1),
+                        PathPoint(0.427, 0.212), PathPoint(0.6, 0.15), PathPoint(0.67, 0.1)
+                ).toFloatArray(mapView),
+                listOf(
+                        PathPoint(0.5, 0.5), PathPoint(0.55, 0.52), PathPoint(0.57, 0.54),
+                        PathPoint(0.59, 0.52), PathPoint(0.6, 0.51), PathPoint(0.59, 0.5),
+                        PathPoint(0.578, 0.447), PathPoint(0.46, 0.44), PathPoint(0.5, 0.5)
+                ).toFloatArray(mapView)
+        ).map {
+            object : PathView.DrawablePath {
+                override val visible: Boolean = true
+                override var path: FloatArray = it
+                override var paint: Paint? = null
+                override val width: Float? = null
+            }
+        }
+
+        pathView.updatePaths(pathList)
         return mapView
     }
 

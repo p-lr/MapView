@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import com.peterlaurence.mapview.MapView
+import com.peterlaurence.mapview.Rotatable
 import com.peterlaurence.mapview.RotationData
 import com.peterlaurence.mapview.util.toRad
 import kotlin.math.cos
@@ -17,10 +18,15 @@ import kotlin.math.sin
  *
  * @author peterLaurence on 18/06/2019
  */
-open class MarkerLayout(context: Context) : ViewGroup(context) {
+open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
 
     private var scale = 1f
-    private var rotationData: RotationData? = null
+    override var rotationData: RotationData? = null
+        set(value) {
+            field = value
+            requestLayout()
+            refreshPositions()
+        }
     private var markerTapListener: MarkerTapListener? = null
     private val calloutViewList = mutableListOf<View>()
 
@@ -31,12 +37,6 @@ open class MarkerLayout(context: Context) : ViewGroup(context) {
     fun setScale(scale: Float) {
         this.scale = scale
         requestLayout()
-    }
-
-    internal fun setRotationData(rotationData: RotationData) {
-        this.rotationData = rotationData
-        requestLayout()
-        refreshPositions()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

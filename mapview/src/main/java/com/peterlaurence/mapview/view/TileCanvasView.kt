@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
+import com.peterlaurence.mapview.Rotatable
 import com.peterlaurence.mapview.RotationData
 import com.peterlaurence.mapview.core.Tile
 import com.peterlaurence.mapview.core.VisibleTilesResolver
@@ -18,9 +19,13 @@ import kotlin.math.min
  */
 internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                               private val tileSize: Int,
-                              private val visibleTilesResolver: VisibleTilesResolver) : View(ctx) {
+                              private val visibleTilesResolver: VisibleTilesResolver) : View(ctx), Rotatable {
     private var scale = 1f
-    private var rotationData: RotationData? = null
+    override var rotationData: RotationData? = null
+        set(value) {
+            field = value
+            invalidate()
+        }
     private val alphaTick = 0.15f
 
     private var tilesToRender = listOf<Tile>()
@@ -36,11 +41,6 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
 
     fun setScale(scale: Float) {
         this.scale = scale
-        invalidate()
-    }
-
-    fun setRotationData(rotationData: RotationData) {
-        this.rotationData = rotationData
         invalidate()
     }
 
