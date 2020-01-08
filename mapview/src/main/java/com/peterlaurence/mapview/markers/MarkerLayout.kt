@@ -5,6 +5,10 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import com.peterlaurence.mapview.MapView
+import com.peterlaurence.mapview.RotationData
+import com.peterlaurence.mapview.util.toRad
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * All markers are laid out using this view.
@@ -15,7 +19,8 @@ import com.peterlaurence.mapview.MapView
  */
 open class MarkerLayout(context: Context) : ViewGroup(context) {
 
-    private var mScale = 1f
+    private var scale = 1f
+    private var rotationData: RotationData? = null
     private var markerTapListener: MarkerTapListener? = null
     private val calloutViewList = mutableListOf<View>()
 
@@ -24,8 +29,14 @@ open class MarkerLayout(context: Context) : ViewGroup(context) {
     }
 
     fun setScale(scale: Float) {
-        mScale = scale
+        this.scale = scale
         requestLayout()
+    }
+
+    internal fun setRotationData(rotationData: RotationData) {
+        this.rotationData = rotationData
+        requestLayout()
+        refreshPositions()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -44,7 +55,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context) {
             val child = getChildAt(i)
             if (child.visibility != View.GONE) {
                 val layoutParams = child.layoutParams as MarkerLayoutParams
-                child.layout(layoutParams.mLeft, layoutParams.mTop, layoutParams.mRight, layoutParams.mBottom)
+                child.layout(layoutParams.left, layoutParams.top, layoutParams.right, layoutParams.bottom)
             }
         }
     }
@@ -59,15 +70,39 @@ open class MarkerLayout(context: Context) : ViewGroup(context) {
             val widthOffset = actualWidth * layoutParams.relativeAnchorX + layoutParams.absoluteAnchorX
             val heightOffset = actualHeight * layoutParams.relativeAnchorY + layoutParams.absoluteAnchorY
             // get offset position
-            val scaledX = (layoutParams.x * mScale).toInt()
-            val scaledY = (layoutParams.y * mScale).toInt()
+            val scaledX = (layoutParams.x * scale).toInt()
+            val scaledY = (layoutParams.y * scale).toInt()
             // save computed values
-            layoutParams.mLeft = (scaledX + widthOffset).toInt()
-            layoutParams.mTop = (scaledY + heightOffset).toInt()
-            layoutParams.mRight = layoutParams.mLeft + actualWidth
-            layoutParams.mBottom = layoutParams.mTop + actualHeight
+            layoutParams.left = (scaledX + widthOffset).toInt()
+            layoutParams.top = (scaledY + heightOffset).toInt()
+            layoutParams.right = layoutParams.left + actualWidth
+            layoutParams.bottom = layoutParams.top + actualHeight
+
+            rotationData?.also {
+                val centerX = it.centerX * measuredWidth
+                val centerY = it.centerY * measuredHeight
+
+                val angleRad = it.angle.toRad()
+                layoutParams.left = (centerX + (scaledX - centerX) * cos(angleRad) - (scaledY - centerY) * sin(angleRad) + widthOffset).toInt()
+                layoutParams.top = (centerY + (scaledX - centerX) * sin(angleRad) + (scaledY - centerY) * cos(angleRad) + heightOffset).toInt()
+                layoutParams.right = layoutParams.left + actualWidth
+                layoutParams.bottom = layoutParams.top + actualHeight
+            }
         }
         return layoutParams
+    }
+
+    private fun refreshPositions() {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (child.visibility != View.GONE) {
+                val layoutParams: MarkerLayoutParams = populateLayoutParams(child)
+                child.left = layoutParams.left
+                child.top = layoutParams.top
+                child.right = layoutParams.right
+                child.bottom = layoutParams.bottom
+            }
+        }
     }
 
     fun addMarker(view: View, left: Int, top: Int, relativeAnchorLeft: Float = -0.5f,
@@ -83,8 +118,8 @@ open class MarkerLayout(context: Context) : ViewGroup(context) {
     }
 
     fun addCallout(view: View, left: Int, top: Int, relativeAnchorLeft: Float = -0.5f,
-                  relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
-                  absoluteAnchorTop: Float = 0f) {
+                   relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
+                   absoluteAnchorTop: Float = 0f) {
         addMarker(view, left, top, relativeAnchorLeft, relativeAnchorTop, absoluteAnchorLeft,
                 absoluteAnchorTop)
         calloutViewList.add(view)
@@ -143,14 +178,16 @@ open class MarkerLayout(context: Context) : ViewGroup(context) {
     }
 }
 
-private class MarkerLayoutParams(width: Int, height: Int, var x: Int, var y: Int, var relativeAnchorX: Float, var relativeAnchorY: Float, var absoluteAnchorX: Float, var absoluteAnchorY: Float) : ViewGroup.LayoutParams(width, height) {
+private class MarkerLayoutParams(width: Int, height: Int, var x: Int, var y: Int,
+                                 var relativeAnchorX: Float, var relativeAnchorY: Float,
+                                 var absoluteAnchorX: Float, var absoluteAnchorY: Float) : ViewGroup.LayoutParams(width, height) {
 
-    var mTop: Int = 0
-    var mLeft: Int = 0
-    var mBottom: Int = 0
-    var mRight: Int = 0
+    var top: Int = 0
+    var left: Int = 0
+    var bottom: Int = 0
+    var right: Int = 0
 
-    fun getHitRect(): Rect = Rect(mLeft, mTop, mRight, mBottom)
+    fun getHitRect(): Rect = Rect(left, top, right, bottom)
 }
 
 interface MarkerTapListener {

@@ -251,6 +251,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
                 centerY = y
             }
             tileCanvasView.setRotationData(rotationData)
+            markerLayout.setRotationData(rotationData)
         }
 
         renderVisibleTilesThrottled()
@@ -276,6 +277,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
             this.centerY = centerY
         }
         tileCanvasView.setRotationData(rotationData)
+        markerLayout.setRotationData(rotationData)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
