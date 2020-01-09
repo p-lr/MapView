@@ -70,6 +70,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private val rotatableList = mutableListOf<Rotatable>()
     private var savedState: SavedState? = null
     private var isConfigured = false
+    private val viewport = Viewport()
     private var rotationData = RotationData()
 
     override val coroutineContext: CoroutineContext
@@ -218,24 +219,21 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     private fun startInternals() {
         throttledTask = throttle(wait = 18) {
-            updateViewport()
+            val viewport = updateViewport()
+            tileCanvasViewModel.setViewport(viewport)
         }
     }
 
-    private fun updateViewport() {
-        val viewport = getCurrentViewport()
-        tileCanvasViewModel.setViewport(viewport)
-    }
-
-
-    private fun getCurrentViewport(): Viewport {
+    private fun updateViewport(): Viewport {
         val padding = configuration.padding
-        val left = max(scrollX - padding, 0)
-        val top = max(scrollY - padding, 0)
-        val right = left + width + padding * 2
-        val bottom = top + height + padding * 2
+        viewport.apply {
+            left = max(scrollX - padding, 0)
+            top = max(scrollY - padding, 0)
+            right = left + width + padding * 2
+            bottom = top + height + padding * 2
+        }
 
-        return Viewport(left, top, right, bottom)
+        return viewport
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
