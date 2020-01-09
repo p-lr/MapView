@@ -110,18 +110,19 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
      * allocating too much of these objects.
      */
     private suspend fun collectNewTiles(visibleTiles: VisibleTiles) {
-        val tileSpecs = flow {
+        val tileSpecsWithoutTile = flow {
             for (row in visibleTiles.rowTop..visibleTiles.rowBottom) {
                 for (col in visibleTiles.colLeft..visibleTiles.colRight) {
-                    emit(TileSpec(visibleTiles.level, row, col, visibleTiles.subSample))
+                    val alreadyProcessed = tilesToRender.any { tile ->
+                        tile.sameSpecAs(visibleTiles.level, row, col, visibleTiles.subSample)
+                    }
+                    /* Only emit specs which haven't already been processed by the collector
+                     * Doing this now results in less object allocations than filtering the flow
+                     * afterwards */
+                    if (!alreadyProcessed) {
+                        emit(TileSpec(visibleTiles.level, row, col, visibleTiles.subSample))
+                    }
                 }
-            }
-        }
-
-        /* Filter the flow to only emit specs which haven't already been processed by the collector */
-        val tileSpecsWithoutTile = tileSpecs.filterNot { spec ->
-            tilesToRender.any {
-                it.sameSpecAs(spec)
             }
         }
 
