@@ -10,10 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
@@ -36,8 +33,8 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
         tilesToRenderLiveData.postValue(tilesToRender)
     }
 
-    private val bitmapPool = BitmapPool()
-    private val paintPool = PaintPool()
+    private val bitmapPool = Pool<Bitmap>()
+    private val paintPool = Pool<Paint>()
     private val visibleTileLocationsChannel = Channel<TileSpec>(capacity = Channel.RENDEZVOUS)
     private val tilesOutput = Channel<Tile>(capacity = Channel.RENDEZVOUS)
     private var tileCollectionJob: Job? = null
@@ -48,7 +45,7 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
      * share data between coroutines in a thread safe way, using cold flows.
      */
     private val bitmapFlow: Flow<Bitmap> = flow {
-        val bitmap = bitmapPool.getBitmap()
+        val bitmap = bitmapPool.get()
         emit(bitmap)
     }.flowOn(Dispatchers.Main).map {
         it ?: Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.RGB_565)
@@ -106,18 +103,31 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
         renderThrottled()
     }
 
+    /**
+     * Leverage built-in back pressure, as this function will suspend when the tile collector is busy
+     * to the point it can't handshake the [visibleTileLocationsChannel] channel.
+     * Using [Flow], a new [TileSpec] instance is created right on time and if necessary, to avoid
+     * allocating too much of these objects.
+     */
     private suspend fun collectNewTiles(visibleTiles: VisibleTiles) {
-        val tileSpecs = visibleTiles.toTileSpecs()
-        val tileSpecsWithoutTile = tileSpecs.filterNot { loc ->
-            tilesToRender.any {
-                it.sameSpecAs(loc)
+        val tileSpecs = flow {
+            for (row in visibleTiles.rowTop..visibleTiles.rowBottom) {
+                for (col in visibleTiles.colLeft..visibleTiles.colRight) {
+                    emit(TileSpec(visibleTiles.level, row, col, visibleTiles.subSample))
+                }
             }
         }
 
-        /* Here, we're leveraging built-in back pressure, as this will suspend when the tile collector
-         * is busy to the point it can't handshake the channel. */
-        for (tileSpec in tileSpecsWithoutTile) {
-            visibleTileLocationsChannel.send(tileSpec)
+        /* Filter the flow to only emit specs which haven't already been processed by the collector */
+        val tileSpecsWithoutTile = tileSpecs.filterNot { spec ->
+            tilesToRender.any {
+                it.sameSpecAs(spec)
+            }
+        }
+
+        /* Back pressure */
+        tileSpecsWithoutTile.collect {
+            visibleTileLocationsChannel.send(it)
         }
     }
 
@@ -148,17 +158,9 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
      * to produce a fade-in effect.
      */
     private fun Tile.setPaint() {
-        paint = (paintPool.getPaint() ?: Paint()).also {
+        paint = (paintPool.get() ?: Paint()).also {
             it.alpha = 0
         }
-    }
-
-    private fun VisibleTiles.toTileSpecs(): List<TileSpec> {
-        return (rowTop..rowBottom).map { row ->
-            (colLeft..colRight).map { col ->
-                TileSpec(level, row, col, subSample)
-            }
-        }.flatten()
     }
 
     private fun VisibleTiles.contains(tile: Tile): Boolean {
@@ -304,12 +306,12 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
      */
     private fun Tile.recycle() {
         if (bitmap.isMutable) {
-            bitmapPool.putBitmap(bitmap)
+            bitmapPool.put(bitmap)
         }
         paint?.let {
             paint = null
             it.alpha = 0
-            paintPool.putPaint(it)
+            paintPool.put(it)
         }
     }
 }
