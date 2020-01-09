@@ -1,9 +1,8 @@
-package com.peterlaurence.mapview.layout.controllers
+package com.peterlaurence.mapview.layout.controller
 
 import com.peterlaurence.mapview.api.MinimumScaleMode
-import com.peterlaurence.mapview.layout.controllers.GestureController.Scalable
-import com.peterlaurence.mapview.util.scale
-import com.peterlaurence.mapview.util.toRad
+import com.peterlaurence.mapview.layout.controller.GestureController.Scalable
+import com.peterlaurence.mapview.util.*
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min

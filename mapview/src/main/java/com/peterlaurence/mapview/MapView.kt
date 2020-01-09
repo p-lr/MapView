@@ -9,9 +9,9 @@ import android.view.View
 import com.peterlaurence.mapview.api.MinimumScaleMode
 import com.peterlaurence.mapview.core.*
 import com.peterlaurence.mapview.layout.GestureLayout
-import com.peterlaurence.mapview.layout.controllers.AngleDegree
 import com.peterlaurence.mapview.layout.setSize
 import com.peterlaurence.mapview.markers.MarkerLayout
+import com.peterlaurence.mapview.util.AngleDegree
 import com.peterlaurence.mapview.view.TileCanvasView
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
 import kotlinx.android.parcel.Parcelize
@@ -226,14 +226,12 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     private fun updateViewport(): Viewport {
         val padding = configuration.padding
-        viewport.apply {
+        return viewport.apply {
             left = max(scrollX - padding, 0)
             top = max(scrollY - padding, 0)
             right = left + width + padding * 2
             bottom = top + height + padding * 2
         }
-
-        return viewport
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {

@@ -6,7 +6,7 @@ import android.view.*
 import android.widget.Scroller
 import androidx.core.view.ViewCompat
 import com.peterlaurence.mapview.layout.animators.ZoomPanAnimator
-import com.peterlaurence.mapview.layout.controllers.GestureController
+import com.peterlaurence.mapview.layout.controller.GestureController
 import com.peterlaurence.mapview.layout.detectors.RotationGestureDetector
 import com.peterlaurence.mapview.layout.detectors.TouchUpGestureDetector
 import com.peterlaurence.mapview.util.scale

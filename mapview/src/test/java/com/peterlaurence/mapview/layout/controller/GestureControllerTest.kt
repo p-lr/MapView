@@ -1,4 +1,4 @@
-package com.peterlaurence.mapview.layout.controllers
+package com.peterlaurence.mapview.layout.controller
 
 import org.junit.Test
 

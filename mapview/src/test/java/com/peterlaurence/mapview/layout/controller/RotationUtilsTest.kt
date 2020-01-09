@@ -1,5 +1,7 @@
-package com.peterlaurence.mapview.layout.controllers
+package com.peterlaurence.mapview.layout.controller
 
+import com.peterlaurence.mapview.util.addModulo
+import com.peterlaurence.mapview.util.modulo
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
