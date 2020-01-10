@@ -96,7 +96,7 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
         }
 
         lastVisible = visibleTiles
-        lastVisibleCount = visibleTiles.getNumberOfTiles()
+        lastVisibleCount = visibleTiles.count
 
         evictTiles(visibleTiles)
 
@@ -111,8 +111,10 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
      */
     private suspend fun collectNewTiles(visibleTiles: VisibleTiles) {
         val tileSpecsWithoutTile = flow {
-            for (row in visibleTiles.rowTop..visibleTiles.rowBottom) {
-                for (col in visibleTiles.colLeft..visibleTiles.colRight) {
+            for (e in visibleTiles.tileMatrix) {
+                val row = e.key
+                val colRange = e.value
+                for (col in colRange) {
                     val alreadyProcessed = tilesToRender.any { tile ->
                         tile.sameSpecAs(visibleTiles.level, row, col, visibleTiles.subSample)
                     }
@@ -165,17 +167,13 @@ class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
     }
 
     private fun VisibleTiles.contains(tile: Tile): Boolean {
-        return level == tile.zoom && subSample == tile.subSample && tile.col in colLeft..colRight
-                && tile.row in rowTop..rowBottom
+        val colRange = tileMatrix[tile.row] ?: return false
+        return level == tile.zoom && subSample == tile.subSample && tile.col in colRange
     }
 
     private fun VisibleTiles.overlaps(tile: Tile): Boolean {
-        return level == tile.zoom && tile.col in colLeft..colRight
-                && tile.row in rowTop..rowBottom
-    }
-
-    private fun VisibleTiles.getNumberOfTiles(): Int {
-        return (rowBottom - rowTop + 1) * (colRight - colLeft + 1)
+        val colRange = tileMatrix[tile.row] ?: return false
+        return level == tile.zoom && tile.col in colRange
     }
 
     /**

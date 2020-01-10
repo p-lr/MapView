@@ -52,32 +52,40 @@ class VisibleTilesResolverTest {
     @Test
     fun viewportTestSimple() {
         val resolver = VisibleTilesResolver(3, 1000, 800)
-        var viewport = Viewport(0, 0,700, 512)
+        var viewport = Viewport(0, 0, 700, 512)
 
         var visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(2, visibleTiles.level)
-        assertEquals(0, visibleTiles.colLeft)
-        assertEquals(0, visibleTiles.rowTop)
-        assertEquals(2, visibleTiles.colRight)
-        assertEquals(1, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(2, visibleTiles.level)
+            assertEquals(0, colLeft)
+            assertEquals(0, rowTop)
+            assertEquals(2, colRight)
+            assertEquals(1, rowBottom)
+        }
+
 
         resolver.setScale(0.5f)
         viewport = Viewport(0, 0, 512, 512)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(1, visibleTiles.level)
-        assertEquals(0, visibleTiles.colLeft)
-        assertEquals(0, visibleTiles.rowTop)
-        assertEquals(1, visibleTiles.colRight)
-        assertEquals(1, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(1, visibleTiles.level)
+            assertEquals(0, colLeft)
+            assertEquals(0, rowTop)
+            assertEquals(1, colRight)
+            assertEquals(1, rowBottom)
+        }
+
 
         val resolver2 = VisibleTilesResolver(5, 8192, 8192)
-        val viewport2 = Viewport(0, 0,8192, 8192)
+        val viewport2 = Viewport(0, 0, 8192, 8192)
         visibleTiles = resolver2.getVisibleTiles(viewport2)
-        assertEquals(4, visibleTiles.level)
-        assertEquals(0, visibleTiles.colLeft)
-        assertEquals(0, visibleTiles.rowTop)
-        assertEquals(31, visibleTiles.colRight)
-        assertEquals(31, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(4, visibleTiles.level)
+            assertEquals(0, colLeft)
+            assertEquals(0, rowTop)
+            assertEquals(31, colRight)
+            assertEquals(31, rowBottom)
+        }
     }
 
     @Test
@@ -87,46 +95,56 @@ class VisibleTilesResolverTest {
         val resolver = VisibleTilesResolver(6, 16400, 8000)
         var viewport = Viewport(0, 0, 1080, 1380)
         var visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(5, visibleTiles.level)
-        assertEquals(0, visibleTiles.colLeft)
-        assertEquals(0, visibleTiles.rowTop)
-        assertEquals(4, visibleTiles.colRight)
-        assertEquals(5, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(5, visibleTiles.level)
+            assertEquals(0, colLeft)
+            assertEquals(0, rowTop)
+            assertEquals(4, colRight)
+            assertEquals(5, rowBottom)
+        }
 
         viewport = Viewport(4753, 6222, 4753 + 1080, 6222 + 1380)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(5, visibleTiles.level)
-        assertEquals(18, visibleTiles.colLeft)
-        assertEquals(24, visibleTiles.rowTop)
-        assertEquals(22, visibleTiles.colRight)
-        assertEquals(29, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(5, visibleTiles.level)
+            assertEquals(18, colLeft)
+            assertEquals(24, rowTop)
+            assertEquals(22, colRight)
+            assertEquals(29, rowBottom)
+        }
 
         viewport = Viewport(3720, 1543, 3720 + 1080, 1543 + 1380)
         resolver.setScale(0.5f)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(4, visibleTiles.level)
-        assertEquals(14, visibleTiles.colLeft)
-        assertEquals(6, visibleTiles.rowTop)
-        assertEquals(18, visibleTiles.colRight)
-        assertEquals(11, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(4, visibleTiles.level)
+            assertEquals(14, colLeft)
+            assertEquals(6, rowTop)
+            assertEquals(18, colRight)
+            assertEquals(11, rowBottom)
+        }
 
         viewport = Viewport(3720, 1543, 3720 + 1080, 1543 + 1380)
         resolver.setScale(0.71f)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(5, visibleTiles.level)
-        assertEquals(20, visibleTiles.colLeft)
-        assertEquals(8, visibleTiles.rowTop)
-        assertEquals(26, visibleTiles.colRight)
-        assertEquals(16, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(5, visibleTiles.level)
+            assertEquals(20, colLeft)
+            assertEquals(8, rowTop)
+            assertEquals(26, colRight)
+            assertEquals(16, rowBottom)
+        }
 
         viewport = Viewport(1643, 427, 1643 + 1080, 427 + 1380)
         resolver.setScale(0.43f)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(4, visibleTiles.level)
-        assertEquals(7, visibleTiles.colLeft)
-        assertEquals(1, visibleTiles.rowTop)
-        assertEquals(12, visibleTiles.colRight)
-        assertEquals(8, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(4, visibleTiles.level)
+            assertEquals(7, colLeft)
+            assertEquals(1, rowTop)
+            assertEquals(12, colRight)
+            assertEquals(8, rowBottom)
+        }
     }
 
     @Test
@@ -137,43 +155,66 @@ class VisibleTilesResolverTest {
         resolver.setScale(0.37f)
         var viewport = Viewport(3720, 1543, 3720 + 1080, 1543 + 1380)
         var visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(3, visibleTiles.level)
-        assertEquals(9, visibleTiles.colLeft)
-        assertEquals(4, visibleTiles.rowTop)
-        assertEquals(12, visibleTiles.colRight)
-        assertEquals(7, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(3, visibleTiles.level)
+            assertEquals(9, colLeft)
+            assertEquals(4, rowTop)
+            assertEquals(12, colRight)
+            assertEquals(7, rowBottom)
+        }
 
         // magnify even further, with an abnormally big viewport
         resolver = VisibleTilesResolver(6, 16400, 8000, magnifyingFactor = 2)
         viewport = Viewport(250, 123, 250 + 1080, 123 + 1380)
         resolver.setScale(0.37f)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(2, visibleTiles.level)
-        assertEquals(0, visibleTiles.colLeft)
-        assertEquals(0, visibleTiles.rowTop)
-        assertEquals(1, visibleTiles.colRight)
-        assertEquals(1, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(2, visibleTiles.level)
+            assertEquals(0, colLeft)
+            assertEquals(0, rowTop)
+            assertEquals(1, colRight)
+            assertEquals(1, rowBottom)
+        }
 
         // (un)magnify
         resolver = VisibleTilesResolver(6, 16400, 8000, magnifyingFactor = -1)
         viewport = Viewport(3720, 1543, 3720 + 1080, 1543 + 1380)
         resolver.setScale(0.37f)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(5, visibleTiles.level)
-        assertEquals(39, visibleTiles.colLeft)
-        assertEquals(16, visibleTiles.rowTop)
-        assertEquals(50, visibleTiles.colRight)
-        assertEquals(30, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(5, visibleTiles.level)
+            assertEquals(39, colLeft)
+            assertEquals(16, rowTop)
+            assertEquals(50, colRight)
+            assertEquals(30, rowBottom)
+        }
 
         // Try to (un)magnify beyond available level: this shouldn't change anything
         resolver = VisibleTilesResolver(6, 16400, 8000, magnifyingFactor = -2)
         viewport = Viewport(3720, 1543, 3720 + 1080, 1543 + 1380)
         resolver.setScale(0.37f)
         visibleTiles = resolver.getVisibleTiles(viewport)
-        assertEquals(5, visibleTiles.level)
-        assertEquals(39, visibleTiles.colLeft)
-        assertEquals(16, visibleTiles.rowTop)
-        assertEquals(50, visibleTiles.colRight)
-        assertEquals(30, visibleTiles.rowBottom)
+        with(visibleTiles.tileMatrix.toTileRange()) {
+            assertEquals(5, visibleTiles.level)
+            assertEquals(39, colLeft)
+            assertEquals(16, rowTop)
+            assertEquals(50, colRight)
+            assertEquals(30, rowBottom)
+        }
     }
+}
+
+private data class TileRange(val colLeft: Int, val rowTop: Int, val colRight: Int, val rowBottom: Int)
+
+/**
+ * If the tile matrix represents a rectangle, then is can be represented by a [TileRange].
+ * It only makes sense when the angle of rotation is 0 modulo pi/2
+ */
+private fun TileMatrix.toTileRange(): TileRange {
+    val rowTop = keys.min()!!
+    val rowBottom = keys.max()!!
+    val colRange = getValue(rowTop)
+    val colLeft = colRange.first
+    val colRight = colRange.last
+    return TileRange(colLeft, rowTop, colRight, rowBottom)
 }

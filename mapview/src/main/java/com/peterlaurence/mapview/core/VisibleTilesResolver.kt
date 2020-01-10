@@ -93,12 +93,26 @@ class VisibleTilesResolver(private val levelCount: Int, private val fullWidth: I
         val colRight = (ceil(viewport.right / scaledTileSize).toInt() - 1).lowerThan(maxCol)
         val rowBottom = (ceil(viewport.bottom / scaledTileSize).toInt() - 1).lowerThan(maxRow)
 
-        return VisibleTiles(level, colLeft, rowTop, colRight, rowBottom, subSample)
+        val tileMatrix = (rowTop..rowBottom).associateWith {
+            colLeft..colRight
+        }
+        val count = (rowBottom - rowTop + 1) * (colRight - colLeft + 1)
+
+        return VisibleTiles(level, tileMatrix, count, subSample)
     }
 }
 
 /**
+ * Properties container for the computed visible tiles.
  * @param level 0-based level index
+ * @param tileMatrix contains all (row, col) indexes, grouped by rows
+ * @param count the precomputed total count
+ * @param subSample the current sub-sample factor. If the current scale of the [VisibleTilesResolver]
+ * is lower than the scale of the minimum level, [subSample] is greater than 0. Otherwise, [subSample]
+ * equals 0.
  */
-data class VisibleTiles(var level: Int, val colLeft: Int, val rowTop: Int, val colRight: Int,
-                        val rowBottom: Int, val subSample: Int = 0)
+data class VisibleTiles(var level: Int, val tileMatrix: TileMatrix, val count: Int, val subSample: Int = 0)
+
+typealias Row = Int
+typealias ColRange = IntRange
+typealias TileMatrix = Map<Row, ColRange>

@@ -57,7 +57,7 @@ class TileCollectorTest {
         val visibleTileLocationsChannel = Channel<TileSpec>(capacity = Channel.RENDEZVOUS)
         val tilesOutput = Channel<Tile>(capacity = Channel.RENDEZVOUS)
 
-        val pool = BitmapPool()
+        val pool = Pool<Bitmap>()
 
         val mapViewTileStreamProvider = object : MapViewTileStreamProvider {
             override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
@@ -66,7 +66,7 @@ class TileCollectorTest {
         }
 
         val bitmapFlow: Flow<Bitmap> = flow {
-            val bitmap = pool.getBitmap()
+            val bitmap = pool.get()
             emit(bitmap)
         }.flowOn(Dispatchers.Unconfined).map {
             it ?: Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.RGB_565)
@@ -90,7 +90,7 @@ class TileCollectorTest {
 
                 /* Add bitmap to the pool only if they are from level 0 */
                 if (tile.zoom == 0) {
-                    pool.putBitmap(tile.bitmap)
+                    pool.put(tile.bitmap)
                 }
             }
         }
