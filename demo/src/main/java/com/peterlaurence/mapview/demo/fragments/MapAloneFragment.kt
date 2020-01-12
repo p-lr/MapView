@@ -62,7 +62,7 @@ class MapAloneFragment : Fragment() {
         val tileSize = 256
         val config = MapViewConfiguration(
             5, 8192, 8192, tileSize, tileStreamProvider
-        ).setMaxScale(2f).setPadding(tileSize * 2)
+        ).setMaxScale(2f)
 
         return MapView(context).apply {
             configure(config)

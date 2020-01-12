@@ -26,7 +26,7 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
             field = value
             invalidate()
         }
-    private val alphaTick = 0.15f
+    private val alphaTick = 0.07f
 
     private var tilesToRender = listOf<Tile>()
 
