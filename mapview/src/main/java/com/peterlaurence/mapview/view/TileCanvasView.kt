@@ -29,6 +29,7 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
     private val alphaTick = 0.07f
 
     private var tilesToRender = listOf<Tile>()
+    private val dest = Rect()
 
     init {
         setWillNotDraw(false)
@@ -69,7 +70,6 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         if (tilesToRender.isEmpty()) return
 
         var needsAnotherPass = false
-        val dest = Rect()
         for (tile in tilesToRender) {
             val scaleForLevel = visibleTilesResolver.getScaleForLevel(tile.zoom)
                     ?: continue
