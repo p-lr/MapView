@@ -105,7 +105,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         /* Apply the configuration */
         setSize(config.fullWidth, config.fullHeight)
         visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
-                magnifyingFactor = config.magnifyingFactor)
+                config.tileSize, magnifyingFactor = config.magnifyingFactor)
         tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
                 config.tileStreamProvider, config.workerCount)
         this.tileSize = config.tileSize
