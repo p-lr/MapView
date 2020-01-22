@@ -3,7 +3,7 @@ package com.peterlaurence.mapview.layout.controller
 import com.peterlaurence.mapview.api.MinimumScaleMode
 import com.peterlaurence.mapview.layout.controller.GestureController.Scalable
 import com.peterlaurence.mapview.util.AngleDegree
-import com.peterlaurence.mapview.util.addModulo
+import com.peterlaurence.mapview.util.modulo
 import com.peterlaurence.mapview.util.scale
 import kotlin.math.max
 import kotlin.math.min
@@ -21,6 +21,7 @@ internal class GestureController(private val scalable: Scalable) {
 
     private var shouldLoopScale = true
 
+    private var isConfigured = false
     private var screenWidth: Int = 0
     private var screenHeight: Int = 0
 
@@ -86,11 +87,15 @@ internal class GestureController(private val scalable: Scalable) {
     var rotationEnabled = false
     var handleRotationGesture = true
     var angle: AngleDegree = 0f
+        set(value) {
+            if (!isConfigured) return
+            field = value.modulo()
+            val (centerX, centerY) = getViewportCenter()
+            scalable.onRotationChanged(angle, centerX, centerY)
+        }
 
     fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float) {
-        angle = angle.addModulo(rotationDelta)
-        val (centerX, centerY) = getViewportCenter()
-        scalable.onRotationChanged(angle, centerX, centerY)
+        angle += rotationDelta
     }
 
     fun getViewportCenter(): ViewportCenter {
@@ -215,6 +220,7 @@ internal class GestureController(private val scalable: Scalable) {
     fun setScreenDimensions(width: Int, height: Int) {
         screenWidth = width
         screenHeight = height
+        isConfigured = true
     }
 
     private fun recalculateScaledPadding() {

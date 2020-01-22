@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
+import com.peterlaurence.mapview.api.setAngle
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
 import com.peterlaurence.mapview.demo.fragments.views.MapMarker
@@ -108,6 +109,7 @@ class RotatingMapFragment : Fragment() {
         }
 
         pathView.updatePaths(pathList)
+        mapView.setAngle(45f)
         return mapView
     }
 

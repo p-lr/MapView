@@ -15,7 +15,3 @@ fun AngleDegree.modulo(): AngleDegree {
     } else mod
 }
 
-fun AngleDegree.addModulo(angle: AngleDegree): AngleDegree {
-    return (this + angle).modulo()
-}
-
