@@ -49,7 +49,7 @@ import kotlin.math.max
  *
  * @author peterLaurence on 31/05/2019
  */
-class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         GestureLayout(context, attrs, defStyleAttr), CoroutineScope {
 
     private lateinit var visibleTilesResolver: VisibleTilesResolver

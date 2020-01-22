@@ -156,7 +156,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
         this.markerTapListener = markerTapListener
     }
 
-    fun processHit(x: Int, y: Int) {
+    open fun processHit(x: Int, y: Int) {
         markerTapListener?.let {
             val view = getViewFromTap(x, y)
             if (view != null) {
