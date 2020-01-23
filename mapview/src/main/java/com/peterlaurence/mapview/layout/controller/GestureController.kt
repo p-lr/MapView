@@ -21,7 +21,7 @@ internal class GestureController(private val scalable: Scalable) {
 
     private var shouldLoopScale = true
 
-    private var isConfigured = false
+    internal var isConfigured = false
     private var screenWidth: Int = 0
     private var screenHeight: Int = 0
 
@@ -88,7 +88,6 @@ internal class GestureController(private val scalable: Scalable) {
     var handleRotationGesture = true
     var angle: AngleDegree = 0f
         set(value) {
-            if (!isConfigured) return
             field = value.modulo()
             val (centerX, centerY) = getViewportCenter()
             scalable.onRotationChanged(angle, centerX, centerY)

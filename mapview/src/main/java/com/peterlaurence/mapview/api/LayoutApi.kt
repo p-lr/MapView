@@ -19,5 +19,6 @@ fun MapView.setBasePadding(padding: Int) {
  * Attempts to set the angle before [MapView] has been laid out will be ignored.
  */
 fun MapView.setAngle(angle: AngleDegree) {
+    if (!gestureController.isConfigured) return
     gestureController.angle = angle
 }
