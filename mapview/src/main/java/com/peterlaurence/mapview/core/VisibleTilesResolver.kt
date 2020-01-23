@@ -1,5 +1,7 @@
 package com.peterlaurence.mapview.core
 
+import com.peterlaurence.mapview.util.rotateX
+import com.peterlaurence.mapview.util.rotateY
 import kotlin.math.*
 
 /**
@@ -88,17 +90,67 @@ class VisibleTilesResolver(private val levelCount: Int, private val fullWidth: I
 
         val scaledTileSize = tileSize.toDouble() * relativeScale
 
-        val colLeft = floor(viewport.left / scaledTileSize).toInt().lowerThan(maxCol)
-        val rowTop = floor(viewport.top / scaledTileSize).toInt().lowerThan(maxRow)
-        val colRight = (ceil(viewport.right / scaledTileSize).toInt() - 1).lowerThan(maxCol)
-        val rowBottom = (ceil(viewport.bottom / scaledTileSize).toInt() - 1).lowerThan(maxRow)
+        fun makeVisibleTiles(left: Int, top: Int, right: Int, bottom: Int): VisibleTiles {
+            val colLeft = floor(left / scaledTileSize).toInt().lowerThan(maxCol)
+            val rowTop = floor(top / scaledTileSize).toInt().lowerThan(maxRow)
+            val colRight = (ceil(right / scaledTileSize).toInt() - 1).lowerThan(maxCol)
+            val rowBottom = (ceil(bottom / scaledTileSize).toInt() - 1).lowerThan(maxRow)
 
-        val tileMatrix = (rowTop..rowBottom).associateWith {
-            colLeft..colRight
+            val tileMatrix = (rowTop..rowBottom).associateWith {
+                colLeft..colRight
+            }
+            val count = (rowBottom - rowTop + 1) * (colRight - colLeft + 1)
+            return VisibleTiles(level, tileMatrix, count, subSample)
         }
-        val count = (rowBottom - rowTop + 1) * (colRight - colLeft + 1)
 
-        return VisibleTiles(level, tileMatrix, count, subSample)
+        return if (viewport.angleRad == 0f) {
+            makeVisibleTiles(viewport.left, viewport.top, viewport.right, viewport.bottom)
+        } else {
+            val xTopLeft = viewport.left
+            val yTopLeft = viewport.top
+
+            val xTopRight = viewport.right
+            val yTopRight = viewport.top
+
+            val xBotLeft = viewport.left
+            val yBotLeft = viewport.bottom
+
+            val xBotRight = viewport.right
+            val yBotRight = viewport.bottom
+
+            val xCenter = (viewport.right + viewport.left).toDouble() / 2
+            val yCenter = (viewport.bottom + viewport.top).toDouble() / 2
+
+            val xTopLeftRot = rotateX(xTopLeft - xCenter, yTopLeft - yCenter, viewport.angleRad) + xCenter
+            val yTopLeftRot = rotateY(xTopLeft - xCenter, yTopLeft - yCenter, viewport.angleRad) + yCenter
+            var xLeftMost = xTopLeftRot
+            var yTopMost = yTopLeftRot
+            var xRightMost = xTopLeftRot
+            var yBotMost = yTopLeftRot
+
+            val xTopRightRot = rotateX(xTopRight - xCenter, yTopRight - yCenter, viewport.angleRad) + xCenter
+            val yTopRightRot = rotateY(xTopRight - xCenter, yTopRight - yCenter, viewport.angleRad) + yCenter
+            xLeftMost = xLeftMost.coerceAtMost(xTopRightRot)
+            yTopMost = yTopMost.coerceAtMost(yTopRightRot)
+            xRightMost = xRightMost.coerceAtLeast(xTopRightRot)
+            yBotMost = yBotMost.coerceAtLeast(yTopRightRot)
+
+            val xBotLeftRot = rotateX(xBotLeft - xCenter, yBotLeft - yCenter, viewport.angleRad) + xCenter
+            val yBotLeftRot = rotateY(xBotLeft - xCenter, yBotLeft - yCenter, viewport.angleRad) + yCenter
+            xLeftMost = xLeftMost.coerceAtMost(xBotLeftRot)
+            yTopMost = yTopMost.coerceAtMost(yBotLeftRot)
+            xRightMost = xRightMost.coerceAtLeast(xBotLeftRot)
+            yBotMost = yBotMost.coerceAtLeast(yBotLeftRot)
+
+            val xBotRightRot = rotateX(xBotRight - xCenter, yBotRight - yCenter, viewport.angleRad) + xCenter
+            val yBotRightRot = rotateY(xBotRight - xCenter, yBotRight - yCenter, viewport.angleRad) + yCenter
+            xLeftMost = xLeftMost.coerceAtMost(xBotRightRot)
+            yTopMost = yTopMost.coerceAtMost(yBotRightRot)
+            xRightMost = xRightMost.coerceAtLeast(xBotRightRot)
+            yBotMost = yBotMost.coerceAtLeast(yBotRightRot)
+
+            makeVisibleTiles(xLeftMost.toInt(), yTopMost.toInt(), xRightMost.toInt(), yBotMost.toInt())
+        }
     }
 }
 

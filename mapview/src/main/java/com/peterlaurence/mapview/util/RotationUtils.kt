@@ -1,5 +1,8 @@
 package com.peterlaurence.mapview.util
 
+import kotlin.math.cos
+import kotlin.math.sin
+
 typealias AngleDegree = Float
 typealias AngleRad = Float
 
@@ -15,3 +18,10 @@ fun AngleDegree.modulo(): AngleDegree {
     } else mod
 }
 
+fun rotateX(x: Double, y: Double, angleRad: AngleRad): Double {
+    return x * cos(angleRad) - y * sin(angleRad)
+}
+
+fun rotateY(x: Double, y: Double, angleRad: AngleRad): Double {
+    return x * sin(angleRad) + y * cos(angleRad)
+}

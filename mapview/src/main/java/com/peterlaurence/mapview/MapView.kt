@@ -12,6 +12,7 @@ import com.peterlaurence.mapview.layout.GestureLayout
 import com.peterlaurence.mapview.layout.setSize
 import com.peterlaurence.mapview.markers.MarkerLayout
 import com.peterlaurence.mapview.util.AngleDegree
+import com.peterlaurence.mapview.util.toRad
 import com.peterlaurence.mapview.view.TileCanvasView
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
 import kotlinx.android.parcel.Parcelize
@@ -231,6 +232,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
             top = max(scrollY - padding, 0)
             right = left + width + padding * 2
             bottom = top + height + padding * 2
+            angleRad = rotationData.angle.toRad()
         }
     }
 
