@@ -336,11 +336,16 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
 
     override fun onFling(event1: MotionEvent, event2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         val c = gestureController
-        val angleRad = -gestureController.angle.toRad()
-        val velocityXr = velocityX * cos(angleRad) - velocityY * sin(angleRad)
-        val velocityYr = velocityX * sin(angleRad) + velocityY * cos(angleRad)
-        scroller.fling(scrollX, scrollY, (-velocityXr).toInt(), (-velocityYr).toInt(),
-                c.scrollMinX, c.scrollLimitX, c.scrollMinY, c.scrollLimitY)
+        if (gestureController.angle == 0f) { // fast path
+            scroller.fling(scrollX, scrollY, (-velocityX).toInt(), (-velocityY).toInt(),
+                    c.scrollMinX, c.scrollLimitX, c.scrollMinY, c.scrollLimitY)
+        } else {
+            val angleRad = -gestureController.angle.toRad()
+            val velocityXr = velocityX * cos(angleRad) - velocityY * sin(angleRad)
+            val velocityYr = velocityX * sin(angleRad) + velocityY * cos(angleRad)
+            scroller.fling(scrollX, scrollY, (-velocityXr).toInt(), (-velocityYr).toInt(),
+                    c.scrollMinX, c.scrollLimitX, c.scrollMinY, c.scrollLimitY)
+        }
 
         isFlinging = true
         ViewCompat.postInvalidateOnAnimation(this)
@@ -352,12 +357,19 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     }
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-        val angleRad = -gestureController.angle.toRad()
-        val distanceXr = distanceX * cos(angleRad) - distanceY * sin(angleRad)
-        val distanceYr = distanceX * sin(angleRad) + distanceY * cos(angleRad)
-        val scrollEndX = scrollX + distanceXr.toInt()
-        val scrollEndY = scrollY + distanceYr.toInt()
-        scrollTo(scrollEndX, scrollEndY)
+        if (gestureController.angle == 0f) {  // fast path
+            val scrollEndX = scrollX + distanceX.toInt()
+            val scrollEndY = scrollY + distanceY.toInt()
+            scrollTo(scrollEndX, scrollEndY)
+        } else {
+            val angleRad = -gestureController.angle.toRad()
+            val distanceXr = distanceX * cos(angleRad) - distanceY * sin(angleRad)
+            val distanceYr = distanceX * sin(angleRad) + distanceY * cos(angleRad)
+            val scrollEndX = scrollX + distanceXr.toInt()
+            val scrollEndY = scrollY + distanceYr.toInt()
+            scrollTo(scrollEndX, scrollEndY)
+        }
+
         if (!isDragging) {
             isDragging = true
         }
@@ -379,10 +391,16 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     override fun onDoubleTap(event: MotionEvent): Boolean {
         val destination = 2.0.pow(floor(ln((gestureController.scale * 2).toDouble()) / ln(2.0))).toFloat()
         val scaleCst = gestureController.getDoubleTapDestinationScale(destination, gestureController.scale)
-        val angleRad = -gestureController.angle.toRad()
-        val eventRx = (height / 2 * sin(angleRad) + width / 2 * (1 - cos(angleRad)) + event.x * cos(angleRad) - event.y * sin(angleRad)).toInt()
-        val eventRy = (height / 2 * (1 - cos(angleRad)) - width / 2 * sin(angleRad) + event.x * sin(angleRad) + event.y * cos(angleRad)).toInt()
-        smoothScaleFromFocalPoint(eventRx, eventRy, scaleCst)
+
+        if (gestureController.angle == 0f) {
+            smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst)
+        } else {
+            val angleRad = -gestureController.angle.toRad()
+            val eventRx = (height / 2 * sin(angleRad) + width / 2 * (1 - cos(angleRad)) + event.x * cos(angleRad) - event.y * sin(angleRad)).toInt()
+            val eventRy = (height / 2 * (1 - cos(angleRad)) - width / 2 * sin(angleRad) + event.x * sin(angleRad) + event.y * cos(angleRad)).toInt()
+            smoothScaleFromFocalPoint(eventRx, eventRy, scaleCst)
+        }
+
         return true
     }
 
