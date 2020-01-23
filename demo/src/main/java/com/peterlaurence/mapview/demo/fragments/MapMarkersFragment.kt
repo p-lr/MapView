@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
+import com.peterlaurence.mapview.api.addCallout
+import com.peterlaurence.mapview.api.addMarker
+import com.peterlaurence.mapview.api.setMarkerTapListener
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
 import com.peterlaurence.mapview.demo.fragments.views.MapMarker
 import com.peterlaurence.mapview.demo.fragments.views.MarkerCallout
 import com.peterlaurence.mapview.markers.MarkerTapListener
-import com.peterlaurence.mapview.markers.addCallout
-import com.peterlaurence.mapview.markers.addMarker
-import com.peterlaurence.mapview.markers.setMarkerTapListener
 import java.io.InputStream
 
 /**
