@@ -23,7 +23,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         ViewGroup(context, attrs, defStyleAttr), GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener,
         TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener,
-        GestureController.Scalable {
+        GestureController.Controllable {
 
     /* Controllers */
     internal val gestureController: GestureController by lazy { GestureController(this) }
@@ -188,6 +188,12 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
 
     override fun onContentChanged() {
         invalidate()
+    }
+
+    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+        super.onScrollChanged(l, t, oldl, oldt)
+
+        gestureController.notifyScrollChanged()
     }
 
     /**
@@ -389,15 +395,19 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     }
 
     override fun onDoubleTap(event: MotionEvent): Boolean {
-        val destination = 2.0.pow(floor(ln((gestureController.scale * 2).toDouble()) / ln(2.0))).toFloat()
-        val scaleCst = gestureController.getDoubleTapDestinationScale(destination, gestureController.scale)
+        val destination = 2.0.pow(floor(
+                ln((gestureController.scale * 2).toDouble()) / ln(2.0))).toFloat()
+        val scaleCst = gestureController.getDoubleTapDestinationScale(destination,
+                gestureController.scale)
 
         if (gestureController.angle == 0f) {
             smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst)
         } else {
             val angleRad = -gestureController.angle.toRad()
-            val eventRx = (height / 2 * sin(angleRad) + width / 2 * (1 - cos(angleRad)) + event.x * cos(angleRad) - event.y * sin(angleRad)).toInt()
-            val eventRy = (height / 2 * (1 - cos(angleRad)) - width / 2 * sin(angleRad) + event.x * sin(angleRad) + event.y * cos(angleRad)).toInt()
+            val eventRx = (height / 2 * sin(angleRad) + width / 2 * (1 - cos(angleRad)) +
+                    event.x * cos(angleRad) - event.y * sin(angleRad)).toInt()
+            val eventRy = (height / 2 * (1 - cos(angleRad)) - width / 2 * sin(angleRad) +
+                    event.x * sin(angleRad) + event.y * cos(angleRad)).toInt()
             smoothScaleFromFocalPoint(eventRx, eventRy, scaleCst)
         }
 

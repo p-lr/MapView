@@ -1,7 +1,7 @@
 package com.peterlaurence.mapview.layout.controller
 
 import com.peterlaurence.mapview.api.MinimumScaleMode
-import com.peterlaurence.mapview.layout.controller.GestureController.Scalable
+import com.peterlaurence.mapview.layout.controller.GestureController.Controllable
 import com.peterlaurence.mapview.util.AngleDegree
 import com.peterlaurence.mapview.util.modulo
 import com.peterlaurence.mapview.util.scale
@@ -9,11 +9,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Controls the scale of the [Scalable], and the scale configuration.
+ * Notifies the [Controllable] with various events, like scale change or referential change.
  *
  * @author P.Laurence on 13/12/19
  */
-internal class GestureController(private val scalable: Scalable) {
+internal class GestureController(private val controllable: Controllable) {
     private var minScale = Float.MIN_VALUE
     private var maxScale = 1f
     private var effectiveMinScale = 0f
@@ -77,10 +77,11 @@ internal class GestureController(private val scalable: Scalable) {
                 val previous = this.scale
                 field = scaleTmp
                 updateScaledDimensions()
-                scalable.constrainScrollToLimits()
+                controllable.constrainScrollToLimits()
                 recalculateScaledPadding()
-                scalable.onScaleChanged(scaleTmp, previous)
-                scalable.onContentChanged()
+                controllable.onScaleChanged(scaleTmp, previous)
+                updateReferential()
+                controllable.onContentChanged()
             }
         }
 
@@ -89,9 +90,17 @@ internal class GestureController(private val scalable: Scalable) {
     var angle: AngleDegree = 0f
         set(value) {
             field = value.modulo()
-            val (centerX, centerY) = getViewportCenter()
-            scalable.onRotationChanged(angle, centerX, centerY)
+            updateReferential()
         }
+
+    private fun updateReferential() {
+        val (centerX, centerY) = getViewportCenter()
+        controllable.onReferentialChanged(angle, centerX, centerY)
+    }
+
+    fun notifyScrollChanged() {
+        updateReferential()
+    }
 
     fun onRotate(rotationDelta: Float, focusX: Float, focusY: Float) {
         angle += rotationDelta
@@ -119,13 +128,13 @@ internal class GestureController(private val scalable: Scalable) {
         baseWidth = width
         baseHeight = height
         updateScaledDimensions()
-        scalable.onMinScaleUpdateRequest()
-        scalable.constrainScrollToLimits()
-        scalable.onLayoutChanged()
+        controllable.onMinScaleUpdateRequest()
+        controllable.constrainScrollToLimits()
+        controllable.onLayoutChanged()
     }
 
     /**
-     * Determines whether the [Scalable] should go back to minimum scale after a double-tap at
+     * Determines whether the [Controllable] should go back to minimum scale after a double-tap at
      * maximum scale.
      *
      * @param shouldLoopScale True to allow going back to minimum scale, false otherwise.
@@ -139,8 +148,8 @@ internal class GestureController(private val scalable: Scalable) {
      * Note that if minimumScaleMode is set to [MinimumScaleMode.FIT] or [MinimumScaleMode.FILL], the minimum value set here will be ignored
      * Default values are 0 and 1.
      *
-     * @param min Minimum scale the [Scalable] should accept.
-     * @param max Maximum scale the [Scalable] should accept.
+     * @param min Minimum scale the [Controllable] should accept.
+     * @param max Maximum scale the [Controllable] should accept.
      */
     fun setScaleLimits(min: Float, max: Float) {
         minScale = min
@@ -153,7 +162,7 @@ internal class GestureController(private val scalable: Scalable) {
 
     fun setMinimumScaleMode(minimumScaleMode: MinimumScaleMode) {
         this.minimumScaleMode = minimumScaleMode
-        scalable.onMinScaleUpdateRequest()
+        controllable.onMinScaleUpdateRequest()
     }
 
     fun getConstrainedDestinationScale(scale: Float): Float {
@@ -226,12 +235,12 @@ internal class GestureController(private val scalable: Scalable) {
         scaledPadding = scale(basePadding, scale)
     }
 
-    interface Scalable {
+    interface Controllable {
         fun onMinScaleUpdateRequest()
         fun onLayoutChanged()
         fun onContentChanged()
         fun onScaleChanged(currentScale: Float, previousScale: Float)
-        fun onRotationChanged(angle: AngleDegree, centerX: Double, centerY: Double)
+        fun onReferentialChanged(angle: AngleDegree, centerX: Double, centerY: Double)
         fun constrainScrollToLimits()
     }
 

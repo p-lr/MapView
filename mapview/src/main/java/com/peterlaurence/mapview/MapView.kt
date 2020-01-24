@@ -246,19 +246,6 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
-        val (x, y) = gestureController.getViewportCenter()
-
-        /* This is very specific to the map rotating feature. A RotationData must be supplied on
-         * each angle change (of course) AND on each scroll change, because the rendering involves
-         * a rotation around the center of the screen.
-         */
-        if (gestureController.rotationEnabled) {
-            rotationData.apply {
-                centerX = x
-                centerY = y
-            }
-            updateAllRotatable()
-        }
 
         renderVisibleTilesThrottled()
     }
@@ -275,7 +262,14 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         renderVisibleTilesThrottled()
     }
 
-    override fun onRotationChanged(angle: AngleDegree, centerX: Double, centerY: Double) {
+    /**
+     * This is very specific to the map rotating feature. A [RotationData] must be supplied on
+     * each angle change (of course) AND on each scroll change, because the rendering involves
+     * a rotation around the center of the screen.
+     * It is also required on each scale change, as in some cases the scroll isn't changing but a
+     * scale change requires an update of the center.
+     */
+    override fun onReferentialChanged(angle: AngleDegree, centerX: Double, centerY: Double) {
         /* If this is called, the rotation must have been enabled */
         rotationData.apply {
             this.angle = angle
