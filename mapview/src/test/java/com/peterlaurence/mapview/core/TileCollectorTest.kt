@@ -28,7 +28,7 @@ import com.peterlaurence.mapview.core.TileStreamProvider as MapViewTileStreamPro
  * * The [Bitmap] of the [Tile]s produced should be consistent with the output of the flow
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@Config(manifest = "src/main/AndroidManifest.xml", sdk = [Build.VERSION_CODES.P])
 class TileCollectorTest {
 
     private val tileSize = 256

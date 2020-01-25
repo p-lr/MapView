@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  *
  * @author peterLaurence on 04/06/2019
  */
-class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
+internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
                           private val visibleTilesResolver: VisibleTilesResolver,
                           tileStreamProvider: TileStreamProvider,
                           workerCount: Int) : CoroutineScope by scope {
