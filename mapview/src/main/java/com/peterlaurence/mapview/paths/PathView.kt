@@ -8,9 +8,8 @@ import android.graphics.Path
 import android.util.TypedValue
 import android.view.View
 import com.peterlaurence.mapview.MapView
-import com.peterlaurence.mapview.Rotatable
-import com.peterlaurence.mapview.RotationData
-import com.peterlaurence.mapview.ScaleChangeListener
+import com.peterlaurence.mapview.ReferentialOwner
+import com.peterlaurence.mapview.ReferentialData
 
 /**
  * This is a custom view that uses [Canvas.drawLines] to draw a path.
@@ -19,18 +18,12 @@ import com.peterlaurence.mapview.ScaleChangeListener
  *
  * @author peterLaurence on 19/02/17 -- Converted to Kotlin on 26/07/19
  */
-class PathView(context: Context) : View(context), ScaleChangeListener, Rotatable {
+class PathView(context: Context) : View(context), ReferentialOwner {
     private val strokeWidthDefault: Float
 
-    override var rotationData: RotationData? = null
+    override var referentialData = ReferentialData(false)
         set(value) {
             field = value
-            invalidate()
-        }
-
-    var scale = 1f
-        set(scale) {
-            field = scale
             invalidate()
         }
 
@@ -71,10 +64,6 @@ class PathView(context: Context) : View(context), ScaleChangeListener, Rotatable
         invalidate()
     }
 
-    override fun onScaleChanged(scale: Float) {
-        this.scale = scale
-    }
-
     fun setShouldDraw(shouldDraw: Boolean) {
         this.shouldDraw = shouldDraw
         invalidate()
@@ -85,13 +74,12 @@ class PathView(context: Context) : View(context), ScaleChangeListener, Rotatable
         if (shouldDraw && pathList != null) {
 
             /* If there is rotation data, take it into account */
-            rotationData?.apply {
-                if (rotationEnabled) {
-                    canvas.rotate(angle, (width * centerX).toFloat(), (height * centerY).toFloat())
-                }
+            val rd = referentialData
+            if (rd.rotationEnabled) {
+                canvas.rotate(rd.angle, (width * rd.centerX).toFloat(), (height * rd.centerY).toFloat())
             }
 
-            canvas.scale(scale, scale)
+            canvas.scale(rd.scale, rd.scale)
             for (path in pathList) {
                 /* If no Paint is defined, take the default one */
                 if (path.paint == null) {
@@ -103,7 +91,7 @@ class PathView(context: Context) : View(context), ScaleChangeListener, Rotatable
 
                 if (path.visible) {
                     path.paint?.let {
-                        it.strokeWidth = width / scale
+                        it.strokeWidth = width / rd.scale
                         canvas.drawLines(path.path, it)
                     }
                 }
@@ -180,9 +168,7 @@ fun List<PathPoint>.toFloatArray(mapView: MapView): FloatArray? {
  */
 fun MapView.addPathView(pathView: PathView) {
     addView(pathView, 1)
-    addScaleChangeListener(pathView)
-    addRotatable(pathView)
-    pathView.scale = scale
+    addReferentialOwner(pathView)
 }
 
 /**
@@ -190,6 +176,5 @@ fun MapView.addPathView(pathView: PathView) {
  */
 fun MapView.removePathView(pathView: PathView) {
     removeView(pathView)
-    removeScaleChangeListener(pathView)
-    removeRotatable(pathView)
+    removeReferentialOwner(pathView)
 }

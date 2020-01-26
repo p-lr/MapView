@@ -5,8 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
-import com.peterlaurence.mapview.Rotatable
-import com.peterlaurence.mapview.RotationData
+import com.peterlaurence.mapview.ReferentialData
+import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.core.Tile
 import com.peterlaurence.mapview.core.VisibleTilesResolver
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
@@ -19,9 +19,8 @@ import kotlin.math.min
  */
 internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                               private val tileSize: Int,
-                              private val visibleTilesResolver: VisibleTilesResolver) : View(ctx), Rotatable {
-    private var scale = 1f
-    override var rotationData: RotationData? = null
+                              private val visibleTilesResolver: VisibleTilesResolver) : View(ctx), ReferentialOwner {
+    override var referentialData = ReferentialData(false)
         set(value) {
             field = value
             invalidate()
@@ -40,22 +39,16 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
         }
     }
 
-    fun setScale(scale: Float) {
-        this.scale = scale
-        invalidate()
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.save()
 
         /* If there is rotation data, take it into account */
-        rotationData?.apply {
-            if (rotationEnabled) {
-                canvas.rotate(angle, (width * centerX).toFloat(), (height * centerY).toFloat())
-            }
+        val rd = referentialData
+        if (rd.rotationEnabled) {
+            canvas.rotate(rd.angle, (width * rd.centerX).toFloat(), (height * rd.centerY).toFloat())
         }
-        canvas.scale(scale, scale)
+        canvas.scale(rd.scale, rd.scale)
         drawTiles(canvas)
         canvas.restore()
     }

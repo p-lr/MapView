@@ -5,8 +5,8 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import com.peterlaurence.mapview.MapView
-import com.peterlaurence.mapview.Rotatable
-import com.peterlaurence.mapview.RotationData
+import com.peterlaurence.mapview.ReferentialOwner
+import com.peterlaurence.mapview.ReferentialData
 import com.peterlaurence.mapview.util.toRad
 import kotlin.math.cos
 import kotlin.math.sin
@@ -18,10 +18,9 @@ import kotlin.math.sin
  *
  * @author peterLaurence on 18/06/2019
  */
-open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
+open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner {
 
-    private var scale = 1f
-    override var rotationData: RotationData? = null
+    override var referentialData = ReferentialData(false)
         set(value) {
             field = value
             requestLayout()
@@ -32,11 +31,6 @@ open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
 
     init {
         clipChildren = false
-    }
-
-    fun setScale(scale: Float) {
-        this.scale = scale
-        requestLayout()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -67,21 +61,22 @@ open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
             val widthOffset = actualWidth * layoutParams.relativeAnchorX + layoutParams.absoluteAnchorX
             val heightOffset = actualHeight * layoutParams.relativeAnchorY + layoutParams.absoluteAnchorY
             // get offset position
-            val scaledX = (layoutParams.x * scale).toInt()
-            val scaledY = (layoutParams.y * scale).toInt()
-            // save computed values
-            layoutParams.left = (scaledX + widthOffset).toInt()
-            layoutParams.top = (scaledY + heightOffset).toInt()
-            layoutParams.right = layoutParams.left + actualWidth
-            layoutParams.bottom = layoutParams.top + actualHeight
+            val scaledX = (layoutParams.x * referentialData.scale).toInt()
+            val scaledY = (layoutParams.y * referentialData.scale).toInt()
 
-            rotationData?.also {
-                val centerX = it.centerX * measuredWidth
-                val centerY = it.centerY * measuredHeight
+            if (referentialData.rotationEnabled) {
+                val centerX = referentialData.centerX * measuredWidth
+                val centerY = referentialData.centerY * measuredHeight
 
-                val angleRad = it.angle.toRad()
+                val angleRad = referentialData.angle.toRad()
                 layoutParams.left = (centerX + (scaledX - centerX) * cos(angleRad) - (scaledY - centerY) * sin(angleRad) + widthOffset).toInt()
                 layoutParams.top = (centerY + (scaledX - centerX) * sin(angleRad) + (scaledY - centerY) * cos(angleRad) + heightOffset).toInt()
+                layoutParams.right = layoutParams.left + actualWidth
+                layoutParams.bottom = layoutParams.top + actualHeight
+            } else {
+                // save computed values
+                layoutParams.left = (scaledX + widthOffset).toInt()
+                layoutParams.top = (scaledY + heightOffset).toInt()
                 layoutParams.right = layoutParams.left + actualWidth
                 layoutParams.bottom = layoutParams.top + actualHeight
             }

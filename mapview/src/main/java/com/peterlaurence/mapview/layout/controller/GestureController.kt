@@ -95,7 +95,7 @@ internal class GestureController(private val controllable: Controllable) {
 
     private fun updateReferential() {
         val (centerX, centerY) = getViewportCenter()
-        controllable.onReferentialChanged(angle, centerX, centerY)
+        controllable.onReferentialChanged(angle, scale, centerX, centerY)
     }
 
     fun notifyScrollChanged() {
@@ -240,7 +240,7 @@ internal class GestureController(private val controllable: Controllable) {
         fun onLayoutChanged()
         fun onContentChanged()
         fun onScaleChanged(currentScale: Float, previousScale: Float)
-        fun onReferentialChanged(angle: AngleDegree, centerX: Double, centerY: Double)
+        fun onReferentialChanged(angle: AngleDegree, scale: Float, centerX: Double, centerY: Double)
         fun constrainScrollToLimits()
     }
 

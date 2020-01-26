@@ -67,12 +67,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private lateinit var configuration: MapViewConfiguration
 
     private lateinit var throttledTask: SendChannel<Unit>
-    private val scaleChangeListeners = mutableListOf<ScaleChangeListener>()
-    private val rotatableList = mutableListOf<Rotatable>()
+    private val refOwnerList = mutableListOf<ReferentialOwner>()
     private var savedState: SavedState? = null
     private var isConfigured = false
     private val viewport = Viewport()
-    private var rotationData = RotationData()
+    private var referentialData = ReferentialData()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -154,20 +153,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         coordinateTranslater = CoordinateTranslater(width, height, left, top, right, bottom)
     }
 
-    fun addScaleChangeListener(listener: ScaleChangeListener) {
-        scaleChangeListeners.add(listener)
+    fun addReferentialOwner(referentialOwner: ReferentialOwner) {
+        refOwnerList.add(referentialOwner)
     }
 
-    fun removeScaleChangeListener(listener: ScaleChangeListener) {
-        scaleChangeListeners.remove(listener)
-    }
-
-    fun addRotatable(rotatable: Rotatable) {
-        rotatableList.add(rotatable)
-    }
-
-    fun removeRotatable(rotatable: Rotatable) {
-        rotatableList.remove(rotatable)
+    fun removeReferentialOwner(referentialOwner: ReferentialOwner) {
+        refOwnerList.remove(referentialOwner)
     }
 
     /**
@@ -176,7 +167,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
      * from all view trees.
      */
     fun destroy() {
-        scaleChangeListeners.clear()
+        refOwnerList.clear()
         job.cancel()
     }
 
@@ -232,7 +223,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
             top = max(scrollY - padding, 0)
             right = left + width + padding * 2
             bottom = top + height + padding * 2
-            angleRad = rotationData.angle.toRad()
+            angleRad = referentialData.angle.toRad()
         }
     }
 
@@ -252,39 +243,34 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     override fun onScaleChanged(currentScale: Float, previousScale: Float) {
         visibleTilesResolver.setScale(currentScale)
-        tileCanvasView.setScale(currentScale)
-        markerLayout.setScale(currentScale)
-
-        scaleChangeListeners.forEach {
-            it.onScaleChanged(currentScale)
-        }
 
         renderVisibleTilesThrottled()
     }
 
     /**
-     * This is very specific to the map rotating feature. A [RotationData] must be supplied on
+     * This is very specific to the map rotating feature. A [ReferentialData] must be supplied on
      * each angle change (of course) AND on each scroll change, because the rendering involves
      * a rotation around the center of the screen.
      * It is also required on each scale change, as in some cases the scroll isn't changing but a
      * scale change requires an update of the center.
      */
-    override fun onReferentialChanged(angle: AngleDegree, centerX: Double, centerY: Double) {
+    override fun onReferentialChanged(angle: AngleDegree, scale: Float, centerX: Double, centerY: Double) {
         /* If this is called, the rotation must have been enabled */
-        rotationData.apply {
+        referentialData.apply {
             this.angle = angle
+            this.scale = scale
             this.centerX = centerX
             this.centerY = centerY
         }
-        updateAllRotatable()
+        updateAllRefOwners()
     }
 
-    private fun updateAllRotatable() {
-        tileCanvasView.rotationData = this.rotationData
-        markerLayout.rotationData = this.rotationData
+    private fun updateAllRefOwners() {
+        tileCanvasView.referentialData = this.referentialData
+        markerLayout.referentialData = this.referentialData
 
-        rotatableList.forEach {
-            it.rotationData = this.rotationData
+        refOwnerList.forEach {
+            it.referentialData = this.referentialData
         }
     }
 
@@ -303,7 +289,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun onSaveInstanceState(): Parcelable? {
         val parentState = super.onSaveInstanceState() ?: Bundle()
         return SavedState(parentState, scale, centerX = scrollX + halfWidth,
-                centerY = scrollY + halfHeight, rotationData = rotationData)
+                centerY = scrollY + halfHeight, referentialData = referentialData)
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
@@ -323,8 +309,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private fun restoreState(savedState: SavedState) {
         gestureController.scale = savedState.scale
-        gestureController.angle = savedState.rotationData.angle
-        rotationData = savedState.rotationData
+        gestureController.angle = savedState.referentialData.angle
+        referentialData = savedState.referentialData
 
         post {
             scrollToAndCenter(savedState.centerX, savedState.centerY)
@@ -333,10 +319,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 }
 
 @Parcelize
-data class RotationData(var rotationEnabled: Boolean = true,
-                        var angle: AngleDegree = 0f,
-                        var centerX: Double = 0.0,
-                        var centerY: Double = 0.0) : Parcelable
+data class ReferentialData(var rotationEnabled: Boolean = true,
+                           var angle: AngleDegree = 0f,
+                           var scale: Float = 0f,
+                           var centerX: Double = 0.0,
+                           var centerY: Double = 0.0) : Parcelable
 
 /**
  * The set of parameters of the [MapView]. Some of them are mandatory:
@@ -460,12 +447,8 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
 
 @Parcelize
 internal data class SavedState(val parcelable: Parcelable, val scale: Float, val centerX: Int, val centerY: Int,
-                               val rotationData: RotationData) : View.BaseSavedState(parcelable)
+                               val referentialData: ReferentialData) : View.BaseSavedState(parcelable)
 
-interface ScaleChangeListener {
-    fun onScaleChanged(scale: Float)
-}
-
-interface Rotatable {
-    var rotationData: RotationData?
+interface ReferentialOwner {
+    var referentialData: ReferentialData
 }
