@@ -41,10 +41,6 @@ open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         measureChildren(widthMeasureSpec, heightMeasureSpec)
-        for (i in 0 until childCount) {
-            val child = getChildAt(i)
-            populateLayoutParams(child)
-        }
         val availableWidth = MeasureSpec.getSize(widthMeasureSpec)
         val availableHeight = MeasureSpec.getSize(heightMeasureSpec)
         setMeasuredDimension(availableWidth, availableHeight)
@@ -54,6 +50,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context), Rotatable {
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             if (child.visibility != View.GONE) {
+                populateLayoutParams(child)
                 val layoutParams = child.layoutParams as MarkerLayoutParams
                 child.layout(layoutParams.left, layoutParams.top, layoutParams.right, layoutParams.bottom)
             }
