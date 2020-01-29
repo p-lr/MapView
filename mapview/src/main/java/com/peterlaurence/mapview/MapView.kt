@@ -154,6 +154,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun addReferentialOwner(referentialOwner: ReferentialOwner) {
+        referentialOwner.referentialData = referentialData
         refOwnerList.add(referentialOwner)
     }
 
