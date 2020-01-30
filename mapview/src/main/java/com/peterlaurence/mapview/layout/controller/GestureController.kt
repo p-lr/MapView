@@ -73,7 +73,7 @@ internal class GestureController(private val controllable: Controllable) {
     var scale = 1f
         set(scale) {
             val scaleTmp = getConstrainedDestinationScale(scale)
-            if (this.scale != scaleTmp) {
+            if (this.scale != scaleTmp || !isConfigured) {
                 val previous = this.scale
                 field = scaleTmp
                 updateScaledDimensions()
