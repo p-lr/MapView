@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-def version = "2.0.0-beta03"
+def version = "2.0.0-beta05"
 
 androidExtensions {
     experimental = true

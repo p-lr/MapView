@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.ReferentialData
+import com.peterlaurence.mapview.util.rotateCenteredX
+import com.peterlaurence.mapview.util.rotateCenteredY
 import com.peterlaurence.mapview.util.toRad
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * All markers are laid out using this view.
@@ -61,16 +61,16 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
             val widthOffset = actualWidth * layoutParams.relativeAnchorX + layoutParams.absoluteAnchorX
             val heightOffset = actualHeight * layoutParams.relativeAnchorY + layoutParams.absoluteAnchorY
             // get offset position
-            val scaledX = (layoutParams.x * referentialData.scale).toInt()
-            val scaledY = (layoutParams.y * referentialData.scale).toInt()
+            val scaledX = layoutParams.x * referentialData.scale
+            val scaledY = layoutParams.y * referentialData.scale
 
             if (referentialData.rotationEnabled) {
                 val centerX = referentialData.centerX * measuredWidth
                 val centerY = referentialData.centerY * measuredHeight
 
                 val angleRad = referentialData.angle.toRad()
-                layoutParams.left = (centerX + (scaledX - centerX) * cos(angleRad) - (scaledY - centerY) * sin(angleRad) + widthOffset).toInt()
-                layoutParams.top = (centerY + (scaledX - centerX) * sin(angleRad) + (scaledY - centerY) * cos(angleRad) + heightOffset).toInt()
+                layoutParams.left = (rotateCenteredX(scaledX, scaledY, centerX, centerY, angleRad) + widthOffset).toInt()
+                layoutParams.top = (rotateCenteredY(scaledX, scaledY, centerX, centerY, angleRad) + heightOffset).toInt()
                 layoutParams.right = layoutParams.left + actualWidth
                 layoutParams.bottom = layoutParams.top + actualHeight
             } else {
