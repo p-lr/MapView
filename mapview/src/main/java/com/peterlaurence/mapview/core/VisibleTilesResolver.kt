@@ -91,8 +91,8 @@ internal class VisibleTilesResolver(private val levelCount: Int, private val ful
         val scaledTileSize = tileSize.toDouble() * relativeScale
 
         fun makeVisibleTiles(left: Int, top: Int, right: Int, bottom: Int): VisibleTiles {
-            val colLeft = floor(left / scaledTileSize).toInt().lowerThan(maxCol)
-            val rowTop = floor(top / scaledTileSize).toInt().lowerThan(maxRow)
+            val colLeft = floor(left / scaledTileSize).toInt().lowerThan(maxCol).coerceAtLeast(0)
+            val rowTop = floor(top / scaledTileSize).toInt().lowerThan(maxRow).coerceAtLeast(0)
             val colRight = (ceil(right / scaledTileSize).toInt() - 1).lowerThan(maxCol)
             val rowBottom = (ceil(bottom / scaledTileSize).toInt() - 1).lowerThan(maxRow)
 

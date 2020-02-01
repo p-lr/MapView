@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.SendChannel
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.max
 
 /**
  * The [MapView] is a subclass of [GestureLayout], specialized for displaying
@@ -220,8 +219,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private fun updateViewport(): Viewport {
         val padding = configuration.padding
         return viewport.apply {
-            left = max(scrollX - padding, 0)
-            top = max(scrollY - padding, 0)
+            left = scrollX - padding - offsetX
+            top = scrollY - padding - offsetY
             right = left + width + padding * 2
             bottom = top + height + padding * 2
             angleRad = referentialData.angle.toRad()
@@ -249,14 +248,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     /**
-     * This is very specific to the map rotating feature. A [ReferentialData] must be supplied on
-     * each angle change (of course) AND on each scroll change, because the rendering involves
-     * a rotation around the center of the screen.
-     * It is also required on each scale change, as in some cases the scroll isn't changing but a
-     * scale change requires an update of the center.
+     * The [ReferentialData] is updated on any of those property change:
+     * * scale
+     * * angle
+     * * scroll
+     * Any of those properties change requires an update of the [MapView] and its child views.
+     * Also, [ReferentialOwner]s registered as listeners of [ReferentialData] are notified as well.
      */
     override fun onReferentialChanged(angle: AngleDegree, scale: Float, centerX: Double, centerY: Double) {
-        /* If this is called, the rotation must have been enabled */
+        /* Update our own reference of ReferentialData */
         referentialData.apply {
             this.angle = angle
             this.scale = scale
@@ -264,6 +264,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
             this.centerY = centerY
         }
         updateAllRefOwners()
+        renderVisibleTilesThrottled()
     }
 
     private fun updateAllRefOwners() {
