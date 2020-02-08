@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=1.0.8) ](https://bintray.com/peterlaurence/maven/mapview/1.0.8/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.0) ](https://bintray.com/peterlaurence/maven/mapview/2.0.0/link)
 
 # MapView
 
@@ -20,16 +20,40 @@ val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight 
 mapView.configure(config)
 ```
 
-MapView shows only the visible part of a tiled map, and supports flinging, dragging, and scaling. It's also possible to
-add markers and paths.
+MapView shows only the visible part of a tiled map, and supports flinging, dragging, scaling, and rotating (since 2.0.0). It's also possible to add markers and paths.
 
 This project holds the source code of this library, plus a demo app (which is useful to get started).
+
+## MapView 2.0.0 is out!
+
+This new major version brings performance improvements and a brand new feature: _map rotation_. To be 
+consistent with previous version, this is disabled by default.
+To enable it, use `MapViewConfiguration.enableRotation()`. You will find a code example inside the demo
+[RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).
+
+When enabling rotation, the `MapView` handles rotation gestures by default. If you only want to rotate
+the map through APIs, then you should use `enableRotation(handleRotationGesture = false)`. The `MapView`
+has a new API `setAngle`:
+
+```kotlin
+/**
+ * Programmatically set the rotation angle of the MapView, in decimal degrees.
+ * It should be called after the [MapView] configuration and after the [MapView] has been laid out.
+ * Attempts to set the angle before [MapView] has been laid out will be ignored.
+ */
+fun MapView.setAngle(angle: AngleDegree)
+```
+
+**Migrating from 1.x.x**
+
+There are some breaking changes, although most of them are just package refactoring. The interface `ScaleChangeListener` has been removed. If you relied on this, have a look at `ReferentialOwner`
+interface. A demo will be added to show how to use it.
 
 ## Installation
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:1.0.8'
+implementation 'com.peterlaurence:mapview:2.0.0'
 ```
 
 ## Origin and motivation
@@ -79,12 +103,12 @@ This convention allows for a simple configuration.
 ## Technical documentation
 
 This section explains in details the configuration. But once configured, you can do a lot of things with your `MapView`
-instance. There is just one thing to remember: `MapView` extends [ZoomPanLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/ZoomPanLayout.kt) and this last class has a ton of 
+instance. There is just one thing to remember: `MapView` extends [GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt) and this last class has a ton of 
 features (the source code is well documented). You can:
 
 * add listeners to events like pan, fling, zoom..
 * programmatically scroll and center to a position
-* respond to various touch events by subclassing `MapView` and overload related methods declared in `ZoomPanLayout`
+* respond to various touch events by subclassing `MapView` and overload related methods declared in `GestureLayout`
 
 This list isn't complete. A dedicated section will be added.
 
@@ -98,10 +122,9 @@ example:
 val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight = 12500,
                                   tileSize = 256, tileStreamProvider = tileStreamProvider)
                                   .setMaxScale(2f)
-                                  .setMagnifyingFactor(1)
 ```
 
-See documentation [here](https://github.com/peterLaurence/MapView/blob/22121723ca35d987d95518845dac08adf614918d/mapview/src/main/java/com/peterlaurence/mapview/MapView.kt#L275). Below is a description of mandatory parameters:
+See documentation [here](https://github.com/peterLaurence/MapView/blob/b9e89f8f179f109b1c0843b19d53c8f9c7f2689c/mapview/src/main/java/com/peterlaurence/mapview/MapView.kt#L340). Below is a description of mandatory parameters:
 
 **`levelCount`**
 
