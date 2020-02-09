@@ -180,6 +180,8 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         }
         onMinScaleUpdateRequest()
         constrainScrollToLimits()
+
+        gestureController.onLayoutDone()
     }
 
     override fun onLayoutChanged() {

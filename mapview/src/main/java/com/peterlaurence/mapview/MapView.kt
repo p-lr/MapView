@@ -52,7 +52,7 @@ import kotlin.coroutines.CoroutineContext
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         GestureLayout(context, attrs, defStyleAttr), CoroutineScope {
 
-    private lateinit var visibleTilesResolver: VisibleTilesResolver
+    private var visibleTilesResolver: VisibleTilesResolver? = null
     private var job = Job()
 
     private var tileSize: Int = 256
@@ -103,15 +103,16 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         /* Apply the configuration */
         setSize(config.fullWidth, config.fullHeight)
-        visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
+        val visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
                 config.tileSize, magnifyingFactor = config.magnifyingFactor)
+        this.visibleTilesResolver = visibleTilesResolver
         tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
                 config.tileStreamProvider, config.workerCount)
         this.tileSize = config.tileSize
         gestureController.rotationEnabled = config.rotationEnabled
         gestureController.handleRotationGesture = config.handleRotationGesture
 
-        initChildViews()
+        initChildViews(visibleTilesResolver)
 
         setScalePolicy(config)
         setStartScale(config.startScale)
@@ -171,7 +172,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         job.cancel()
     }
 
-    private fun initChildViews() {
+    private fun initChildViews(visibleTilesResolver: VisibleTilesResolver) {
         /* Remove the TileCanvasView if it was already added */
         if (this::tileCanvasView.isInitialized) {
             removeView(tileCanvasView)
@@ -186,7 +187,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun setStartScale(startScale: Float?) {
-        gestureController.scale = startScale ?: (visibleTilesResolver.getScaleForLevel(0) ?: 1f)
+        gestureController.scale = startScale ?: (visibleTilesResolver?.getScaleForLevel(0) ?: 1f)
     }
 
     private fun setScalePolicy(config: MapViewConfiguration) {
@@ -242,7 +243,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     override fun onScaleChanged(currentScale: Float, previousScale: Float) {
-        visibleTilesResolver.setScale(currentScale)
+        visibleTilesResolver?.setScale(currentScale) ?: return
 
         renderVisibleTilesThrottled()
     }
@@ -268,8 +269,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun updateAllRefOwners() {
-        tileCanvasView.referentialData = this.referentialData
-        markerLayout.referentialData = this.referentialData
+        if (this::tileCanvasView.isInitialized) {
+            tileCanvasView.referentialData = this.referentialData
+        }
+        if (this::markerLayout.isInitialized) {
+            markerLayout.referentialData = this.referentialData
+        }
 
         refOwnerList.forEach {
             it.referentialData = this.referentialData

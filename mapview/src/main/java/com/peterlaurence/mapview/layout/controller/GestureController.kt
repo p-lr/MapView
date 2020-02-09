@@ -21,7 +21,7 @@ internal class GestureController(private val controllable: Controllable) {
 
     private var shouldLoopScale = true
 
-    internal var isConfigured = false
+    internal var isLayoutDone = false
     private var screenWidth: Int = 0
     private var screenHeight: Int = 0
 
@@ -73,7 +73,7 @@ internal class GestureController(private val controllable: Controllable) {
     var scale = 1f
         set(scale) {
             val scaleTmp = getConstrainedDestinationScale(scale)
-            if (this.scale != scaleTmp || !isConfigured) {
+            if (this.scale != scaleTmp || !isLayoutDone) {
                 val previous = this.scale
                 field = scaleTmp
                 updateScaledDimensions()
@@ -228,7 +228,10 @@ internal class GestureController(private val controllable: Controllable) {
     fun setScreenDimensions(width: Int, height: Int) {
         screenWidth = width
         screenHeight = height
-        isConfigured = true
+    }
+
+    fun onLayoutDone() {
+        isLayoutDone = true
     }
 
     private fun recalculateScaledPadding() {
