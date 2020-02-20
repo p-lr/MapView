@@ -157,7 +157,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
         }
     }
 
-    private fun getViewFromTap(x: Int, y: Int): View? {
+    internal fun getViewFromTap(x: Int, y: Int): View? {
         for (i in childCount - 1 downTo 0) {
             val child = getChildAt(i)
             val layoutParams = child.layoutParams as MarkerLayoutParams
