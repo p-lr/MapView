@@ -53,6 +53,18 @@ fun MapView.moveMarker(view: View, x: Double, y: Double) {
 }
 
 /**
+ * Finds view which bounding box contains position.
+ *
+ * @param x    Relative x position the View instance should be positioned at.
+ * @param y    Relative y position the View instance should be positioned at.
+ */
+fun MapView.getMarkerFromPosition(x: Double, y: Double) : View? {
+    val x = coordinateTranslater.translateAndScaleX(x, scale)
+    val y = coordinateTranslater.translateAndScaleY(y, scale)
+    return markerLayout.getViewFromTap(x, y)
+}
+
+/**
  * Scroll the TileView so that the View passed is centered in the viewport.
  *
  * @param view          The View marker that the TileView should center on.
