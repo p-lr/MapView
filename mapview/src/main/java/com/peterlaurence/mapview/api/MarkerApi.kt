@@ -16,7 +16,7 @@ import com.peterlaurence.mapview.markers.MarkerTapListener
  * @param relativeAnchorTop  The y-axis position of a marker will be offset by a number equal to the height of the marker multiplied by this value.
  * @param absoluteAnchorLeft The x-axis position of a marker will be offset by this value.
  * @param absoluteAnchorTop  The y-axis position of a marker will be offset by this value.
- * @param fixedAngle Angle which should the marker face (depends on map angle).
+ * @param fixedAngle Angle which the marker should face (depends on map angle).
  *                   If the angle is null the marker will not rotate.
  */
 fun MapView.addMarker(view: View, x: Double, y: Double, relativeAnchorLeft: Float = -0.5f,
@@ -48,7 +48,7 @@ fun MapView.setMarkerTapListener(markerTapListener: MarkerTapListener) {
  * @param view  The marker View to be repositioned.
  * @param x     Relative x position the View instance should be positioned at.
  * @param y     Relative y position the View instance should be positioned at.
- * @param angle Angle by which should the marker be rotated (depends on map angle).
+ * @param angle Angle by which the marker should be rotated (depends on map angle).
  *              If the angle is null the marker will not rotate.
  */
 fun MapView.moveMarker(view: View, x: Double, y: Double, angle: Float? = null) {
@@ -62,7 +62,7 @@ fun MapView.moveMarker(view: View, x: Double, y: Double, angle: Float? = null) {
  * Rotates an existing marker.
  *
  * @param view  The marker View to be repositioned.
- * @param angle Angle by which should the marker be rotated (depends on map angle).
+ * @param angle Angle by which the marker should be rotated (depends on map angle).
  */
 fun MapView.rotateMarker(view: View, angle: Float) {
     markerLayout.rotateMarker(view, angle)

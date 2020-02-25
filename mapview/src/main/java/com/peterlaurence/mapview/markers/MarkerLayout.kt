@@ -74,9 +74,9 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
                 layoutParams.right = layoutParams.left + actualWidth
                 layoutParams.bottom = layoutParams.top + actualHeight
 
-                if (layoutParams.shouldRotateWithMap) {
-                    // rotates Marker with map by current map degrees or keeps fixedAngle
-                    child.rotation = layoutParams.fixedAngle?.plus(referentialData.angle) ?: referentialData.angle
+                if (layoutParams.fixedAngle != null) {
+                    // rotates marker with map or keeps fixed angle
+                    child.rotation = layoutParams.fixedAngle!!.plus(referentialData.angle)
                 }
             } else {
                 // save computed values
@@ -84,6 +84,8 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
                 layoutParams.top = (scaledY + heightOffset).toInt()
                 layoutParams.right = layoutParams.left + actualWidth
                 layoutParams.bottom = layoutParams.top + actualHeight
+
+                child.rotation = layoutParams.fixedAngle ?: 0f
             }
         }
         return layoutParams
@@ -184,17 +186,15 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
 }
 
 internal class MarkerLayoutParams(width: Int, height: Int, var x: Int, var y: Int,
-                                  var relativeAnchorX: Float, var relativeAnchorY: Float,
-                                  var absoluteAnchorX: Float, var absoluteAnchorY: Float,
-                                  var fixedAngle: Float? = null)
-                                  : ViewGroup.LayoutParams(width, height) {
+                                 var relativeAnchorX: Float, var relativeAnchorY: Float,
+                                 var absoluteAnchorX: Float, var absoluteAnchorY: Float,
+                                 var fixedAngle: Float? = null)
+                                 : ViewGroup.LayoutParams(width, height) {
 
     var top: Int = 0
     var left: Int = 0
     var bottom: Int = 0
     var right: Int = 0
-
-    var shouldRotateWithMap: Boolean = fixedAngle != null
 
     fun getHitRect(): Rect = Rect(left, top, right, bottom)
 }
