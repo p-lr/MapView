@@ -10,6 +10,7 @@ import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
 import com.peterlaurence.mapview.api.addCallout
 import com.peterlaurence.mapview.api.addMarker
+import com.peterlaurence.mapview.api.rotateMarker
 import com.peterlaurence.mapview.api.setMarkerTapListener
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
@@ -70,17 +71,23 @@ class RotatingMapFragment : Fragment() {
         mapView.addNewMarker(0.5, 0.5, "marker #1")
         mapView.addNewMarker(0.4, 0.3, "marker #2")
         mapView.addNewMarker(0.6, 0.4, "marker #3")
-
+        mapView.addCurrentPositionMarker(0.7, 0.7, 0f)
 
         /* When a marker is tapped, we want to show a callout view */
         mapView.setMarkerTapListener(object : MarkerTapListener {
             override fun onMarkerTap(view: View, x: Int, y: Int) {
                 if (view is MapMarker) {
-                    val callout = MarkerCallout(context)
-                    callout.setTitle(view.name)
-                    callout.setSubTitle("position: ${view.x} , ${view.y}")
-                    mapView.addCallout(callout, view.x, view.y, -0.5f, -1.2f, 0f, 0f)
-                    callout.transitionIn()
+                    if (view.name == POSITION_MARKER) {
+                        val randomAngle = (0..360).random().toFloat()
+                        mapView.rotateMarker(view, randomAngle)
+                    }
+                    else {
+                        val callout = MarkerCallout(context)
+                        callout.setTitle(view.name)
+                        callout.setSubTitle("position: ${view.x} , ${view.y}")
+                        mapView.addCallout(callout, view.x, view.y, -0.5f, -1.2f, 0f, 0f)
+                        callout.transitionIn()
+                    }
                 }
             }
         })
@@ -128,4 +135,14 @@ class RotatingMapFragment : Fragment() {
 
         addMarker(marker, x, y)
     }
+
+    private fun MapView.addCurrentPositionMarker(x: Double, y: Double, fixedAngle: Float) {
+        val marker = MapMarker(context, x, y, POSITION_MARKER).apply {
+            setImageResource(R.drawable.position_marker)
+        }
+
+        addMarker(marker, x, y, -0.5f, -0.5f, fixedAngle = fixedAngle)
+    }
 }
+
+const val POSITION_MARKER = "position marker"

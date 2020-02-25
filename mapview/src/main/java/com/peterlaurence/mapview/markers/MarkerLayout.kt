@@ -73,6 +73,11 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
                 layoutParams.top = (rotateCenteredY(scaledX, scaledY, centerX, centerY, angleRad) + heightOffset).toInt()
                 layoutParams.right = layoutParams.left + actualWidth
                 layoutParams.bottom = layoutParams.top + actualHeight
+
+                if (layoutParams.shouldRotateWithMap) {
+                    // rotates Marker with map by current map degrees or keeps fixedAngle
+                    child.rotation = layoutParams.fixedAngle?.plus(referentialData.angle) ?: referentialData.angle
+                }
             } else {
                 // save computed values
                 layoutParams.left = (scaledX + widthOffset).toInt()
@@ -99,13 +104,13 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
 
     fun addMarker(view: View, left: Int, top: Int, relativeAnchorLeft: Float = -0.5f,
                   relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
-                  absoluteAnchorTop: Float = 0f) {
+                  absoluteAnchorTop: Float = 0f, fixedAngle: Float? = null) {
         val layoutParams = MarkerLayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT,
                 left, top,
                 relativeAnchorLeft, relativeAnchorTop,
-                absoluteAnchorLeft, absoluteAnchorTop)
+                absoluteAnchorLeft, absoluteAnchorTop, fixedAngle)
         addView(view, layoutParams)
     }
 
@@ -136,10 +141,18 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
         invalidate()
     }
 
-    fun moveMarker(view: View, x: Int, y: Int) {
+    fun moveMarker(view: View, x: Int, y: Int, angle: Float?) {
         val lp = view.layoutParams as? MarkerLayoutParams ?: return
         lp.x = x
         lp.y = y
+        lp.fixedAngle = angle
+        view.layoutParams = lp
+        requestLayout()
+    }
+
+    fun rotateMarker(view: View, angle: Float) {
+        val lp = view.layoutParams as? MarkerLayoutParams ?: return
+        lp.fixedAngle = angle
         view.layoutParams = lp
         requestLayout()
     }
@@ -171,13 +184,17 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
 }
 
 internal class MarkerLayoutParams(width: Int, height: Int, var x: Int, var y: Int,
-                                 var relativeAnchorX: Float, var relativeAnchorY: Float,
-                                 var absoluteAnchorX: Float, var absoluteAnchorY: Float) : ViewGroup.LayoutParams(width, height) {
+                                  var relativeAnchorX: Float, var relativeAnchorY: Float,
+                                  var absoluteAnchorX: Float, var absoluteAnchorY: Float,
+                                  var fixedAngle: Float? = null)
+                                  : ViewGroup.LayoutParams(width, height) {
 
     var top: Int = 0
     var left: Int = 0
     var bottom: Int = 0
     var right: Int = 0
+
+    var shouldRotateWithMap: Boolean = fixedAngle != null
 
     fun getHitRect(): Rect = Rect(left, top, right, bottom)
 }
