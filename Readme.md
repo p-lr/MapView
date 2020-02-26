@@ -46,8 +46,7 @@ fun MapView.setAngle(angle: AngleDegree)
 
 **Migrating from 1.x.x**
 
-There are some breaking changes, although most of them are just package refactoring. The interface `ScaleChangeListener` has been removed. If you relied on this, have a look at `ReferentialOwner`
-interface. A demo will be added to show how to use it.
+There are some breaking changes, although most of them are just package refactoring. The interface `ScaleChangeListener` has been removed. If you relied on this, have a look at `ReferentialOwner`interface. There's an example of usage inside the `RotatingMapFragment` demo.
 
 ## Installation
 
@@ -161,6 +160,36 @@ interface TileStreamProvider {
 ```
 Your implementation of this interface does the necessary coordinate translation (if required). This is where you do your
 HTTP request if you have remote tiles, or fetch from a local database (or file system).
+
+### <a name="TOC-ReferentialOwner"></a> ReferentialOwner
+
+When the scale and/or the rotation of the MapView change, some of the child views might have to change
+accordingly. For that purpose, you can register a `ReferentialOwner` to the MapView.
+
+A `ReferentialOwner` is an interface:
+```kotlin
+interface ReferentialOwner {
+    var referentialData: ReferentialData
+}
+```
+And `ReferentialData` holds several useful properties:
+```kotlin
+data class ReferentialData(var rotationEnabled: Boolean = true,
+                           var angle: AngleDegree = 0f,
+                           var scale: Float = 0f,
+                           var centerX: Double = 0.0,
+                           var centerY: Double = 0.0) : Parcelable
+```
+A `ReferentialOwner` should be registered to the MapView:
+```kotlin
+mapView.addReferentialOwner(refOwner)
+// If you need to unregister it:
+mapView.removeReferentialOwner(refOwner)
+```
+From inside your `ReferentialOwner` implementation, you can have any logic you want. You can rotate
+some markers, rotate complex views taking into account the `centerX` and `centerY` properties, etc.
+
+There's an example of usage at [RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).
 
 ## Create a deep-zoom map
 
