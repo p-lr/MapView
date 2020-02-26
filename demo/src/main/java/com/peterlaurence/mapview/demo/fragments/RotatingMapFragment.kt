@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
+import com.peterlaurence.mapview.ReferentialData
+import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.api.addCallout
 import com.peterlaurence.mapview.api.addMarker
 import com.peterlaurence.mapview.api.setMarkerTapListener
@@ -20,6 +22,7 @@ import com.peterlaurence.mapview.paths.PathPoint
 import com.peterlaurence.mapview.paths.PathView
 import com.peterlaurence.mapview.paths.addPathView
 import com.peterlaurence.mapview.paths.toFloatArray
+import com.peterlaurence.mapview.util.AngleDegree
 import java.io.InputStream
 
 /**
@@ -71,16 +74,47 @@ class RotatingMapFragment : Fragment() {
         mapView.addNewMarker(0.4, 0.3, "marker #2")
         mapView.addNewMarker(0.6, 0.4, "marker #3")
 
+        val positionMarker = mapView.addPositionMarker(0.7, 0.7)
+
+        /* A ReferentialOwner is an observer which will be notified by the MapView if anything changes.
+         * Here, we want to rotate the positionMarker so that it turns along with the map. */
+        val refOwner = object : ReferentialOwner {
+            override var referentialData: ReferentialData = ReferentialData(false, 0f, 1f, 0.0, 0.0)
+                set(value) {
+                    field = value
+                    rotateMaker()
+                }
+
+            /* Add an offset, which we'll change dynamically by taping the marker */
+            var angleDegree: AngleDegree = 0f
+                set(value) {
+                    field = value
+                    rotateMaker()
+                }
+
+            private fun rotateMaker() {
+                positionMarker.rotation = angleDegree + referentialData.angle
+            }
+        }
+
+        /* Register the ReferentialOwner */
+        mapView.addReferentialOwner(refOwner)
 
         /* When a marker is tapped, we want to show a callout view */
         mapView.setMarkerTapListener(object : MarkerTapListener {
             override fun onMarkerTap(view: View, x: Int, y: Int) {
                 if (view is MapMarker) {
-                    val callout = MarkerCallout(context)
-                    callout.setTitle(view.name)
-                    callout.setSubTitle("position: ${view.x} , ${view.y}")
-                    mapView.addCallout(callout, view.x, view.y, -0.5f, -1.2f, 0f, 0f)
-                    callout.transitionIn()
+                    if (view.name == POSITION_MARKER) {
+                        /* Change the angle offset */
+                        val randomAngle = (0..360).random().toFloat()
+                        refOwner.angleDegree = randomAngle
+                    } else {
+                        val callout = MarkerCallout(context)
+                        callout.setTitle(view.name)
+                        callout.setSubTitle("position: ${view.x} , ${view.y}")
+                        mapView.addCallout(callout, view.x, view.y, -0.5f, -1.2f, 0f, 0f)
+                        callout.transitionIn()
+                    }
                 }
             }
         })
@@ -128,4 +162,15 @@ class RotatingMapFragment : Fragment() {
 
         addMarker(marker, x, y)
     }
+
+    private fun MapView.addPositionMarker(x: Double, y: Double): View {
+        val marker = MapMarker(context, x, y, POSITION_MARKER).apply {
+            setImageResource(R.drawable.position_marker)
+        }
+
+        addMarker(marker, x, y, -0.5f, -0.5f)
+        return marker
+    }
 }
+
+const val POSITION_MARKER = "position marker"
