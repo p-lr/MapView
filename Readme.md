@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.2) ](https://bintray.com/peterlaurence/maven/mapview/2.0.2/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.3) ](https://bintray.com/peterlaurence/maven/mapview/2.0.3/link)
 
 # MapView
 
@@ -24,7 +24,7 @@ MapView shows only the visible part of a tiled map, and supports flinging, dragg
 
 This project holds the source code of this library, plus a demo app (which is useful to get started).
 
-## MapView 2.0.2 is out!
+## MapView 2.x.x is out!
 
 This new major version brings performance improvements and a brand new feature: _map rotation_. To be 
 consistent with previous version, this is disabled by default.
@@ -52,7 +52,7 @@ There are some breaking changes, although most of them are just package refactor
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.0.2'
+implementation 'com.peterlaurence:mapview:2.0.3'
 ```
 
 ## Origin and motivation
