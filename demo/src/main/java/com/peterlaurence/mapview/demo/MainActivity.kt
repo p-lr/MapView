@@ -15,8 +15,8 @@ import com.google.android.material.navigation.NavigationView
 import com.peterlaurence.mapview.demo.fragments.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_MARKERS_TAG, MAP_PATHS_TAG,
-            MAP_DEFERRED_TAG, MAP_REMOTE_HTTP_TAG, MAP_ROTATING_TAG)
+    private val fragmentTags = listOf(MAP_ALONE_TAG, MAP_CONSTRAINED_TAG, MAP_MARKERS_TAG,
+            MAP_PATHS_TAG, MAP_DEFERRED_TAG, MAP_REMOTE_HTTP_TAG, MAP_ROTATING_TAG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_map_alone -> createAndShowFragment<MapAloneFragment>(MAP_ALONE_TAG)
+            R.id.nav_map_constrained -> createAndShowFragment<MapConstrainedFragment>(MAP_CONSTRAINED_TAG)
             R.id.nav_map_markers -> createAndShowFragment<MapMarkersFragment>(MAP_MARKERS_TAG)
             R.id.nav_map_paths -> createAndShowFragment<MapPathFragment>(MAP_PATHS_TAG)
             R.id.nav_remote_http -> createAndShowFragment<RemoteHttpFragment>(MAP_REMOTE_HTTP_TAG)
@@ -107,6 +108,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 }
 
 const val MAP_ALONE_TAG = "map_alone"
+const val MAP_CONSTRAINED_TAG = "map_constrained"
 const val MAP_MARKERS_TAG = "map_markers"
 const val MAP_PATHS_TAG = "map_paths"
 const val MAP_REMOTE_HTTP_TAG = "map_remote_http"

@@ -29,17 +29,29 @@ internal class GestureController(private val controllable: Controllable) {
     private var scaledPadding: Int = 0
 
     internal val scrollLimitX: Int
-        get() = scaledWidth - screenWidth + scaledPadding
+        get() = userDefinedScrollMaxX?.let {
+            scale(it, scale) - screenWidth
+        } ?: scaledWidth - screenWidth + scaledPadding
 
     internal val scrollLimitY: Int
-        get() = scaledHeight - screenHeight + scaledPadding
+        get() = userDefinedScrollMaxY?.let {
+            scale(it, scale) - screenHeight
+        } ?: scaledHeight - screenHeight + scaledPadding
 
     internal val scrollMinX: Int
-        get() = -scaledPadding
+        get() = userDefinedScrollMinX?.let {
+            scale(it, scale)
+        } ?: -scaledPadding
 
     internal val scrollMinY: Int
-        get() = -scaledPadding
+        get() = userDefinedScrollMinY?.let {
+            scale(it, scale)
+        } ?: -scaledPadding
 
+    private var userDefinedScrollMinX: Int? = null
+    private var userDefinedScrollMinY: Int? = null
+    private var userDefinedScrollMaxX: Int? = null
+    private var userDefinedScrollMaxY: Int? = null
     private val scrollPosition = ScrollPosition(0, 0)
     private val offsetDestination = OffsetDestination(0, 0, 0f)
     private val viewportCenter = ViewportCenter(0.0, 0.0)
@@ -49,6 +61,7 @@ internal class GestureController(private val controllable: Controllable) {
      */
     var baseWidth: Int = 0
         private set
+
     /**
      * The base (not scaled) height of the underlying composite image.
      */
@@ -60,6 +73,7 @@ internal class GestureController(private val controllable: Controllable) {
      */
     var scaledWidth: Int = 0
         private set
+
     /**
      * The scaled height of the underlying composite image.
      */
@@ -185,9 +199,16 @@ internal class GestureController(private val controllable: Controllable) {
         }
     }
 
-    fun calculateMinimumScaleToFit(viewportWidth: Int, viewportHeight: Int, baseWidth: Int, baseHeight: Int) {
-        val mMinimumScaleX = viewportWidth / baseWidth.toFloat()
-        val mMinimumScaleY = viewportHeight / baseHeight.toFloat()
+    fun calculateMinimumScaleToFit(viewportWidth: Int, viewportHeight: Int) {
+        val logicalWidth = if (userDefinedScrollMinX != null && userDefinedScrollMaxX != null) {
+            userDefinedScrollMaxX!! - userDefinedScrollMinX!!
+        } else baseWidth
+        val logicalHeight = if (userDefinedScrollMinY != null && userDefinedScrollMaxY != null) {
+            userDefinedScrollMaxY!! - userDefinedScrollMinY!!
+        } else baseHeight
+
+        val mMinimumScaleX = viewportWidth / logicalWidth.toFloat()
+        val mMinimumScaleY = viewportHeight / logicalHeight.toFloat()
         val recalculatedMinScale = calculatedMinScale(mMinimumScaleX, mMinimumScaleY)
         if (recalculatedMinScale != effectiveMinScale) {
             effectiveMinScale = recalculatedMinScale
@@ -201,6 +222,16 @@ internal class GestureController(private val controllable: Controllable) {
         scrollPosition.x = scrollMinX.coerceAtLeast(min(x, scrollLimitX))
         scrollPosition.y = scrollMinY.coerceAtLeast(min(y, scrollLimitY))
         return scrollPosition
+    }
+
+    /**
+     * Set the scroll limits at scale 1.0f
+     */
+    fun setScrollLimits(minX: Int, minY: Int, maxX: Int, maxY: Int) {
+        userDefinedScrollMinX = minX
+        userDefinedScrollMinY = minY
+        userDefinedScrollMaxX = maxX
+        userDefinedScrollMaxY = maxY
     }
 
     fun getOffsetDestination(offsetX: Int, offsetY: Int, destScale: Float): OffsetDestination {

@@ -22,3 +22,19 @@ fun MapView.setAngle(angle: AngleDegree) {
     if (!gestureController.isLayoutDone) return
     gestureController.angle = angle
 }
+
+/**
+ * Constrain the scroll to the specified relative limits. The [MapView.defineBounds] method *must*
+ * have been previously invoked (otherwise relative values have no meaning).
+ * To enforce that the viewport is constrained to the specified area, the minimum scale mode is set
+ * to [MinimumScaleMode.FILL].
+ */
+fun MapView.constrainScroll(relativeMinX: Double, relativeMinY: Double, relativeMaxX: Double, relativeMaxY: Double) {
+    gestureController.setMinimumScaleMode(MinimumScaleMode.FILL)
+    gestureController.setScrollLimits(
+            coordinateTranslater.translateX(relativeMinX),
+            coordinateTranslater.translateY(relativeMinY),
+            coordinateTranslater.translateX(relativeMaxX),
+            coordinateTranslater.translateY(relativeMaxY)
+    )
+}

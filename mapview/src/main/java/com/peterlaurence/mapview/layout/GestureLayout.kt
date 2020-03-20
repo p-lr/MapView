@@ -29,7 +29,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
     internal val gestureController: GestureController by lazy { GestureController(this) }
 
     override fun onMinScaleUpdateRequest() {
-        gestureController.calculateMinimumScaleToFit(width, height, gestureController.baseWidth, gestureController.baseHeight)
+        gestureController.calculateMinimumScaleToFit(width, height)
     }
 
     /**

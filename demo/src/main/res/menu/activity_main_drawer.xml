@@ -8,6 +8,9 @@
             android:id="@+id/nav_map_alone"
             android:title="@string/map_alone" />
         <item
+            android:id="@+id/nav_map_constrained"
+            android:title="@string/map_constrained" />
+        <item
             android:id="@+id/nav_map_markers"
             android:title="@string/map_markers" />
         <item

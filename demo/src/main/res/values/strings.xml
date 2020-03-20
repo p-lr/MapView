@@ -8,6 +8,7 @@
     <string name="welcome">Welcome to MapView demo.\nUse the lateral menu to select between available demo.</string>
 
     <string name="map_alone">Map demo</string>
+    <string name="map_constrained">Map constrained demo</string>
     <string name="map_markers">Map and markers demo</string>
     <string name="map_paths">Map paths demo</string>
     <string name="map_remote_http">Remote HTTP demo</string>
