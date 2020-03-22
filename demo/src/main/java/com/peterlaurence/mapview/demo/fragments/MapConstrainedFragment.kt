@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.MapViewConfiguration
@@ -19,17 +20,20 @@ import java.io.InputStream
  */
 class MapConstrainedFragment : Fragment() {
     private lateinit var parentView: ViewGroup
+    private lateinit var button: Button
 
     /**
      * The [MapView] should always be added inside [onCreateView], to ensure state save/restore.
      */
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_layout, container, false).also {
+        return inflater.inflate(R.layout.fragment_btn_layout, container, false).also {
             parentView = it as ViewGroup
+            button = it.findViewById(R.id.button)
+            button.text = getString(R.string.change_area)
             context?.let { ctx ->
                 makeMapView(ctx)?.addToFragment()
             }
@@ -63,7 +67,7 @@ class MapConstrainedFragment : Fragment() {
         }
         val tileSize = 256
         val config = MapViewConfiguration(
-            5, 8192, 8192, tileSize, tileStreamProvider
+                5, 8192, 8192, tileSize, tileStreamProvider
         ).setMaxScale(2f)
 
         return MapView(context).apply {
@@ -82,6 +86,11 @@ class MapConstrainedFragment : Fragment() {
              * -----------------------
              */
             constrainScroll(0.5, 0.5, 0.7, 0.7)
+
+            /* Check the behavior on dynamic area swap */
+            button.setOnClickListener {
+                constrainScroll(0.1, 0.1, 0.5, 0.5)
+            }
         }
     }
 }

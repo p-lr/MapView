@@ -232,6 +232,9 @@ internal class GestureController(private val controllable: Controllable) {
         userDefinedScrollMinY = minY
         userDefinedScrollMaxX = maxX
         userDefinedScrollMaxY = maxY
+
+        /* If the current scroll is outside of the given area, scroll to the nearest position */
+        controllable.constrainScrollToLimits()
     }
 
     fun getOffsetDestination(offsetX: Int, offsetY: Int, destScale: Float): OffsetDestination {
