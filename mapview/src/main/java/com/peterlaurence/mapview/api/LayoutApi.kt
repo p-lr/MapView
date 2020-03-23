@@ -20,7 +20,9 @@ fun MapView.setBasePadding(padding: Int) {
  */
 fun MapView.setAngle(angle: AngleDegree) {
     if (!gestureController.isLayoutDone) return
-    gestureController.angle = angle
+    if (gestureController.rotationEnabled) {
+        gestureController.angle = angle
+    }
 }
 
 /**
@@ -37,4 +39,28 @@ fun MapView.constrainScroll(relativeMinX: Double, relativeMinY: Double, relative
             coordinateTranslater.translateX(relativeMaxX),
             coordinateTranslater.translateY(relativeMaxY)
     )
+}
+
+/**
+ * Dynamically enable rotation.
+ * By default, the rotation gestures are handled. If you want to set the angle programmatically only,
+ * set [handleRotationGesture] to false.
+ */
+fun MapView.enableRotation(handleRotationGesture: Boolean = true) {
+    gestureController.rotationEnabled = true
+    gestureController.handleRotationGesture = handleRotationGesture
+}
+
+/**
+ * Dynamically disable rotation.
+ * By default, when the rotation is disabled, the [MapView] keeps the last angle value ([freezeAngle]).
+ * You can optionally set a value to [freezeAngle], so that the supplied value is guarantied to be
+ * accounted for.
+ */
+fun MapView.disableRotation(freezeAngle: AngleDegree? = null) {
+    gestureController.rotationEnabled = false
+    if (freezeAngle != null) {
+        /* Force the angle value, even if the rotation is disabled */
+        gestureController.angle = freezeAngle
+    }
 }
