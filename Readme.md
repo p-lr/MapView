@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.3) ](https://bintray.com/peterlaurence/maven/mapview/2.0.3/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.4) ](https://bintray.com/peterlaurence/maven/mapview/2.0.4/link)
 
 # MapView
 
@@ -52,7 +52,7 @@ There are some breaking changes, although most of them are just package refactor
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.0.3'
+implementation 'com.peterlaurence:mapview:2.0.4'
 ```
 
 ## Origin and motivation
@@ -160,6 +160,10 @@ interface TileStreamProvider {
 ```
 Your implementation of this interface does the necessary coordinate translation (if required). This is where you do your
 HTTP request if you have remote tiles, or fetch from a local database (or file system).
+
+### API documentation
+
+API documentation has its own [wiki page](https://github.com/peterLaurence/MapView/wiki/MapView-API).
 
 ### <a name="TOC-ReferentialOwner"></a> ReferentialOwner
 
