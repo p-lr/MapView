@@ -1,6 +1,7 @@
 package com.peterlaurence.mapview
 
 import android.content.Context
+import android.graphics.ColorFilter
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -107,7 +108,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
                 config.tileSize, magnifyingFactor = config.magnifyingFactor)
         this.visibleTilesResolver = visibleTilesResolver
         tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
-                config.tileStreamProvider, config.workerCount)
+                config.tileStreamProvider, config.colorFilter, config.workerCount)
         this.tileSize = config.tileSize
         gestureController.rotationEnabled = config.rotationEnabled
         gestureController.handleRotationGesture = config.handleRotationGesture
@@ -375,6 +376,9 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var handleRotationGesture: Boolean = true
         private set
 
+    var colorFilter: ColorFilter? = null
+        private set
+
     /**
      * Define the size of the thread pool that will handle tile decoding. In some situations, a pool
      * of several times the numbers of cores is suitable. Whereas sometimes we want to limit to just
@@ -448,6 +452,15 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     fun enableRotation(handleRotationGesture: Boolean = true): MapViewConfiguration {
         rotationEnabled = true
         this.handleRotationGesture = handleRotationGesture
+        return this
+    }
+
+    /**
+     * Sets the color filter used to paint bitmaps on screen to [colorFilter].
+     * Default is `null`.
+     */
+    fun setColorFilter(colorFilter: ColorFilter) : MapViewConfiguration {
+        this.colorFilter = colorFilter
         return this
     }
 }

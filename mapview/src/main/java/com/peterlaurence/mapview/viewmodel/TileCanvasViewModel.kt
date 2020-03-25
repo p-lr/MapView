@@ -1,6 +1,7 @@
 package com.peterlaurence.mapview.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.ColorFilter
 import android.graphics.Paint
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
                           private val visibleTilesResolver: VisibleTilesResolver,
                           tileStreamProvider: TileStreamProvider,
+                          private val colorFilter: ColorFilter?,
                           workerCount: Int) : CoroutineScope by scope {
     private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
     private val renderTask = throttle<Unit>(wait = 34) {
@@ -158,11 +160,12 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
 
     /**
      * Pick a [Paint] from the [paintPool], or create a new one. The the alpha needs to be set to 0,
-     * to produce a fade-in effect.
+     * to produce a fade-in effect. Color filter is also set.
      */
     private fun Tile.setPaint() {
         paint = (paintPool.get() ?: Paint()).also {
             it.alpha = 0
+            it.colorFilter = colorFilter
         }
     }
 
@@ -310,6 +313,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
         paint?.let {
             paint = null
             it.alpha = 0
+            it.colorFilter = null
             paintPool.put(it)
         }
     }
