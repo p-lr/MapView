@@ -108,7 +108,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
                 config.tileSize, magnifyingFactor = config.magnifyingFactor)
         this.visibleTilesResolver = visibleTilesResolver
         tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
-                config.tileStreamProvider, config.colorFilter, config.workerCount)
+                config.tileStreamProvider, config.tileOptionsProvider, config.workerCount)
         this.tileSize = config.tileSize
         gestureController.rotationEnabled = config.rotationEnabled
         gestureController.handleRotationGesture = config.handleRotationGesture
@@ -376,7 +376,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var handleRotationGesture: Boolean = true
         private set
 
-    var colorFilter: ColorFilter? = null
+    var tileOptionsProvider: TileOptionsProvider? = null
         private set
 
     /**
@@ -456,11 +456,10 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     }
 
     /**
-     * Sets the color filter used to paint bitmaps on screen to [colorFilter].
-     * Default is `null`.
+     * Sets the additional options provider for rendering tiles. Default is `null`.
      */
-    fun setColorFilter(colorFilter: ColorFilter) : MapViewConfiguration {
-        this.colorFilter = colorFilter
+    fun setTileOptionsProvider(tileOptionsProvider: TileOptionsProvider) : MapViewConfiguration {
+        this.tileOptionsProvider = tileOptionsProvider
         return this
     }
 }

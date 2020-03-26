@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
                           private val visibleTilesResolver: VisibleTilesResolver,
                           tileStreamProvider: TileStreamProvider,
-                          private val colorFilter: ColorFilter?,
+                          private val tileOptionsProvider: TileOptionsProvider?,
                           workerCount: Int) : CoroutineScope by scope {
     private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
     private val renderTask = throttle<Unit>(wait = 34) {
@@ -165,7 +165,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     private fun Tile.setPaint() {
         paint = (paintPool.get() ?: Paint()).also {
             it.alpha = 0
-            it.colorFilter = colorFilter
+            it.colorFilter = tileOptionsProvider?.getColorFilter(row, col, zoom)
         }
     }
 
