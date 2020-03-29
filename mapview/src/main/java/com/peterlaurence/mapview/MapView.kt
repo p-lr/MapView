@@ -346,10 +346,11 @@ data class ReferentialData(var rotationEnabled: Boolean = true,
 data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val fullHeight: Int,
                                 val tileSize: Int, val tileStreamProvider: TileStreamProvider) {
     /**
-     * The maximum level of parallelism. For local tiles, a value of 2 is enough.
+     * The maximum level of parallelism. For local tiles, a value of the number of cores minus one
+     * is enough.
      * For remote HTTP tiles, don't hesitate to raise this up to 60 (if the device is powerful enough).
      */
-    var workerCount = 2 // appropriate for local usage. Don't hesitate to raise up to 60 for remote usage
+    var workerCount = Runtime.getRuntime().availableProcessors() - 1
         private set
 
     var minScale: Float? = null

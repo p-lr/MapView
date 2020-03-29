@@ -131,7 +131,7 @@ class TileCollector(private val workerCount: Int) {
         }
     }
 
-    private val dispatcher = ThreadPoolExecutor(0, workerCount + 1,
+    private val dispatcher = ThreadPoolExecutor(0, workerCount.coerceAtLeast(1),
             60L, TimeUnit.SECONDS,
             SynchronousQueue<Runnable>(), ThreadFactory { r ->
         Thread(r).apply {
