@@ -53,7 +53,7 @@ class RemoteHttpFragment : Fragment() {
         val tileStreamProvider = object : TileStreamProvider {
             override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
                 return try {
-                    val url = URL("http://plrapps.ovh:8080/mapview-tile/$zoomLvl/$row/$col.jpg")
+                    val url = URL("https://plrapps.ovh:8080/mapview-tile/$zoomLvl/$row/$col.jpg")
                     val connection = createConnection(url)
                     connection.connect()
                     BufferedInputStream(connection.inputStream)
