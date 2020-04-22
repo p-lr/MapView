@@ -173,6 +173,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         job.cancel()
     }
 
+    fun redrawTiles() {
+        renderVisibleTilesThrottled();
+    }
+
     private fun initChildViews(visibleTilesResolver: VisibleTilesResolver) {
         /* Remove the TileCanvasView if it was already added */
         if (this::tileCanvasView.isInitialized) {
