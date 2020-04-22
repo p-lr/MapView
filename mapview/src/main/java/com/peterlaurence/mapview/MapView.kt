@@ -154,6 +154,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         coordinateTranslater = CoordinateTranslater(width, height, left, top, right, bottom)
     }
 
+    /**
+     * Add a [ReferentialOwner] to the MapView. This [ReferentialOwner] will be notified of any
+     * change of scale, rotation angle, or rotation pivot point.
+     * Using this API, the MapView holds a reference on the provided [ReferentialOwner] instance.
+     * Don't forget to remove it when it's no longer needed, using [removeReferentialOwner].
+     */
     fun addReferentialOwner(referentialOwner: ReferentialOwner) {
         referentialOwner.referentialData = referentialData
         refOwnerList.add(referentialOwner)
@@ -164,6 +170,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     /**
+     * Public API to programmatically trigger a redraw of the tiles.
+     */
+    fun redrawTiles() {
+        renderVisibleTilesThrottled();
+    }
+
+    /**
      * Stop everything.
      * [MapView] then does necessary housekeeping. After this call, the [MapView] should be removed
      * from all view trees.
@@ -171,10 +184,6 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     fun destroy() {
         refOwnerList.clear()
         job.cancel()
-    }
-
-    fun redrawTiles() {
-        renderVisibleTilesThrottled();
     }
 
     private fun initChildViews(visibleTilesResolver: VisibleTilesResolver) {
