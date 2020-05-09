@@ -92,7 +92,7 @@ class PathView(context: Context) : View(context), ReferentialOwner {
                 if (path.visible) {
                     path.paint?.let {
                         it.strokeWidth = width / rd.scale
-                        canvas.drawLines(path.path, it)
+                        canvas.drawLines(path.path, path.offset, path.count, it)
                     }
                 }
             }
@@ -117,6 +117,20 @@ class PathView(context: Context) : View(context), ReferentialOwner {
          * The width of the path
          */
         val width: Float?
+
+        /**
+         * The number of values in the [path] array to skip. It should be a multiple of 4.
+         */
+        val offset: Int
+            get() = 0
+
+        /**
+         * The number of values in the array to process, after skipping [offset] of them.
+         * Beware that [count] + [offset] shouldn't exceed the [path] length, or an exception will
+         * be thrown.
+         */
+        val count: Int
+            get() = path.size
     }
 }
 
