@@ -80,6 +80,10 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
         return tilesToRenderLiveData
     }
 
+    fun getAlphaTick() : Float {
+        return tileOptionsProvider?.alphaTick ?: 0.07f
+    }
+
     fun setViewport(viewport: Viewport) {
         /* It's important to set the idle flag to false before launching computations, so that
          * tile eviction don't happen too quickly (can cause blinks) */
