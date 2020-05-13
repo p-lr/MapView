@@ -390,7 +390,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var handleRotationGesture: Boolean = true
         private set
 
-    var tileOptionsProvider: TileOptionsProvider? = null
+    var tileOptionsProvider: TileOptionsProvider = object : TileOptionsProvider {}
         private set
 
     /**

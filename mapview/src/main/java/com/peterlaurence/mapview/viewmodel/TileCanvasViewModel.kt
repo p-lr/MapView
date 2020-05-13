@@ -1,7 +1,6 @@
 package com.peterlaurence.mapview.viewmodel
 
 import android.graphics.Bitmap
-import android.graphics.ColorFilter
 import android.graphics.Paint
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,10 +20,10 @@ import kotlinx.coroutines.launch
  * @author peterLaurence on 04/06/2019
  */
 internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
-                          private val visibleTilesResolver: VisibleTilesResolver,
-                          tileStreamProvider: TileStreamProvider,
-                          private val tileOptionsProvider: TileOptionsProvider?,
-                          workerCount: Int) : CoroutineScope by scope {
+                                   private val visibleTilesResolver: VisibleTilesResolver,
+                                   tileStreamProvider: TileStreamProvider,
+                                   private val tileOptionsProvider: TileOptionsProvider,
+                                   workerCount: Int) : CoroutineScope by scope {
     private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
     private val renderTask = throttle<Unit>(wait = 34) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
@@ -80,8 +79,8 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
         return tilesToRenderLiveData
     }
 
-    fun getAlphaTick() : Float {
-        return tileOptionsProvider?.alphaTick ?: 0.07f
+    fun getAlphaTick(): Float {
+        return tileOptionsProvider.alphaTick
     }
 
     fun setViewport(viewport: Viewport) {
@@ -169,7 +168,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     private fun Tile.setPaint() {
         paint = (paintPool.get() ?: Paint()).also {
             it.alpha = 0
-            it.colorFilter = tileOptionsProvider?.getColorFilter(row, col, zoom)
+            it.colorFilter = tileOptionsProvider.getColorFilter(row, col, zoom)
         }
     }
 
