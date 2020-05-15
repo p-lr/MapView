@@ -1,7 +1,6 @@
 package com.peterlaurence.mapview
 
 import android.content.Context
-import android.graphics.ColorFilter
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -339,6 +338,19 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 }
 
+/**
+ * This data class holds information about the current state of the [MapView].
+ * An object can receive updated values of [ReferentialData] by implementing the [ReferentialOwner]
+ * interface and should be registered with [MapView.addReferentialOwner].
+ *
+ * @param rotationEnabled Whether the rotation is enabled or not
+ * @param angle The current angle in decimal degrees of the MapView's rotation
+ * @param scale The current scale the MapView
+ * @param centerX The ratio between the X coordinate of the center of the visible area and the full
+ * width (at scale 1) of the MapView
+ * @param centerY The ratio between the Y coordinate of the center of the visible area and the full
+ * height (at scale 1) of the MapView
+ */
 @Parcelize
 data class ReferentialData(var rotationEnabled: Boolean = true,
                            var angle: AngleDegree = 0f,
@@ -472,7 +484,7 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     /**
      * Sets the additional options provider for rendering tiles. Default is `null`.
      */
-    fun setTileOptionsProvider(tileOptionsProvider: TileOptionsProvider) : MapViewConfiguration {
+    fun setTileOptionsProvider(tileOptionsProvider: TileOptionsProvider): MapViewConfiguration {
         this.tileOptionsProvider = tileOptionsProvider
         return this
     }
