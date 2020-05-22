@@ -27,7 +27,7 @@ This project holds the source code of this library, plus a demo app (which is us
 ## MapView 2.x.x is out!
 
 This new major version brings performance improvements and a brand new feature: _map rotation_. To be 
-consistent with previous version, this is disabled by default.
+consistent with previous versions, this is disabled by default.
 To enable it, use `MapViewConfiguration.enableRotation()`. You will find a code example inside the demo
 [RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).
 
@@ -197,7 +197,7 @@ There's an example of usage at [RotatingMapFragment](demo/src/main/java/com/pete
 
 ## Create a deep-zoom map
 
-If you don't have already such a map and you need to make one from a big image, follow this [tutorial](doc/libvips.md).
+If you don't already have such a map and you need to make one from a big image, follow this [tutorial](doc/libvips.md).
 
 
 
