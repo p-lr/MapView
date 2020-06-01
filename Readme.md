@@ -199,6 +199,9 @@ There's an example of usage at [RotatingMapFragment](demo/src/main/java/com/pete
 
 If you don't already have such a map and you need to make one from a big image, follow this [tutorial](doc/libvips.md).
 
+## How do I..
+
+Follow this [cheat sheet](doc/how-do-i.md)
 
 
 
