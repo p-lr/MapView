@@ -2,7 +2,7 @@
 
 # MapView
 
-MapView is a Fast, Memory Efficient android library to display tiled maps with minimal effort.
+MapView is a Fast, memory efficient Android library to display tiled maps with minimal effort.
 
 ```kotlin
 val mapView = MapView(context)
@@ -137,7 +137,7 @@ In other words, if you put together all the tiles of the last level, you would o
 
 **`tileSize`**
 
-The size of the tiles in pixels, which are assumed to be squares and always of the same size for all levels. For now, MapView don't support rectangular tiles or tiles of heterogeneous sizes.
+The size of the tiles in pixels, which are assumed to be squares and always of the same size for all levels. For now, MapView doesn't support rectangular tiles or tiles of heterogeneous sizes.
 
 **`tileStreamProvider`**
 
@@ -160,10 +160,6 @@ interface TileStreamProvider {
 ```
 Your implementation of this interface does the necessary coordinate translation (if required). This is where you do your
 HTTP request if you have remote tiles, or fetch from a local database (or file system).
-
-### API documentation
-
-API documentation has its own [wiki page](https://github.com/peterLaurence/MapView/wiki/MapView-API).
 
 ### <a name="TOC-ReferentialOwner"></a> ReferentialOwner
 
@@ -201,7 +197,11 @@ If you don't already have such a map and you need to make one from a big image, 
 
 ## How do I..
 
-Follow this [cheat sheet](doc/how-do-i.md)
+Follow this [cheat sheet](doc/how-do-i.md).
+
+### API documentation
+
+API documentation has its own [wiki page](https://github.com/peterLaurence/MapView/wiki/MapView-API).
 
 
 
