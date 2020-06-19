@@ -1,10 +1,10 @@
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'maven-publish'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-def version = "2.0.6"
+def versionTag = "2.0.6"
 
 androidExtensions {
     experimental = true
@@ -13,9 +13,6 @@ androidExtensions {
 buildscript {
     repositories {
         jcenter()
-    }
-    dependencies {
-        classpath 'com.novoda:bintray-release:0.9.1'
     }
 }
 
@@ -64,11 +61,19 @@ repositories {
     maven { url "https://kotlin.bintray.com/kotlinx" }
 }
 
-publish {
-    userOrg = 'peterlaurence'
-    groupId = 'com.peterlaurence'
-    artifactId = 'mapview'
-    publishVersion = version
-    desc = 'Android Kotlin library to display tiled maps, with support of markers and paths'
-    website = 'https://github.com/peterLaurence/MapView'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = 'com.peterlaurence'
+                artifactId = 'mapview'
+                version = versionTag
+            }
+        }
+    }
 }
