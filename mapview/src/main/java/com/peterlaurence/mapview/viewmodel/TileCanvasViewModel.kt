@@ -24,7 +24,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
                                    private val tileOptionsProvider: TileOptionsProvider,
                                    workerCount: Int) : CoroutineScope by scope {
     private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
-    private val renderTask = throttle<Unit>(wait = 34) {
+    private val renderTask = throttle(wait = 34) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
          * above others */
         tilesToRender.sortBy {

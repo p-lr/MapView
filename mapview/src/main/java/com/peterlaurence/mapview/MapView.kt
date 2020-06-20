@@ -65,7 +65,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private lateinit var configuration: MapViewConfiguration
 
-    private lateinit var throttledTask: SendChannel<Unit>
+    private var throttledTask: SendChannel<Unit>? = null
     private val refOwnerList = mutableListOf<ReferentialOwner>()
     private var savedState: SavedState? = null
     private var isConfigured = false
@@ -218,9 +218,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun renderVisibleTilesThrottled() {
-        if (this::throttledTask.isInitialized) {
-            throttledTask.offer(Unit)
-        }
+        throttledTask?.offer(Unit)
     }
 
     private fun startInternals() {

@@ -4,40 +4,27 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 /**
- * Limit the rate at which a [block] is called given the last [T] value sent to the returned
- * [SendChannel]. If a value is sent to the channel before [wait] ms elapsed, its value will be
- * scheduled to be used as argument of the next [block] call, unless another value is sent meanwhile.
+ * Limit the rate at which a [block] is called.
+ * The [block] execution is triggered upon reception of [Unit] from the returned [SendChannel].
  *
  * @param wait The time in ms between each [block] call.
  *
  * @author peterLaurence
  */
-fun <T> CoroutineScope.throttle(wait: Long = 17,
-                                block: (T) -> Unit): SendChannel<T> {
+fun CoroutineScope.throttle(wait: Long, block: () -> Unit): SendChannel<Unit> {
 
-    val channel = Channel<T>(capacity = Channel.CONFLATED)
-
+    val channel = Channel<Unit>(capacity = 1)
+    val flow = channel.receiveAsFlow()
     launch {
-        var nextTime = Long.MIN_VALUE
-        for (elem in channel) {
-            val curTime = System.nanoTime() / 1000000
-            if (curTime < nextTime) {
-                delay(nextTime - curTime)
-                var mostRecent = elem
-                while (!channel.isEmpty) {  // take the most recently sent without waiting
-                    mostRecent = channel.receive()
-                }
-                nextTime += wait  // maintain strict time interval between sends
-                block(mostRecent)
-            } else {
-                nextTime = curTime + wait
-                block(elem)
-            }
+        flow.collect {
+            block()
+            delay(wait)
         }
     }
-
     return channel
 }
