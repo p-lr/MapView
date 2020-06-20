@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import com.peterlaurence.mapview.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.*
@@ -38,7 +37,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     private val paintPool = Pool<Paint>()
     private val visibleTileLocationsChannel = Channel<TileSpec>(capacity = Channel.RENDEZVOUS)
     private val tilesOutput = Channel<Tile>(capacity = Channel.RENDEZVOUS)
-    private var tileCollectionJob: Job? = null
+    private val visibleTilesFlow = MutableStateFlow<VisibleTiles?>(null)
 
     /**
      * A [Flow] of [Bitmap] that first collects from the [bitmapPool] on the Main thread. If the
@@ -68,6 +67,11 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     private var tilesToRender = mutableListOf<Tile>()
 
     init {
+        /* Collect visible tiles and send specs to the TileCollector */
+        launch {
+            collectNewTiles()
+        }
+
         /* Launch the TileCollector along with a coroutine to consume the produced tiles */
         with(TileCollector(workerCount)) {
             collectTiles(visibleTileLocationsChannel, tilesOutput, tileStreamProvider, bitmapFlow)
@@ -94,11 +98,8 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     }
 
     private fun setVisibleTiles(visibleTiles: VisibleTiles) {
-        /* Cancel the previous job, to avoid overwhelming the tile collector */
-        tileCollectionJob?.cancel()
-        tileCollectionJob = launch {
-            collectNewTiles(visibleTiles)
-        }
+        /* Feed the tile processing machinery */
+        visibleTilesFlow.value = visibleTiles
 
         lastVisible = visibleTiles
         lastVisibleCount = visibleTiles.count
@@ -109,33 +110,37 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     }
 
     /**
+     * Consumes incoming visible tiles from [visibleTilesFlow] and sends [TileSpec] instances to the
+     * [TileCollector].
+     *
      * Leverage built-in back pressure, as this function will suspend when the tile collector is busy
      * to the point it can't handshake the [visibleTileLocationsChannel] channel.
-     * Using [Flow], a new [TileSpec] instance is created right on time and if necessary, to avoid
-     * allocating too much of these objects.
+     *
+     * Using [Flow.collectLatest], we cancel any ongoing previous tile list processing. It's
+     * particularly useful when the [TileCollector] is too slow, so when a new [VisibleTiles] element
+     * is received from [visibleTilesFlow], no new [TileSpec] elements from the previous [VisibleTiles]
+     * element are sent to the [TileCollector]. Instead, the new [VisibleTiles] element is processed
+     * right away.
      */
-    private suspend fun collectNewTiles(visibleTiles: VisibleTiles) {
-        val tileSpecsWithoutTile = flow {
-            for (e in visibleTiles.tileMatrix) {
-                val row = e.key
-                val colRange = e.value
-                for (col in colRange) {
-                    val alreadyProcessed = tilesToRender.any { tile ->
-                        tile.sameSpecAs(visibleTiles.level, row, col, visibleTiles.subSample)
-                    }
-                    /* Only emit specs which haven't already been processed by the collector
-                     * Doing this now results in less object allocations than filtering the flow
-                     * afterwards */
-                    if (!alreadyProcessed) {
-                        emit(TileSpec(visibleTiles.level, row, col, visibleTiles.subSample))
+    private suspend fun collectNewTiles() {
+        visibleTilesFlow.collectLatest { visibleTiles ->
+            if (visibleTiles != null) {
+                for (e in visibleTiles.tileMatrix) {
+                    val row = e.key
+                    val colRange = e.value
+                    for (col in colRange) {
+                        val alreadyProcessed = tilesToRender.any { tile ->
+                            tile.sameSpecAs(visibleTiles.level, row, col, visibleTiles.subSample)
+                        }
+                        /* Only emit specs which haven't already been processed by the collector
+                         * Doing this now results in less object allocations than filtering the flow
+                         * afterwards */
+                        if (!alreadyProcessed) {
+                            visibleTileLocationsChannel.send(TileSpec(visibleTiles.level, row, col, visibleTiles.subSample))
+                        }
                     }
                 }
             }
-        }
-
-        /* Back pressure */
-        tileSpecsWithoutTile.collect {
-            visibleTileLocationsChannel.send(it)
         }
     }
 
