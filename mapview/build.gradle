@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-def versionTag = "2.0.7"
+def versionTag = "2.0.8"
 
 androidExtensions {
     experimental = true
@@ -92,7 +92,6 @@ afterEvaluate {
         pkg {
             repo = 'maven'
             name = 'mapview'
-            configurations = ['archives']
             desc = 'Android Kotlin library to display tiled maps, with support of markers and paths'
             websiteUrl = 'https://github.com/peterLaurence/MapView'
             vcsUrl = 'https://github.com/peterLaurence/MapView.git'

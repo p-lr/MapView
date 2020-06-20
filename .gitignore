@@ -13,3 +13,4 @@
 .idea
 .externalNativeBuild
 publish.sh
+/publishErrors.txt
