@@ -21,7 +21,7 @@ fun MapView.addMarker(view: View, x: Double, y: Double, relativeAnchorLeft: Floa
                       relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
                       absoluteAnchorTop: Float = 0f) {
 
-    markerLayout.addMarker(view,
+    markerLayout?.addMarker(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y),
             relativeAnchorLeft, relativeAnchorTop,
@@ -36,7 +36,7 @@ fun MapView.addMarker(view: View, x: Double, y: Double, relativeAnchorLeft: Floa
  * with scrolling.
  */
 fun MapView.setMarkerTapListener(markerTapListener: MarkerTapListener) {
-    markerLayout.setMarkerTapListener(markerTapListener)
+    markerLayout?.setMarkerTapListener(markerTapListener)
 }
 
 /**
@@ -47,7 +47,7 @@ fun MapView.setMarkerTapListener(markerTapListener: MarkerTapListener) {
  * @param y    Relative y position the View instance should be positioned at.
  */
 fun MapView.moveMarker(view: View, x: Double, y: Double) {
-    markerLayout.moveMarker(view,
+    markerLayout?.moveMarker(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y))
 }
@@ -58,10 +58,11 @@ fun MapView.moveMarker(view: View, x: Double, y: Double) {
  * @param x    Relative x position the View instance should be positioned at.
  * @param y    Relative y position the View instance should be positioned at.
  */
-fun MapView.getMarkerFromPosition(x: Double, y: Double) : View? {
-    val x = coordinateTranslater.translateAndScaleX(x, scale)
-    val y = coordinateTranslater.translateAndScaleY(y, scale)
-    return markerLayout.getViewFromTap(x, y)
+@Suppress("unused")
+fun MapView.getMarkerFromPosition(x: Double, y: Double): View? {
+    val xPixel = coordinateTranslater.translateAndScaleX(x, scale)
+    val yPixel = coordinateTranslater.translateAndScaleY(y, scale)
+    return markerLayout?.getViewFromTap(xPixel, yPixel)
 }
 
 /**
@@ -70,8 +71,9 @@ fun MapView.getMarkerFromPosition(x: Double, y: Double) : View? {
  * @param view          The View marker that the TileView should center on.
  * @param shouldAnimate True if the movement should use a transition effect.
  */
+@Suppress("unused")
 fun MapView.moveToMarker(view: View, shouldAnimate: Boolean) {
-    if (markerLayout.indexOfChild(view) == -1) {
+    if (markerLayout?.indexOfChild(view) == -1) {
         throw IllegalStateException("The view passed is not an existing marker")
     }
     val params = view.layoutParams
@@ -92,7 +94,7 @@ fun MapView.moveToMarker(view: View, shouldAnimate: Boolean) {
  * @param view The marker View to be removed.
  */
 fun MapView.removeMarker(view: View) {
-    markerLayout.removeMarker(view)
+    markerLayout?.removeMarker(view)
 }
 
 /**
@@ -110,7 +112,7 @@ fun MapView.removeMarker(view: View) {
 fun MapView.addCallout(view: View, x: Double, y: Double, relativeAnchorLeft: Float = -0.5f,
                        relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
                        absoluteAnchorTop: Float = 0f) {
-    markerLayout.addCallout(view,
+    markerLayout?.addCallout(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y),
             relativeAnchorLeft, relativeAnchorTop,
@@ -124,5 +126,5 @@ fun MapView.addCallout(view: View, x: Double, y: Double, relativeAnchorLeft: Flo
  * @param view The callout View to be removed.
  */
 fun MapView.removeCallout(view: View) {
-    markerLayout.removeCallout(view)
+    markerLayout?.removeCallout(view)
 }

@@ -56,9 +56,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private var job = Job()
 
     private var tileSize: Int = 256
-    private lateinit var tileCanvasView: TileCanvasView
-    private lateinit var tileCanvasViewModel: TileCanvasViewModel
-    lateinit var markerLayout: MarkerLayout
+    private var tileCanvasView: TileCanvasView? = null
+    private var tileCanvasViewModel: TileCanvasViewModel? = null
+    var markerLayout: MarkerLayout? = null
         private set
     lateinit var coordinateTranslater: CoordinateTranslater
         private set
@@ -106,13 +106,14 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
                 config.tileSize, magnifyingFactor = config.magnifyingFactor)
         this.visibleTilesResolver = visibleTilesResolver
-        tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
+        val tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
                 config.tileStreamProvider, config.tileOptionsProvider, config.workerCount)
+        this.tileCanvasViewModel = tileCanvasViewModel
         this.tileSize = config.tileSize
         gestureController.rotationEnabled = config.rotationEnabled
         gestureController.handleRotationGesture = config.handleRotationGesture
 
-        initChildViews(visibleTilesResolver)
+        initChildViews(visibleTilesResolver, tileCanvasViewModel)
 
         setScalePolicy(config)
         setStartScale(config.startScale)
@@ -185,18 +186,16 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         job.cancel()
     }
 
-    private fun initChildViews(visibleTilesResolver: VisibleTilesResolver) {
+    private fun initChildViews(visibleTilesResolver: VisibleTilesResolver, tileCanvasViewModel: TileCanvasViewModel) {
         /* Remove the TileCanvasView if it was already added */
-        if (this::tileCanvasView.isInitialized) {
+        if (tileCanvasView != null) {
             removeView(tileCanvasView)
         }
         tileCanvasView = TileCanvasView(context, tileCanvasViewModel, tileSize, visibleTilesResolver)
         addView(tileCanvasView, 0)
 
-        if (!this::markerLayout.isInitialized) {
-            markerLayout = MarkerLayout(context)
-            addView(markerLayout)
-        }
+        markerLayout = MarkerLayout(context)
+        addView(markerLayout)
     }
 
     private fun setStartScale(startScale: Float?) {
@@ -224,7 +223,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private fun startInternals() {
         throttledTask = throttle(wait = 18) {
             val viewport = updateViewport()
-            tileCanvasViewModel.setViewport(viewport)
+            tileCanvasViewModel?.setViewport(viewport)
         }
     }
 
@@ -280,12 +279,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun updateAllRefOwners() {
-        if (this::tileCanvasView.isInitialized) {
-            tileCanvasView.referentialData = this.referentialData
-        }
-        if (this::markerLayout.isInitialized) {
-            markerLayout.referentialData = this.referentialData
-        }
+        tileCanvasView?.referentialData = this.referentialData
+        markerLayout?.referentialData = this.referentialData
 
         refOwnerList.forEach {
             it.referentialData = this.referentialData
@@ -293,14 +288,14 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        markerLayout.removeAllCallout()
+        markerLayout?.removeAllCallout()
         return super.onTouchEvent(event)
     }
 
     override fun onSingleTapConfirmed(event: MotionEvent): Boolean {
         val x = scrollX + event.x.toInt() - offsetX
         val y = scrollY + event.y.toInt() - offsetY
-        markerLayout.processHit(x, y)
+        markerLayout?.processHit(x, y)
         return super.onSingleTapConfirmed(event)
     }
 
