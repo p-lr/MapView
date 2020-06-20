@@ -1,35 +1,30 @@
 package com.peterlaurence.mapview.core
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 /**
- * Returns a [SendChannel] which accepts messages of type [T].
- * The provided [block] function is executed only if a particular timespan (here, [wait]) has passed
- * without the [SendChannel] receiving an object.
+ * So long as the returned [SendChannel] receives [T] elements, the provided [block] function isn't
+ * executed until a time-span of [timeoutMillis] elapses.
  * When [block] is executed, it's provided with the last [T] value sent to the channel.
  *
  * @author peterLaurence
  */
 fun <T> CoroutineScope.debounce(
-        wait: Long = 300,
+        timeoutMillis: Long,
         block: (T) -> Unit
 ): SendChannel<T> {
     val channel = Channel<T>(capacity = Channel.CONFLATED)
-    var job: Job? = null
+    val flow = channel.receiveAsFlow().debounce(timeoutMillis)
     launch {
-        for (elem in channel) {
-            job?.cancel()
-            job = launch {
-                delay(wait)
-                block(elem)
-            }
+        flow.collect {
+            block(it)
         }
-        job?.join()
     }
 
     return channel

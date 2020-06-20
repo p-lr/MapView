@@ -59,7 +59,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     /**
      * So long as this debounced channel is offered a message, the lambda isn't called.
      */
-    private val idleDebounced = debounce<Unit> {
+    private val idleDebounced = debounce<Unit>(300) {
         idle = true
         evictTiles(lastVisible)
     }
