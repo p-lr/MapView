@@ -152,14 +152,20 @@ The MapView will request tiles using the convention that each levels has its til
 <img src="doc/readme-files/tilematrix.png">
 </p>
 
-But note that MapView isn't opinionated about that. This is one of the purpose of this `TileStreamProvider`:
+However, MapView isn't opinionated about that. This is one of the purpose of this `TileStreamProvider`:
 ```kotlin
 interface TileStreamProvider {
     fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream?
 }
 ```
-Your implementation of this interface does the necessary coordinate translation (if required). This is where you do your
-HTTP request if you have remote tiles, or fetch from a local database (or file system).
+Your implementation of this interface does the necessary coordinate translation (if required). This is 
+where you do your HTTP request if you have remote tiles, or fetch from a local database (or file system).
+
+*Tile caching*
+
+The MapView leverages bitmap pooling to reduce the pressure on the garbage collector. However, 
+there's no tile caching by default - this is an implementation detail of the supplied 
+`TileStreamProvider`.
 
 ### <a name="TOC-ReferentialOwner"></a> ReferentialOwner
 

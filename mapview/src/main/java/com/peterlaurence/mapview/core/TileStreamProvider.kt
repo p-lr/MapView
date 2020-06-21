@@ -3,7 +3,14 @@ package com.peterlaurence.mapview.core
 import java.io.InputStream
 
 /**
- * The tile provider that should only be used by MapView internals.
+ * The tile provider is user-provided to the MapView. It must be supplied as part of the configuration
+ * of the MapView.
+ *
+ * The MapView leverages bitmap pooling to reduce the pressure on the garbage collector. However,
+ * there's no tile caching by default - this is an implementation detail of the supplied
+ * [TileStreamProvider].
+ *
+ * If [getTileStream] returns null, the tile is simply ignored by the tile processing machinery.
  */
 interface TileStreamProvider {
     fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream?
