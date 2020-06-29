@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-def versionTag = "2.0.8"
+def versionTag = "2.0.9"
 
 androidExtensions {
     experimental = true
@@ -22,7 +22,6 @@ buildscript {
 
 android {
     compileSdkVersion 29
-
 
     defaultConfig {
         minSdkVersion 24

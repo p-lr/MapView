@@ -2,89 +2,88 @@ package com.peterlaurence.mapview.layout.animators
 
 import android.animation.Animator
 import android.animation.ValueAnimator
-import android.view.animation.Interpolator
-import kotlin.math.pow
+import android.view.animation.AccelerateInterpolator
 
 class ZoomPanAnimator(private val listener: OnZoomPanAnimationListener) : ValueAnimator(),
     ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
 
-    private val mStartState = ZoomPanState()
-    private val mEndState = ZoomPanState()
-    private var mHasPendingZoomUpdates: Boolean = false
-    private var mHasPendingPanUpdates: Boolean = false
+    private val startState = ZoomPanState()
+    private val endState = ZoomPanState()
+    private var hasPendingZoomUpdates: Boolean = false
+    private var hasPendingPanUpdates: Boolean = false
 
     init {
         addUpdateListener(this)
         addListener(this)
         setFloatValues(0f, 1f)
-        interpolator = FastEaseInInterpolator()
+        interpolator = AccelerateInterpolator()
     }
 
     private fun setupPanAnimation(x: Int, y: Int): Boolean {
-        mStartState.x = listener.getScrollX()
-        mStartState.y = listener.getScrollY()
-        mEndState.x = x
-        mEndState.y = y
-        return mStartState.x != mEndState.x || mStartState.y != mEndState.y
+        startState.x = listener.getScrollX()
+        startState.y = listener.getScrollY()
+        endState.x = x
+        endState.y = y
+        return startState.x != endState.x || startState.y != endState.y
     }
 
     private fun setupZoomAnimation(scale: Float): Boolean {
-        mStartState.scale = listener.getScale()
-        mEndState.scale = scale
-        return mStartState.scale != mEndState.scale
+        startState.scale = listener.getScale()
+        endState.scale = scale
+        return startState.scale != endState.scale
     }
 
     fun animateZoomPan(x: Int, y: Int, scale: Float) {
-        mHasPendingZoomUpdates = setupZoomAnimation(scale)
-        mHasPendingPanUpdates = setupPanAnimation(x, y)
-        if (mHasPendingPanUpdates || mHasPendingZoomUpdates) {
+        hasPendingZoomUpdates = setupZoomAnimation(scale)
+        hasPendingPanUpdates = setupPanAnimation(x, y)
+        if (hasPendingPanUpdates || hasPendingZoomUpdates) {
             start()
         }
     }
 
     fun animateZoom(scale: Float) {
-        mHasPendingZoomUpdates = setupZoomAnimation(scale)
-        if (mHasPendingZoomUpdates) {
+        hasPendingZoomUpdates = setupZoomAnimation(scale)
+        if (hasPendingZoomUpdates) {
             start()
         }
     }
 
     fun animatePan(x: Int, y: Int) {
-        mHasPendingPanUpdates = setupPanAnimation(x, y)
-        if (mHasPendingPanUpdates) {
+        hasPendingPanUpdates = setupPanAnimation(x, y)
+        if (hasPendingPanUpdates) {
             start()
         }
     }
 
     override fun onAnimationUpdate(animation: ValueAnimator) {
         val progress = animation.animatedValue as Float
-        if (mHasPendingZoomUpdates) {
-            val scale = mStartState.scale + (mEndState.scale - mStartState.scale) * progress
+        if (hasPendingZoomUpdates) {
+            val scale = startState.scale + (endState.scale - startState.scale) * progress
             listener.setScale(scale)
         }
-        if (mHasPendingPanUpdates) {
-            val x = (mStartState.x + (mEndState.x - mStartState.x) * progress).toInt()
-            val y = (mStartState.y + (mEndState.y - mStartState.y) * progress).toInt()
+        if (hasPendingPanUpdates) {
+            val x = (startState.x + (endState.x - startState.x) * progress).toInt()
+            val y = (startState.y + (endState.y - startState.y) * progress).toInt()
             listener.scrollTo(x, y)
         }
     }
 
     override fun onAnimationStart(animator: Animator) {
-        if (mHasPendingZoomUpdates) {
+        if (hasPendingZoomUpdates) {
             listener.setIsScaling(true)
         }
-        if (mHasPendingPanUpdates) {
+        if (hasPendingPanUpdates) {
             listener.setIsSliding(true)
         }
     }
 
     override fun onAnimationEnd(animator: Animator) {
-        if (mHasPendingZoomUpdates) {
-            mHasPendingZoomUpdates = false
+        if (hasPendingZoomUpdates) {
+            hasPendingZoomUpdates = false
             listener.setIsScaling(false)
         }
-        if (mHasPendingPanUpdates) {
-            mHasPendingPanUpdates = false
+        if (hasPendingPanUpdates) {
+            hasPendingPanUpdates = false
             listener.setIsSliding(false)
         }
     }
@@ -101,12 +100,6 @@ class ZoomPanAnimator(private val listener: OnZoomPanAnimationListener) : ValueA
         var x: Int = 0
         var y: Int = 0
         var scale: Float = 0.toFloat()
-    }
-
-    private class FastEaseInInterpolator : Interpolator {
-        override fun getInterpolation(input: Float): Float {
-            return (1 - (1 - input).toDouble().pow(8.0)).toFloat()
-        }
     }
 
     interface OnZoomPanAnimationListener {

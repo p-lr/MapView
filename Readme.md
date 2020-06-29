@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.8) ](https://bintray.com/peterlaurence/maven/mapview/2.0.8/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.9) ](https://bintray.com/peterlaurence/maven/mapview/2.0.9/link)
 
 # MapView
 
@@ -60,7 +60,7 @@ There are some breaking changes, although most of them are just package refactor
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.0.8'
+implementation 'com.peterlaurence:mapview:2.0.9'
 ```
 
 ## Origin and motivation

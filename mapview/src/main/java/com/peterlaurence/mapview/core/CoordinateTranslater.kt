@@ -51,6 +51,7 @@ class CoordinateTranslater(val baseWidth: Int, val baseHeight: Int, val left: Do
      * and an angle alpha. This return the X coordinate by applying a rotation of -alpha around the
      * center.
      */
+    @Suppress("unused")
     fun reverseRotationX(rd: ReferentialData, x: Float, y: Float): Double {
         val centerX = rd.centerX * baseWidth * rd.scale
         val centerY = rd.centerY * baseHeight * rd.scale
@@ -62,6 +63,7 @@ class CoordinateTranslater(val baseWidth: Int, val baseHeight: Int, val left: Do
      * and an angle alpha. This return the Y coordinate by applying a rotation of -alpha around the
      * center.
      */
+    @Suppress("unused")
     fun reverseRotationY(rd: ReferentialData, x: Float, y: Float): Double {
         val centerX = rd.centerX * baseWidth * rd.scale
         val centerY = rd.centerY * baseHeight * rd.scale

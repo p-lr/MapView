@@ -231,6 +231,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
      */
+    @Suppress("unused")
     fun slideToAndCenter(x: Int, y: Int) {
         slideTo(x - halfWidth, y - halfHeight)
     }

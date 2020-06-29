@@ -9,7 +9,7 @@ import com.peterlaurence.mapview.markers.MarkerTapListener
  * Add a marker to the the MapView.  The marker can be any View.
  * No LayoutParams are required; the View will be laid out using WRAP_CONTENT for both width and height, and positioned based on the parameters.
  *
- * @param view    View instance to be added to the TileView.
+ * @param view    View instance to be added to the MapView.
  * @param x       Relative x position the View instance should be positioned at.
  * @param y       Relative y position the View instance should be positioned at.
  * @param relativeAnchorLeft The x-axis position of a marker will be offset by a number equal to the width of the marker multiplied by this value.
@@ -66,39 +66,58 @@ fun MapView.getMarkerFromPosition(x: Double, y: Double): View? {
 }
 
 /**
- * Scroll the TileView so that the View passed is centered in the viewport.
+ * Scrolls the MapView so that the View passed is centered in the viewport.
+ * The scale remains constant.
  *
- * @param view          The View marker that the TileView should center on.
- * @param shouldAnimate True if the movement should use a transition effect.
+ * The scroll position is animated if [shouldAnimate] is set to `true`.
+ *
+ * @param view The marker that the MapView should center on.
+ * @param shouldAnimate `true` if the movement should use a transition effect.
  */
 @Suppress("unused")
 fun MapView.moveToMarker(view: View, shouldAnimate: Boolean) {
+    moveToMarker(view, scale, shouldAnimate)
+}
+
+/**
+ * Scrolls the MapView so that the marker passed is centered in the viewport.
+ * Takes an additional [destinationScale] parameter.
+ *
+ * The scroll position and scale are animated if [shouldAnimate] is set to `true`.
+ *
+ * @param view The marker that the MapView should center on.
+ * @param destinationScale The scale of the MapView when centered on the marker
+ * @param shouldAnimate True if the movement should use a transition effect.
+ */
+@Suppress("unused")
+fun MapView.moveToMarker(view: View, destinationScale: Float, shouldAnimate: Boolean) {
     if (markerLayout?.indexOfChild(view) == -1) {
         throw IllegalStateException("The view passed is not an existing marker")
     }
     val params = view.layoutParams
     if (params is MarkerLayoutParams) {
-        val scaledX = (params.x * scale).toInt()
-        val scaledY = (params.y * scale).toInt()
+        val scaledX = (params.x * destinationScale).toInt()
+        val scaledY = (params.y * destinationScale).toInt()
         if (shouldAnimate) {
-            slideToAndCenter(scaledX, scaledY)
+            slideToAndCenterWithScale(scaledX, scaledY, destinationScale)
         } else {
+            scale = destinationScale
             scrollToAndCenter(scaledX, scaledY)
         }
     }
 }
 
 /**
- * Removes a marker View from the TileView's view tree.
+ * Removes a marker from the MapView's view tree.
  *
- * @param view The marker View to be removed.
+ * @param view The marker to be removed.
  */
 fun MapView.removeMarker(view: View) {
     markerLayout?.removeMarker(view)
 }
 
 /**
- * Add a callout to the the MapView.  The callout can be any View.
+ * Add a callout to the the MapView. The callout can be any View.
  * No LayoutParams are required; the View will be laid out using WRAP_CONTENT for both width and height, and positioned based on the parameters.
  *
  * @param view    View instance to be added to the MapView.
