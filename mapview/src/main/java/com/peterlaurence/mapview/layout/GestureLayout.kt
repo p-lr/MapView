@@ -3,6 +3,9 @@ package com.peterlaurence.mapview.layout
 import android.content.Context
 import android.util.AttributeSet
 import android.view.*
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.Interpolator
 import android.widget.Scroller
 import androidx.core.view.ViewCompat
 import com.peterlaurence.mapview.layout.animators.ZoomPanAnimator
@@ -25,8 +28,10 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         TouchUpGestureDetector.OnTouchUpListener, RotationGestureDetector.OnRotationGestureListener,
         GestureController.Controllable {
 
-    /* Controllers */
     internal val gestureController: GestureController by lazy { GestureController(this) }
+
+    private val defaultInterpolator: Interpolator = AccelerateDecelerateInterpolator()
+    private val fastInterpolator: Interpolator = DecelerateInterpolator(2f)
 
     override fun onMinScaleUpdateRequest() {
         gestureController.calculateMinimumScaleToFit(width, height)
@@ -220,9 +225,10 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
      *
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
+     * @param interpolator The [Interpolator] the animation should use.
      */
-    fun slideTo(x: Int, y: Int) {
-        animator.animatePan(x, y)
+    fun slideTo(x: Int, y: Int, interpolator: Interpolator = defaultInterpolator) {
+        animator.animatePan(x, y, interpolator)
     }
 
     /**
@@ -230,10 +236,11 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
      *
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
+     * @param interpolator The [Interpolator] the animation should use.
      */
     @Suppress("unused")
-    fun slideToAndCenter(x: Int, y: Int) {
-        slideTo(x - halfWidth, y - halfHeight)
+    fun slideToAndCenter(x: Int, y: Int, interpolator: Interpolator = defaultInterpolator) {
+        slideTo(x - halfWidth, y - halfHeight, interpolator)
     }
 
     /**
@@ -243,18 +250,21 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
      * @param x Horizontal destination point.
      * @param y Vertical destination point.
      * @param scale The final scale value the layout should animate to.
+     * @param interpolator The [Interpolator] the animation should use.
      */
-    fun slideToAndCenterWithScale(x: Int, y: Int, scale: Float) {
-        animator.animateZoomPan(x - halfWidth, y - halfHeight, scale)
+    fun slideToAndCenterWithScale(x: Int, y: Int, scale: Float, interpolator: Interpolator = defaultInterpolator) {
+        animator.animateZoomPan(x - halfWidth, y - halfHeight, scale, interpolator)
     }
 
     /**
      * Scales the [GestureLayout] with animated progress, without maintaining scroll position.
      *
      * @param destination The final scale value the layout should animate to.
+     * @param interpolator The [Interpolator] the animation should use.
      */
-    fun smoothScaleTo(destination: Float) {
-        animator.animateZoom(destination)
+    @Suppress("unused")
+    fun smoothScaleTo(destination: Float, interpolator: Interpolator = defaultInterpolator) {
+        animator.animateZoom(destination, interpolator)
     }
 
     /**
@@ -264,22 +274,25 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
      * @param focusX The horizontal focal point to maintain, relative to the screen (as supplied by MotionEvent.getX).
      * @param focusY The vertical focal point to maintain, relative to the screen (as supplied by MotionEvent.getY).
      * @param scale The final scale value the layout should animate to.
+     * @param interpolator The [Interpolator] the animation should use.
      */
-    fun smoothScaleFromFocalPoint(focusX: Int, focusY: Int, scale: Float) {
+    fun smoothScaleFromFocalPoint(focusX: Int, focusY: Int, scale: Float, interpolator: Interpolator = defaultInterpolator) {
         val (x, y, scaleCst) = gestureController.getOffsetDestination(focusX, focusY, scale)
         if (scaleCst == gestureController.scale) {
             return
         }
-        animator.animateZoomPan(x, y, scaleCst)
+        animator.animateZoomPan(x, y, scaleCst, interpolator)
     }
 
     /**
      * Animate the scale of the [GestureLayout] while maintaining the current center point.
      *
      * @param scale The final scale value the layout should animate to.
+     * @param interpolator The [Interpolator] the animation should use.
      */
-    fun smoothScaleFromCenter(scale: Float) {
-        smoothScaleFromFocalPoint(halfWidth, halfHeight, scale)
+    @Suppress("unused")
+    fun smoothScaleFromCenter(scale: Float, interpolator: Interpolator = defaultInterpolator) {
+        smoothScaleFromFocalPoint(halfWidth, halfHeight, scale, interpolator)
     }
 
     override fun constrainScrollToLimits() {
@@ -404,14 +417,14 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
                 gestureController.scale)
 
         if (gestureController.angle == 0f) {
-            smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst)
+            smoothScaleFromFocalPoint(event.x.toInt(), event.y.toInt(), scaleCst, fastInterpolator)
         } else {
             val angleRad = -gestureController.angle.toRad()
             val eventRx = (height / 2 * sin(angleRad) + width / 2 * (1 - cos(angleRad)) +
                     event.x * cos(angleRad) - event.y * sin(angleRad)).toInt()
             val eventRy = (height / 2 * (1 - cos(angleRad)) - width / 2 * sin(angleRad) +
                     event.x * sin(angleRad) + event.y * cos(angleRad)).toInt()
-            smoothScaleFromFocalPoint(eventRx, eventRy, scaleCst)
+            smoothScaleFromFocalPoint(eventRx, eventRy, scaleCst, fastInterpolator)
         }
 
         return true

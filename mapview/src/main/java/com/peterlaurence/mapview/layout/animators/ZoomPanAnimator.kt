@@ -2,7 +2,7 @@ package com.peterlaurence.mapview.layout.animators
 
 import android.animation.Animator
 import android.animation.ValueAnimator
-import android.view.animation.AccelerateInterpolator
+import android.view.animation.Interpolator
 
 class ZoomPanAnimator(private val listener: OnZoomPanAnimationListener) : ValueAnimator(),
     ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
@@ -16,7 +16,6 @@ class ZoomPanAnimator(private val listener: OnZoomPanAnimationListener) : ValueA
         addUpdateListener(this)
         addListener(this)
         setFloatValues(0f, 1f)
-        interpolator = AccelerateInterpolator()
     }
 
     private fun setupPanAnimation(x: Int, y: Int): Boolean {
@@ -33,24 +32,27 @@ class ZoomPanAnimator(private val listener: OnZoomPanAnimationListener) : ValueA
         return startState.scale != endState.scale
     }
 
-    fun animateZoomPan(x: Int, y: Int, scale: Float) {
+    fun animateZoomPan(x: Int, y: Int, scale: Float, interpolator: Interpolator) {
         hasPendingZoomUpdates = setupZoomAnimation(scale)
         hasPendingPanUpdates = setupPanAnimation(x, y)
         if (hasPendingPanUpdates || hasPendingZoomUpdates) {
+            this.interpolator = interpolator
             start()
         }
     }
 
-    fun animateZoom(scale: Float) {
+    fun animateZoom(scale: Float, interpolator: Interpolator) {
         hasPendingZoomUpdates = setupZoomAnimation(scale)
         if (hasPendingZoomUpdates) {
+            this.interpolator = interpolator
             start()
         }
     }
 
-    fun animatePan(x: Int, y: Int) {
+    fun animatePan(x: Int, y: Int, interpolator: Interpolator) {
         hasPendingPanUpdates = setupPanAnimation(x, y)
         if (hasPendingPanUpdates) {
+            this.interpolator = interpolator
             start()
         }
     }
