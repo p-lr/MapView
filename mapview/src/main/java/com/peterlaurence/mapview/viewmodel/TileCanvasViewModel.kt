@@ -151,14 +151,10 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
      */
     private fun CoroutineScope.consumeTiles(tileChannel: ReceiveChannel<Tile>) = launch {
         for (tile in tileChannel) {
-            if (lastVisible.contains(tile)) {
-                if (!tilesToRender.contains(tile)) {
-                    tile.setPaint()
-                    tilesToRender.add(tile)
-                    idleDebounced.offer(Unit)
-                } else {
-                    tile.recycle()
-                }
+            if (lastVisible.contains(tile) && !tilesToRender.contains(tile)) {
+                tile.setPaint()
+                tilesToRender.add(tile)
+                idleDebounced.offer(Unit)
                 renderThrottled()
             } else {
                 tile.recycle()
