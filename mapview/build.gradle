@@ -80,12 +80,10 @@ afterEvaluate {
         }
     }
 
-    Properties properties = new Properties()
-    properties.load( new FileInputStream("local.properties"))
-
     bintray {
-        user = properties.getProperty("bintray.user")
-        key = properties.getProperty("bintray.apikey")
+        user = System.getenv("bintrayUser")
+        key = System.getenv("bintrayApikey")
+        dryRun = System.getenv("dryRun")
 
         publications = ['release']
         pkg {
