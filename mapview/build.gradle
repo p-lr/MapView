@@ -81,9 +81,12 @@ afterEvaluate {
     }
 
     bintray {
-        user = System.getenv("bintrayUser")
-        key = System.getenv("bintrayApikey")
-        dryRun = System.getenv("dryRun")
+        try {
+            user = System.getenv("bintrayUser")
+            key = System.getenv("bintrayApikey")
+            dryRun = System.getenv("dryRun")
+        } catch (Exception e) {
+        }
 
         publications = ['release']
         pkg {
@@ -98,7 +101,7 @@ afterEvaluate {
             version {
                 name = versionTag
                 vcsTag = versionTag
-                released  = new Date()
+                released = new Date()
             }
         }
     }
