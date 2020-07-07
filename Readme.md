@@ -12,7 +12,7 @@ MapView is a Fast, memory efficient Android library to display tiled maps with m
 val mapView = MapView(context)
 val tileStreamProvider = object : TileStreamProvider {
    override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
-     return FileInputStream(File("path_of_tile")) // or it can be a remote http fetch
+     return FileInputStream(File("path/{zoomLvl}/{row}/{col}.jpg")) // or it can be a remote HTTP fetch
    }
 }
 
@@ -24,9 +24,11 @@ val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight 
 mapView.configure(config)
 ```
 
-MapView shows only the visible part of a tiled map, and supports flinging, dragging, scaling, and rotating. It's also possible to add markers and paths.
+MapView shows only the visible part of a tiled map, and supports flinging, dragging, scaling, and 
+rotating. It's also possible to add markers and paths.
 
 This project holds the source code of this library, plus a demo app (which is useful to get started).
+To test the demo, just clone the repo and launch the demo app from Android Studio.
 
 ## MapView 2.x.x is out!
 
@@ -54,7 +56,9 @@ fun MapView.setAngle(angle: AngleDegree)
 
 **Migrating from 1.x.x**
 
-There are some breaking changes, although most of them are just package refactoring. The interface `ScaleChangeListener` has been removed. If you relied on this, have a look at `ReferentialOwner`interface. There's an example of usage inside the `RotatingMapFragment` demo.
+There are some breaking changes, although most of them are just package refactoring. The interface 
+`ScaleChangeListener` has been removed. If you relied on this, have a look at `ReferentialOwner`interface. 
+There's an example of usage inside the `RotatingMapFragment` demo.
 
 ## Installation
 
@@ -65,12 +69,14 @@ implementation 'com.peterlaurence:mapview:2.0.10'
 
 ## Origin and motivation
 
-As a long time contributor to [TileView](https://github.com/moagrius/TileView), which is a reference in this area, I
-wanted to see the performance we would have using Kotlin coroutines. The result was beyond my expectations and this is
-why I'm sharing it the world. The overall design can be seen [here](https://github.com/peterLaurence/MapView/wiki/TileCollector-design).
-The focus has been on efficiency (no thread contention thanks to asynchronous programming, and the load on the main thread is low enough to maximize the fps).
+As a long time contributor to [TileView](https://github.com/moagrius/TileView), I wanted to see the 
+performance we would get using idiomatic Kotlin (coroutines, flows). The result was beyond my 
+expectations - this is why I'm sharing it the world. The overall design can be seen 
+[here](https://github.com/peterLaurence/MapView/wiki/TileCollector-design).
+The focus has been on efficiency (no thread contention thanks to asynchronous programming, and the 
+load on the main thread is low enough to maximize the fps).
 
-A special thanks goes to Mike (@moagrius), as this library wouldn't exist without his first contributions.
+Thanks for Mike (@moagrius), as this library wouldn't exist without his first contributions.
 
 ## Principles
 
@@ -82,8 +88,10 @@ MapView is optimized to display maps that have several levels, like this:
 <img src="doc/readme-files/deepzoom.png">
 </p>
 
-Each next level is twice bigger than the former, and provides more details. Overall, this looks like a pyramid. Another common name is "deep-zoom" map.
-This library comes with a demo app, which shows basic usage of the MapView and bundles a map in the assets. Looking at structure of this map, you have a real example of a deep-zoom map.
+Each next level is twice bigger than the former, and provides more details. Overall, this looks like
+ a pyramid. Another common name is "deep-zoom" map.
+This library comes with a demo app, which shows basic usage of the MapView and bundles a map in the 
+assets. Looking at structure of this map, you have a real example of a deep-zoom map.
 
 MapView can also be used with single level maps.
 
@@ -101,17 +109,22 @@ val mapView = MapView(context)
 mapView.configure(config)
 ```
 
+For more insight, you can have a look at the source of the various [demos](demo/src/main/java/com/peterlaurence/mapview/demo/fragments).
+
 ### Convention
 
 MapView uses the convention that the last level is at scale 1. So all levels have scales between 0 and 1.
-Even though you don't have to be aware of the details, it's important to know that. For example, if you set the max scale to 2, it means that the last level will be allowed to be upscaled to twice its original size (since the last level is at scale 1).
+Even though you don't have to be aware of the details, it's important to know that. For example, if 
+you set the max scale to 2, it means that the last level will be allowed to be upscaled to twice its
+ original size (since the last level is at scale 1).
 This convention allows for a simple configuration.
 
 ## Technical documentation
 
-This section explains in details the configuration. But once configured, you can do a lot of things with your `MapView`
-instance. There is just one thing to remember: `MapView` extends [GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt) and this last class has a ton of 
-features (the source code is well documented). You can:
+This section explains in details the configuration. But once configured, you can do a lot of things 
+with your `MapView` instance. There is just one thing to remember: `MapView` extends 
+[GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt) and this 
+last class has a ton of features (the source code is well documented). You can:
 
 * add listeners to events like pan, fling, zoom..
 * programmatically scroll and center to a position
@@ -121,36 +134,42 @@ This list isn't complete. A dedicated section will be added.
 
 ### <a name="TOC-MapViewConfiguration"></a> MapViewConfiguration
 
-The MapView must be configured using a `MapViewConfiguration`. It holds the mandatory parameters to build a MapView
+The MapView must be configured using a `MapViewConfiguration`. It holds the mandatory parameters to 
+build a MapView.
 
-Then, you can set optional properties by calling available methods on your `MapViewConfiguration` instance. Here is an
-example:
+Then, you can set optional properties by calling available methods on your `MapViewConfiguration` 
+instance. Here is an example:
+
 ```kotlin
 val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight = 12500,
                                   tileSize = 256, tileStreamProvider = tileStreamProvider)
                                   .setMaxScale(2f)
 ```
 
-See documentation [here](https://github.com/peterLaurence/MapView/blob/b9e89f8f179f109b1c0843b19d53c8f9c7f2689c/mapview/src/main/java/com/peterlaurence/mapview/MapView.kt#L340). Below is a description of mandatory parameters:
+See documentation [here](https://github.com/peterLaurence/MapView/blob/b9e89f8f179f109b1c0843b19d53c8f9c7f2689c/mapview/src/main/java/com/peterlaurence/mapview/MapView.kt#L340). 
+Below is a description of mandatory parameters:
 
 **`levelCount`**
 
-The provided `MapViewConfiguration.levelCount` will define the zoomLevels index that the provided `MapViewConfiguration.tileStreamProvider` will be given for its `TileStreamProvider.zoomLevels`.
+The provided `MapViewConfiguration.levelCount` will define the zoomLevels index that the provided 
+`MapViewConfiguration.tileStreamProvider` will be given for its `TileStreamProvider.zoomLevels`.
 The zoomLevels will be in the range [0 ; `MapViewConfiguration.levelCount`-1].
 
 **`fullWidth` and `fullHeight`**
 
-These are respectively the width and height in pixels of the map _at scale 1_ (that is, the width and height of the last level).
-In other words, if you put together all the tiles of the last level, you would obtain a big image. `fullWidth` and `fullHeight` are dimentions in pixels of this big image.
+These are respectively the width and height in pixels of the map _at scale 1_ (that is, the width 
+and height of the last level).
+In other words, if you put together all the tiles of the last level, you would obtain a big image. 
+`fullWidth` and `fullHeight` are dimensions in pixels of this big image.
 
 **`tileSize`**
 
-The size of the tiles in pixels, which are assumed to be squares and always of the same size for all levels. For now, MapView doesn't support rectangular tiles or tiles of heterogeneous sizes.
+The size of the tiles in pixels, which are assumed to be squares and always of the same size for all
+levels. For now, MapView doesn't support rectangular tiles or tiles of heterogeneous sizes.
 
 **`tileStreamProvider`**
 
 See the section below.
-
 
 ### <a name="TOC-TileStreamProvider"></a> TileStreamProvider
 
