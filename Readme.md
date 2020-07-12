@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.10) ](https://bintray.com/peterlaurence/maven/mapview/2.0.10/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.11) ](https://bintray.com/peterlaurence/maven/mapview/2.0.11/link)
 
 # MapView
 
@@ -64,7 +64,7 @@ There's an example of usage inside the `RotatingMapFragment` demo.
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.0.10'
+implementation 'com.peterlaurence:mapview:2.0.11'
 ```
 
 ## Origin and motivation
