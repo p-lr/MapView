@@ -18,9 +18,8 @@ import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
-import kotlin.coroutines.CoroutineContext
 
 /**
  * The [MapView] is a subclass of [GestureLayout], specialized for displaying
@@ -50,10 +49,9 @@ import kotlin.coroutines.CoroutineContext
  * @author peterLaurence on 31/05/2019
  */
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-        GestureLayout(context, attrs, defStyleAttr), CoroutineScope {
+        GestureLayout(context, attrs, defStyleAttr) {
 
     private var visibleTilesResolver: VisibleTilesResolver? = null
-    private var job = Job()
 
     private var tileSize: Int = 256
     private var tileCanvasView: TileCanvasView? = null
@@ -72,8 +70,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private val viewport = Viewport()
     private var referentialData = ReferentialData()
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     /**
      * Configure the [MapView], with a [MapViewConfiguration]. Other settings can be set using dedicated
@@ -106,7 +103,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val visibleTilesResolver = VisibleTilesResolver(config.levelCount, config.fullWidth, config.fullHeight,
                 config.tileSize, magnifyingFactor = config.magnifyingFactor)
         this.visibleTilesResolver = visibleTilesResolver
-        val tileCanvasViewModel = TileCanvasViewModel(this, config.tileSize, visibleTilesResolver,
+        val tileCanvasViewModel = TileCanvasViewModel(scope, config.tileSize, visibleTilesResolver,
                 config.tileStreamProvider, config.tileOptionsProvider, config.workerCount)
         this.tileCanvasViewModel = tileCanvasViewModel
         this.tileSize = config.tileSize
@@ -183,7 +180,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
      */
     fun destroy() {
         refOwnerList.clear()
-        job.cancel()
+        scope.cancel()
     }
 
     private fun initChildViews(visibleTilesResolver: VisibleTilesResolver, tileCanvasViewModel: TileCanvasViewModel) {
@@ -191,7 +188,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         if (tileCanvasView != null) {
             removeView(tileCanvasView)
         }
-        tileCanvasView = TileCanvasView(context, tileCanvasViewModel, tileSize, visibleTilesResolver)
+        tileCanvasView = TileCanvasView(context, tileCanvasViewModel, scope, tileSize, visibleTilesResolver)
         addView(tileCanvasView, 0)
 
         markerLayout = MarkerLayout(context)
@@ -221,7 +218,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun startInternals() {
-        throttledTask = throttle(wait = 18) {
+        throttledTask = scope.throttle(wait = 18) {
             val viewport = updateViewport()
             tileCanvasViewModel?.setViewport(viewport)
         }

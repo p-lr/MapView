@@ -10,6 +10,9 @@ import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.core.Tile
 import com.peterlaurence.mapview.core.VisibleTilesResolver
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 /**
@@ -18,6 +21,7 @@ import kotlin.math.min
  * @author peterLaurence on 02/06/2019
  */
 internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
+                              scope: CoroutineScope,
                               private val tileSize: Int,
                               private val visibleTilesResolver: VisibleTilesResolver) : View(ctx), ReferentialOwner {
     override var referentialData = ReferentialData(false)
@@ -33,9 +37,11 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
     init {
         setWillNotDraw(false)
 
-        viewModel.getTilesToRender().observeForever {
-            tilesToRender = it
-            invalidate()
+        scope.launch {
+            viewModel.getTilesToRenderFlow().collect {
+                tilesToRender = it
+                invalidate()
+            }
         }
     }
 
