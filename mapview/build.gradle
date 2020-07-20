@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-def versionTag = "2.0.12"
+def versionTag = "2.0.13"
 
 androidExtensions {
     experimental = true
