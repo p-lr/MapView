@@ -208,8 +208,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
                 gestureController.setScaleLimits(it, config.maxScale)
             } ?: error("A min scale greater than 0 must be set when using MinimumScaleMode.NONE")
         } else {
-            gestureController.setMinimumScaleMode(config.minimumScaleMode)
             gestureController.setScaleLimits(config.minScale ?: 0f, config.maxScale)
+            gestureController.setMinimumScaleMode(config.minimumScaleMode)
         }
     }
 
@@ -406,12 +406,14 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     }
 
     /**
-     * Set the minimum scale. It must be at least 0, except when using [MinimumScaleMode.NONE] where the
-     * min scale must be greater than 0.
+     * Set the minimum scale.
+     * When set, [minimumScaleMode] is set to [MinimumScaleMode.NONE]. Otherwise, the specified
+     * minimum scale would be ignored.
      */
     fun setMinScale(scale: Float): MapViewConfiguration {
         if (scale < 0f) error("Minimum scale must be at least 0")
         minScale = scale
+        minimumScaleMode = MinimumScaleMode.NONE
         return this
     }
 
@@ -454,6 +456,9 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
 
     /**
      * Set the minimum scale mode. See [MinimumScaleMode].
+     * Note that it doesn't make sense to specify a min scale (using [setMinScale]) when [scaleMode]
+     * is [MinimumScaleMode.FIT] (the default) or [MinimumScaleMode.FILL], as those modes "override"
+     * the min scale.
      */
     fun setMinimumScaleMode(scaleMode: MinimumScaleMode): MapViewConfiguration {
         minimumScaleMode = scaleMode
