@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.13) ](https://bintray.com/peterlaurence/maven/mapview/2.0.13/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.0.14) ](https://bintray.com/peterlaurence/maven/mapview/2.0.14/link)
 
 # MapView
 
@@ -7,6 +7,7 @@ MapView is a Fast, memory efficient Android library to display tiled maps with m
   ![output0](https://user-images.githubusercontent.com/15638794/85230007-8d738280-b3ed-11ea-8493-9965a8982294.gif)
   ![output1](https://user-images.githubusercontent.com/15638794/85230084-fc50db80-b3ed-11ea-8ec0-9f03a14ffba4.gif)
 
+An example of setting up:
 
 ```kotlin
 val mapView = MapView(context)
@@ -64,7 +65,7 @@ There's an example of usage inside the `RotatingMapFragment` demo.
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.0.13'
+implementation 'com.peterlaurence:mapview:2.0.14'
 ```
 
 Also, for each module that uses MapView, update the module's build.gradle file, as shown below:
