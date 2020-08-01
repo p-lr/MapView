@@ -13,6 +13,7 @@ import com.peterlaurence.mapview.api.constrainScroll
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
 import java.io.InputStream
+import kotlin.random.Random
 
 /**
  * An example showing how to constrain [MapView] to only display a specific area, using
@@ -89,7 +90,12 @@ class MapConstrainedFragment : Fragment() {
 
             /* Check the behavior on dynamic area swap */
             button.setOnClickListener {
-                constrainScroll(0.1, 0.1, 0.5, 0.5)
+                val relativeMinX = Random.nextDouble()
+                val relativeMaxX = (relativeMinX + 0.5).coerceAtMost(1.0)
+                val relativeMinY = Random.nextDouble()
+                val relativeMaxY = (relativeMinY + 0.3).coerceAtMost(1.0)
+
+                constrainScroll(relativeMinX, relativeMinY, relativeMaxX, relativeMaxY)
             }
         }
     }
