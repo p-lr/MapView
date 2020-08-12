@@ -4,6 +4,8 @@ import android.view.View
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.markers.MarkerLayoutParams
 import com.peterlaurence.mapview.markers.MarkerTapListener
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Add a marker to the the MapView.  The marker can be any View.
@@ -40,7 +42,7 @@ fun MapView.setMarkerTapListener(markerTapListener: MarkerTapListener) {
 }
 
 /**
- * Moves an existing marker to another position.
+ * Moves an existing marker to the specified position.
  *
  * @param view The marker View to be repositioned.
  * @param x    Relative x position the View instance should be positioned at.
@@ -50,6 +52,30 @@ fun MapView.moveMarker(view: View, x: Double, y: Double) {
     markerLayout?.moveMarker(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y))
+}
+
+/**
+ * Moves an existing maker to the specified position, while constraining its position to the inner
+ * bounds of the [MapView].
+ *
+ * @param view The marker View to be repositioned.
+ * @param x    Relative x position the View instance should be positioned at.
+ * @param y    Relative y position the View instance should be positioned at.
+ */
+fun MapView.moveMarkerConstrained(view: View, x: Double, y: Double) {
+    val markerLayout = markerLayout ?: return
+
+    val l = coordinateTranslater.left
+    val r = coordinateTranslater.right
+    val t = coordinateTranslater.top
+    val b = coordinateTranslater.bottom
+
+    val xConstrained = x.coerceIn(min(l, r), max(l, r))
+    val yConstrained = y.coerceIn(min(b, t), max(b, t))
+
+    markerLayout.moveMarker(view,
+            coordinateTranslater.translateX(xConstrained),
+            coordinateTranslater.translateY(yConstrained))
 }
 
 /**

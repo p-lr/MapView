@@ -2,6 +2,8 @@ package com.peterlaurence.mapview.api
 
 import com.peterlaurence.mapview.MapView
 import com.peterlaurence.mapview.util.AngleDegree
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Adds extra padding around the map, making it possible to scroll past the end of the border
@@ -64,4 +66,22 @@ fun MapView.disableRotation(freezeAngle: AngleDegree? = null) {
         /* Force the angle value, even if the rotation is disabled */
         gestureController.angle = freezeAngle
     }
+}
+
+/**
+ * Given a relative coordinate in X, get the constrained value in the bounds of the [MapView].
+ */
+fun MapView.getConstrainedX(x: Double): Double {
+    val l = coordinateTranslater.left
+    val r = coordinateTranslater.right
+    return x.coerceIn(min(l, r), max(l, r))
+}
+
+/**
+ * Given a relative coordinate in Y, get the constrained value in the bounds of the [MapView].
+ */
+fun MapView.getConstrainedY(y: Double): Double {
+    val t = coordinateTranslater.top
+    val b = coordinateTranslater.bottom
+    return y.coerceIn(min(b, t), max(b, t))
 }
