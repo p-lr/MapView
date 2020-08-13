@@ -120,6 +120,9 @@ internal class GestureController(private val controllable: Controllable) {
         angle += rotationDelta
     }
 
+    /**
+     * Beware, this method should only be invoked **after** [setScreenDimensions].
+     */
     fun getViewportCenter(): ViewportCenter {
         viewportCenter.x = (scrollPosition.x + min(screenWidth / 2, scaledWidth / 2)).toDouble() / scaledWidth
         viewportCenter.y = (scrollPosition.y + min(screenHeight / 2, scaledHeight / 2)).toDouble() / scaledHeight

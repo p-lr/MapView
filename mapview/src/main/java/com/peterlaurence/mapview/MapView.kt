@@ -298,8 +298,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     override fun onSaveInstanceState(): Parcelable? {
         val parentState = super.onSaveInstanceState() ?: Bundle()
-        return SavedState(parentState, scale, centerX = scrollX + halfWidth,
-                centerY = scrollY + halfHeight, referentialData = referentialData)
+        val saveCenterX = (referentialData.centerX * coordinateTranslater.baseWidth * scale).toInt()
+        val saveCenterY = (referentialData.centerY * coordinateTranslater.baseHeight * scale).toInt()
+        return SavedState(parentState, scale, centerX = saveCenterX, centerY = saveCenterY,
+                referentialData = referentialData)
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
@@ -317,13 +319,22 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
+    /**
+     * Beware, all layout modifications must happen after the first layout pass, otherwise things
+     * like screen dimensions aren't initialized in [gestureController].
+     * So modifications are done inside a [post] block, after a deep-copy of the saved state is done.
+     */
     private fun restoreState(savedState: SavedState) {
-        gestureController.scale = savedState.scale
-        gestureController.angle = savedState.referentialData.angle
         referentialData = savedState.referentialData
 
+        /* We make a deep-copy of the state, because values of the referentialData are mutable,
+         * and they change between the moment we get the saved state and the moment we restore the
+         * state. */
+        val stateSnapshot = savedState.copy(referentialData = savedState.referentialData.copy())
         post {
-            scrollToAndCenter(savedState.centerX, savedState.centerY)
+            gestureController.scale = stateSnapshot.scale
+            gestureController.angle = stateSnapshot.referentialData.angle
+            scrollToAndCenter(stateSnapshot.centerX, stateSnapshot.centerY)
         }
     }
 }
