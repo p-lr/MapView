@@ -298,10 +298,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     override fun onSaveInstanceState(): Parcelable? {
         val parentState = super.onSaveInstanceState() ?: Bundle()
-        val saveCenterX = (referentialData.centerX * coordinateTranslater.baseWidth * scale).toInt()
-        val saveCenterY = (referentialData.centerY * coordinateTranslater.baseHeight * scale).toInt()
-        return SavedState(parentState, scale, centerX = saveCenterX, centerY = saveCenterY,
-                referentialData = referentialData)
+        return SavedState(parentState, scale, centerX = scrollX + halfWidth,
+                centerY = scrollY + halfHeight, referentialData = referentialData)
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
