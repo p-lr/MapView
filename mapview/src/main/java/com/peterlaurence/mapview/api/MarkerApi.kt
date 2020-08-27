@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.peterlaurence.mapview.api
 
 import android.view.View
@@ -84,7 +86,6 @@ fun MapView.moveMarkerConstrained(view: View, x: Double, y: Double) {
  * @param x    Relative x position the View instance should be positioned at.
  * @param y    Relative y position the View instance should be positioned at.
  */
-@Suppress("unused")
 fun MapView.getMarkerFromPosition(x: Double, y: Double): View? {
     val xPixel = coordinateTranslater.translateAndScaleX(x, scale)
     val yPixel = coordinateTranslater.translateAndScaleY(y, scale)
@@ -100,7 +101,6 @@ fun MapView.getMarkerFromPosition(x: Double, y: Double): View? {
  * @param view The marker that the MapView should center on.
  * @param shouldAnimate `true` if the movement should use a transition effect.
  */
-@Suppress("unused")
 fun MapView.moveToMarker(view: View, shouldAnimate: Boolean) {
     moveToMarker(view, scale, shouldAnimate)
 }
@@ -115,7 +115,6 @@ fun MapView.moveToMarker(view: View, shouldAnimate: Boolean) {
  * @param destinationScale The scale of the MapView when centered on the marker
  * @param shouldAnimate True if the movement should use a transition effect.
  */
-@Suppress("unused")
 fun MapView.moveToMarker(view: View, destinationScale: Float, shouldAnimate: Boolean) {
     if (markerLayout?.indexOfChild(view) == -1) {
         throw IllegalStateException("The view passed is not an existing marker")
@@ -124,11 +123,15 @@ fun MapView.moveToMarker(view: View, destinationScale: Float, shouldAnimate: Boo
     if (params is MarkerLayoutParams) {
         val scaledX = (params.x * destinationScale).toInt()
         val scaledY = (params.y * destinationScale).toInt()
-        if (shouldAnimate) {
-            slideToAndCenterWithScale(scaledX, scaledY, destinationScale)
-        } else {
-            scale = destinationScale
-            scrollToAndCenter(scaledX, scaledY)
+        /* Internally, dimensions (width and height) may not be set yet.
+         * Schedule the scroll after the next layout pass. */
+        post {
+            if (shouldAnimate) {
+                slideToAndCenterWithScale(scaledX, scaledY, destinationScale)
+            } else {
+                scale = destinationScale
+                scrollToAndCenter(scaledX, scaledY)
+            }
         }
     }
 }

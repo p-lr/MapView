@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.peterlaurence.mapview.api
 
 import com.peterlaurence.mapview.MapView
