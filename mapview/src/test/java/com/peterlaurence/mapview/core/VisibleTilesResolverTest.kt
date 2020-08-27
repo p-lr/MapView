@@ -211,8 +211,8 @@ private data class TileRange(val colLeft: Int, val rowTop: Int, val colRight: In
  * It only makes sense when the angle of rotation is 0 modulo pi/2
  */
 private fun TileMatrix.toTileRange(): TileRange {
-    val rowTop = keys.min()!!
-    val rowBottom = keys.max()!!
+    val rowTop = keys.minOrNull()!!
+    val rowBottom = keys.maxOrNull()!!
     val colRange = getValue(rowTop)
     val colLeft = colRange.first
     val colRight = colRange.last
