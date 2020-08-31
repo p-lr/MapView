@@ -12,7 +12,6 @@ import com.peterlaurence.mapview.MapViewConfiguration
 import com.peterlaurence.mapview.api.constrainScroll
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
-import java.io.InputStream
 import kotlin.random.Random
 
 /**
@@ -57,13 +56,11 @@ class MapConstrainedFragment : Fragment() {
      * But it's not mandatory, it could have been done later on. But beware to configure only once.
      */
     private fun makeMapView(context: Context): MapView? {
-        val tileStreamProvider = object : TileStreamProvider {
-            override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
-                return try {
-                    context.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
-                } catch (e: Exception) {
-                    null
-                }
+        val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
+            try {
+                context.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
+            } catch (e: Exception) {
+                null
             }
         }
         val tileSize = 256

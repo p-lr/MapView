@@ -13,7 +13,6 @@ import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.InputStream
 
 /**
  * An example showing deferred configuration of [MapView]. In this example, a [MapView] is first
@@ -72,13 +71,11 @@ class DeferredFragment : Fragment() {
         /* Safeguard, to prevent a re-configuration of an already configured instance */
         if (isConfigured) return
 
-        val tileStreamProvider = object : TileStreamProvider {
-            override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
-                return try {
-                    context?.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
-                } catch (e: Exception) {
-                    null
-                }
+        val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
+            try {
+                context?.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
+            } catch (e: Exception) {
+                null
             }
         }
         val tileSize = 256

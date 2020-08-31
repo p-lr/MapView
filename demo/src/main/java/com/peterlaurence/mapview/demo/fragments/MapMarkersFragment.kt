@@ -44,13 +44,11 @@ class MapMarkersFragment : Fragment() {
         val context = context ?: return null
         val mapView = MapView(context)
 
-        val tileStreamProvider = object : TileStreamProvider {
-            override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
-                return try {
-                    context.assets.open("tiles/esp/$zoomLvl/$row/$col.jpg")
-                } catch (e: Exception) {
-                    null
-                }
+        val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
+            try {
+                context.assets.open("tiles/esp/$zoomLvl/$row/$col.jpg")
+            } catch (e: Exception) {
+                null
             }
         }
         val tileSize = 256

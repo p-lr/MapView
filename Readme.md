@@ -11,10 +11,8 @@ An example of setting up:
 
 ```kotlin
 val mapView = MapView(context)
-val tileStreamProvider = object : TileStreamProvider {
-   override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
-     return FileInputStream(File("path/{zoomLvl}/{row}/{col}.jpg")) // or it can be a remote HTTP fetch
-   }
+val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
+    FileInputStream(File("path/{zoomLvl}/{row}/{col}.jpg")) // or it can be a remote HTTP fetch
 }
 
 val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight = 12500,
