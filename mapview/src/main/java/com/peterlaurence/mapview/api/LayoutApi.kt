@@ -3,6 +3,7 @@
 package com.peterlaurence.mapview.api
 
 import com.peterlaurence.mapview.MapView
+import com.peterlaurence.mapview.core.Viewport
 import com.peterlaurence.mapview.util.AngleDegree
 import kotlin.math.max
 import kotlin.math.min
@@ -86,4 +87,11 @@ fun MapView.getConstrainedY(y: Double): Double {
     val t = coordinateTranslater.top
     val b = coordinateTranslater.bottom
     return y.coerceIn(min(b, t), max(b, t))
+}
+
+/**
+ * Get a copy of the visible area.
+ */
+fun MapView.getViewport(): Viewport {
+    return viewport.copy()
 }

@@ -67,7 +67,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private val refOwnerList = mutableListOf<ReferentialOwner>()
     private var savedState: SavedState? = null
     private var isConfigured = false
-    private val viewport = Viewport()
+    internal val viewport = Viewport()
     private var referentialData = ReferentialData()
 
     private val scope = CoroutineScope(Dispatchers.Main)
