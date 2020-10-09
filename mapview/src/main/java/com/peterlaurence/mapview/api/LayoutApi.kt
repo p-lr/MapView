@@ -90,8 +90,19 @@ fun MapView.getConstrainedY(y: Double): Double {
 }
 
 /**
- * Get a copy of the visible area.
+ * Get a copy of the area taken into account to fetch tiles.
+ * This area is larger than the visible viewport when positive padding is set in the [MapView]
+ * configuration.
  */
 fun MapView.getViewport(): Viewport {
     return viewport.copy()
+}
+
+/**
+ * Get a copy of the visible area.
+ */
+fun MapView.getVisibleViewport(): Viewport {
+    val padding = configuration.padding
+    return viewport.copy(left = viewport.left + padding, top = viewport.top + padding,
+            right = viewport.right - padding, bottom = viewport.bottom - padding)
 }

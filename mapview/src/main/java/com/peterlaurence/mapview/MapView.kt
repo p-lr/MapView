@@ -1,5 +1,6 @@
 package com.peterlaurence.mapview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
@@ -61,7 +62,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     lateinit var coordinateTranslater: CoordinateTranslater
         private set
 
-    private lateinit var configuration: MapViewConfiguration
+    internal lateinit var configuration: MapViewConfiguration
 
     private var throttledTask: SendChannel<Unit>? = null
     private val refOwnerList = mutableListOf<ReferentialOwner>()
@@ -169,8 +170,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * Public API to programmatically trigger a redraw of the tiles.
      */
+    @Suppress("unused")
     fun redrawTiles() {
-        renderVisibleTilesThrottled();
+        renderVisibleTilesThrottled()
     }
 
     /**
@@ -284,6 +286,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         markerLayout?.removeAllCallout()
         return super.onTouchEvent(event)
@@ -367,6 +370,7 @@ data class ReferentialData(var rotationEnabled: Boolean = true,
  * @param tileSize the size of tiles (must be squares)
  * @param tileStreamProvider the tiles provider
  */
+@Suppress("unused")
 data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val fullHeight: Int,
                                 val tileSize: Int, val tileStreamProvider: TileStreamProvider) {
     /**
