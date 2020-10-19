@@ -108,8 +108,9 @@ MapView is optimized to display maps that have several levels, like this:
 
 Each next level is twice bigger than the former, and provides more details. Overall, this looks like
  a pyramid. Another common name is "deep-zoom" map.
-This library comes with a demo app, which shows basic usage of the MapView and bundles a map in the 
-assets. Looking at structure of this map, you have a real example of a deep-zoom map.
+This library comes with a demo app made of a set of various use-cases such as using markers, 
+paths, rotating the map, etc. All examples use the same map stored in the assets. If you wonder what
+a deep-zoom maps looks like, you have a great example there.
 
 MapView can also be used with single level maps.
 
