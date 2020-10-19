@@ -17,6 +17,8 @@ import java.util.concurrent.Executors
 /**
  * The view-model which contains all the logic related to [Tile] management.
  * It defers [Tile] loading to the [TileCollector].
+ * All internal data manipulation are thread-confined to a single background thread. This is
+ * guarantied by the [scope] and its custom dispatcher.
  *
  * @author peterLaurence on 04/06/2019
  */
@@ -26,9 +28,11 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
                                    private val tileOptionsProvider: TileOptionsProvider,
                                    workerCount: Int) {
 
-    private val scope = CoroutineScope(parentScope.coroutineContext + Executors.newSingleThreadExecutor().asCoroutineDispatcher())
+    private val scope = CoroutineScope(
+            parentScope.coroutineContext +
+                    Executors.newSingleThreadExecutor().asCoroutineDispatcher())
     private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
-    private val renderTask = scope.throttle(wait = 15) {
+    private val renderTask = scope.throttle(wait = 34) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
          * above others */
         val tilesToRenderCopy = tilesToRender.sortedBy {
