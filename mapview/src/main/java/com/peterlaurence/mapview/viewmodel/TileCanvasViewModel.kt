@@ -7,10 +7,12 @@ import androidx.lifecycle.MutableLiveData
 import com.peterlaurence.mapview.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.concurrent.Executors
 
 /**
  * The view-model which contains all the logic related to [Tile] management.
@@ -18,19 +20,21 @@ import kotlinx.coroutines.launch
  *
  * @author peterLaurence on 04/06/2019
  */
-internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: Int,
+internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
                                    private val visibleTilesResolver: VisibleTilesResolver,
                                    tileStreamProvider: TileStreamProvider,
                                    private val tileOptionsProvider: TileOptionsProvider,
-                                   workerCount: Int) : CoroutineScope by scope {
+                                   workerCount: Int) {
+
+    private val scope = CoroutineScope(parentScope.coroutineContext + Executors.newSingleThreadExecutor().asCoroutineDispatcher())
     private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
-    private val renderTask = throttle(wait = 34) {
+    private val renderTask = scope.throttle(wait = 15) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
          * above others */
-        tilesToRender.sortBy {
+        val tilesToRenderCopy = tilesToRender.sortedBy {
             it.zoom == lastVisible.level && it.subSample == lastVisible.subSample
         }
-        tilesToRenderLiveData.value = tilesToRender
+        tilesToRenderLiveData.postValue(tilesToRenderCopy)
     }
 
     private val bitmapPool = Pool<Bitmap>()
@@ -59,7 +63,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
     /**
      * So long as this debounced channel is offered a message, the lambda isn't called.
      */
-    private val idleDebounced = debounce<Unit>(300) {
+    private val idleDebounced = scope.debounce<Unit>(300) {
         idle = true
         evictTiles(lastVisible)
     }
@@ -68,13 +72,17 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
 
     init {
         /* Collect visible tiles and send specs to the TileCollector */
-        launch {
+        scope.launch {
             collectNewTiles()
         }
 
-        /* Launch the TileCollector along with a coroutine to consume the produced tiles */
+        /* Launch the TileCollector */
         with(TileCollector(workerCount)) {
-            collectTiles(visibleTileLocationsChannel, tilesOutput, tileStreamProvider, bitmapFlow)
+            scope.collectTiles(visibleTileLocationsChannel, tilesOutput, tileStreamProvider, bitmapFlow)
+        }
+
+        /* Launch a coroutine to consume the produced tiles */
+        scope.launch {
             consumeTiles(tilesOutput)
         }
     }
@@ -87,7 +95,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
         return tileOptionsProvider.alphaTick
     }
 
-    fun setViewport(viewport: Viewport) {
+    fun setViewport(viewport: Viewport) = scope.launch {
         /* It's important to set the idle flag to false before launching computations, so that
          * tile eviction don't happen too quickly (can cause blinks) */
         idle = false
@@ -149,7 +157,7 @@ internal class TileCanvasViewModel(private val scope: CoroutineScope, tileSize: 
      * add the corresponding Bitmap to the [bitmapPool], and assign a [Paint] object to this tile.
      * The TileCanvasView manages the alpha, but the view-model takes care of recycling those objects.
      */
-    private fun CoroutineScope.consumeTiles(tileChannel: ReceiveChannel<Tile>) = launch {
+    private suspend fun consumeTiles(tileChannel: ReceiveChannel<Tile>) {
         for (tile in tileChannel) {
             if (lastVisible.contains(tile) && !tilesToRender.contains(tile)) {
                 tile.setPaint()
