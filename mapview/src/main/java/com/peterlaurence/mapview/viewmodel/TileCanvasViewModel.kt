@@ -2,8 +2,6 @@ package com.peterlaurence.mapview.viewmodel
 
 import android.graphics.Bitmap
 import android.graphics.Paint
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.peterlaurence.mapview.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,14 +29,14 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
     private val scope = CoroutineScope(
             parentScope.coroutineContext +
                     Executors.newSingleThreadExecutor().asCoroutineDispatcher())
-    private val tilesToRenderLiveData = MutableLiveData<List<Tile>>()
+    private val tilesToRenderFlow = MutableStateFlow<List<Tile>>(listOf())
     private val renderTask = scope.throttle(wait = 34) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
          * above others */
         val tilesToRenderCopy = tilesToRender.sortedBy {
             it.zoom == lastVisible.level && it.subSample == lastVisible.subSample
         }
-        tilesToRenderLiveData.postValue(tilesToRenderCopy)
+        tilesToRenderFlow.value = tilesToRenderCopy
     }
 
     private val bitmapPool = Pool<Bitmap>()
@@ -91,8 +89,8 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         }
     }
 
-    fun getTilesToRender(): LiveData<List<Tile>> {
-        return tilesToRenderLiveData
+    fun getTilesToRender(): StateFlow<List<Tile>> {
+        return tilesToRenderFlow
     }
 
     fun getAlphaTick(): Float {

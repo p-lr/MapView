@@ -190,7 +190,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         if (tileCanvasView != null) {
             removeView(tileCanvasView)
         }
-        tileCanvasView = TileCanvasView(context, tileCanvasViewModel, tileSize, visibleTilesResolver)
+        tileCanvasView = TileCanvasView(context, tileCanvasViewModel, tileSize, visibleTilesResolver, scope)
         addView(tileCanvasView, 0)
 
         markerLayout = MarkerLayout(context)

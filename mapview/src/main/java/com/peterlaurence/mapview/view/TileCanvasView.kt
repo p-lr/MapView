@@ -10,6 +10,9 @@ import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.core.Tile
 import com.peterlaurence.mapview.core.VisibleTilesResolver
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 /**
@@ -19,7 +22,9 @@ import kotlin.math.min
  */
 internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                               private val tileSize: Int,
-                              private val visibleTilesResolver: VisibleTilesResolver) : View(ctx), ReferentialOwner {
+                              private val visibleTilesResolver: VisibleTilesResolver,
+                              scope: CoroutineScope
+) : View(ctx), ReferentialOwner {
     override var referentialData = ReferentialData(false)
         set(value) {
             field = value
@@ -33,12 +38,11 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
     init {
         setWillNotDraw(false)
 
-        // TODO: Once sharedFlow are released, use it instead of a liveData like so:
-        // scope.launch {
-        //    viewModel.getTilesToRender().collect { ...
-        viewModel.getTilesToRender().observeForever {
-            tilesToRender = it
-            invalidate()
+        scope.launch {
+            viewModel.getTilesToRender().collect {
+                tilesToRender = it
+                invalidate()
+            }
         }
     }
 
