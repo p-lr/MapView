@@ -2,18 +2,16 @@ package com.peterlaurence.mapview.core
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Process
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadFactory
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
@@ -86,7 +84,7 @@ class TileCollector(private val workerCount: Int) {
                 bitmapLoadingOptions.inSampleSize = spec.subSample
             } else {
                 bitmapLoadingOptions.inScaled = false
-                bitmapLoadingOptions.inBitmap = bitmapFlow.single()
+                bitmapLoadingOptions.inBitmap = bitmapFlow.singleOrNull()
                 bitmapLoadingOptions.inSampleSize = 0
             }
 
@@ -132,14 +130,5 @@ class TileCollector(private val workerCount: Int) {
     }
 
     private val dispatcher = ThreadPoolExecutor(0, workerCount.coerceAtLeast(1),
-            60L, TimeUnit.SECONDS,
-            SynchronousQueue<Runnable>(), ThreadFactory { r ->
-        Thread(r).apply {
-            isDaemon = true
-            /* Beware, using THREAD_PRIORITY_LOWEST leads to UI hang on some emulators, while
-             * THREAD_PRIORITY_BACKGROUND has similar positive impact on overall responsiveness on
-             * low-end devices while not having this side effect. */
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
-        }
-    }).asCoroutineDispatcher()
+            60L, TimeUnit.SECONDS, LinkedBlockingQueue()).asCoroutineDispatcher()
 }

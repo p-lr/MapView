@@ -13,7 +13,7 @@ interface TileOptionsProvider {
 
     /**
      * Controls the speed of fade in effect when rendering tiles. Higher values make alpha
-     * value go to 255 faster. Should be in between (0.0f, 1.0f].
+     * value go to 255 faster. Should be in the range [0.0f, 1.0f].
      */
     @JvmDefault
     val alphaTick : Float

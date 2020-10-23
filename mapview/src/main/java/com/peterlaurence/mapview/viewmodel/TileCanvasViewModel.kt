@@ -32,7 +32,7 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
     private val tilesToRenderFlow = MutableStateFlow<List<Tile>>(listOf())
     private val renderTask = scope.throttle(wait = 34) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
-         * above others */
+         * above others, and make a defensive copy. */
         val tilesToRenderCopy = tilesToRender.sortedBy {
             it.zoom == lastVisible.level && it.subSample == lastVisible.subSample
         }
