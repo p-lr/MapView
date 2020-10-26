@@ -3,6 +3,7 @@ package com.peterlaurence.mapview.core
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
@@ -107,7 +109,7 @@ class TileCollector(private val workerCount: Int) {
 
     private fun CoroutineScope.tileCollectorKernel(tileSpecs: ReceiveChannel<TileSpec>,
                                                    tilesToDownload: SendChannel<TileSpec>,
-                                                   tilesDownloadedFromWorker: ReceiveChannel<TileSpec>) = launch(dispatcher) {
+                                                   tilesDownloadedFromWorker: ReceiveChannel<TileSpec>) = launch(Dispatchers.Default) {
 
         val tilesBeingProcessed = mutableListOf<TileSpec>()
 
@@ -129,6 +131,13 @@ class TileCollector(private val workerCount: Int) {
         }
     }
 
-    private val dispatcher = ThreadPoolExecutor(0, workerCount.coerceAtLeast(1),
+    /**
+     * When using a [LinkedBlockingQueue], the core pool size mustn't be 0, or the active thread
+     * count won't be greater than 1. Previous versions used a [SynchronousQueue], which could have
+     * a core pool size of 0 and a growing count of active threads. However, a [Runnable] could be
+     * rejected when no thread were available. Starting from kotlinx.coroutines 1.4.0, this cause
+     * the associated coroutine to be cancelled. By using a [LinkedBlockingQueue], we avoid rejections.
+     */
+    private val dispatcher = ThreadPoolExecutor(workerCount, workerCount,
             60L, TimeUnit.SECONDS, LinkedBlockingQueue()).asCoroutineDispatcher()
 }

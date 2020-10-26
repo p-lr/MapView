@@ -79,7 +79,7 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         }
 
         /* Launch the TileCollector */
-        with(TileCollector(workerCount)) {
+        with(TileCollector(workerCount.coerceAtLeast(1))) {
             scope.collectTiles(visibleTileLocationsChannel, tilesOutput, tileStreamProvider, bitmapFlow)
         }
 
