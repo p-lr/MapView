@@ -91,8 +91,8 @@ As a long time contributor to [TileView](https://github.com/moagrius/TileView), 
 performance we would get using idiomatic Kotlin (coroutines, flows). The result was beyond my 
 expectations. The overall design can be seen 
 [here](https://github.com/peterLaurence/MapView/wiki/TileCollector-design).
-The focus has been on efficiency (no thread contention thanks to asynchronous programming, and the 
-load on the main thread is low enough to maximize the fps).
+The focus has been on efficiency (No thread contention thanks to non-blocking algorithm. Therefore,
+the load on the main thread is low enough to get high fps).
 
 Thanks for Mike (@moagrius), as this library wouldn't exist without his first contributions.
 
