@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-def versionTag = "2.1.0"
+def versionTag = "2.1.1"
 
 androidExtensions {
     experimental = true
@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    def coroutine_version = '1.4.0'
+    def coroutine_version = '1.4.1'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
