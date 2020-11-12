@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Paint
 import com.peterlaurence.mapview.core.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -26,9 +25,10 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
                                    private val tileOptionsProvider: TileOptionsProvider,
                                    workerCount: Int) {
 
+    /* This view-model uses a background thread for its computations */
+    private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     private val scope = CoroutineScope(
-            parentScope.coroutineContext +
-                    Executors.newSingleThreadExecutor().asCoroutineDispatcher())
+            parentScope.coroutineContext + singleThreadDispatcher)
     private val tilesToRenderFlow = MutableStateFlow<List<Tile>>(listOf())
     private val renderTask = scope.throttle(wait = 34) {
         /* Right before sending tiles to the view, reorder them so that tiles from current level are
@@ -46,14 +46,15 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
     private val visibleTilesFlow = MutableStateFlow<VisibleTiles?>(null)
 
     /**
-     * A [Flow] of [Bitmap] that first collects from the [bitmapPool] on the Main thread. If the
-     * pool was empty, a new [Bitmap] is allocated from the calling thread. It's a simple way to
-     * share data between coroutines in a thread safe way, using cold flows.
+     * A [Flow] of [Bitmap] that first collects from the [bitmapPool] on this view-model's
+     * background thread. If the pool was empty, a new [Bitmap] is allocated from the calling thread.
+     * [bitmapPool]'s `put` is also invoked fom this background thread. Therefore, [bitmapPool]
+     * usage is thread confined.
      */
     private val bitmapFlow: Flow<Bitmap> = flow {
         val bitmap = bitmapPool.get()
         emit(bitmap)
-    }.flowOn(Dispatchers.Main).map {
+    }.flowOn(singleThreadDispatcher).map {
         it ?: Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.RGB_565)
     }
 

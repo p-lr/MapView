@@ -17,7 +17,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStream
 import com.peterlaurence.mapview.core.TileStreamProvider as MapViewTileStreamProvider
 
 /**
@@ -59,11 +58,7 @@ class TileCollectorTest {
 
         val pool = Pool<Bitmap>()
 
-        val mapViewTileStreamProvider = object : MapViewTileStreamProvider {
-            override fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream? {
-                return FileInputStream(imageFile)
-            }
-        }
+        val mapViewTileStreamProvider = MapViewTileStreamProvider { _, _, _ -> FileInputStream(imageFile) }
 
         val bitmapFlow: Flow<Bitmap> = flow {
             val bitmap = pool.get()
