@@ -140,16 +140,17 @@ This convention allows for a simple configuration.
 
 ## Technical documentation
 
-This section explains in details the configuration. But once configured, you can do a lot of things 
-with your `MapView` instance. There is just one thing to remember: `MapView` extends 
-[GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt) and this 
-last class has a ton of features (the source code is well documented). You can:
+The MapView needs to be configured - more on that below. Once configured, you can do a lot of things
+with your `MapView` instance. `MapView` is a subclass of
+[GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt), which
+has many features. You can:
 
 * add listeners to events like pan, fling, zoom..
 * programmatically scroll and center to a position
 * respond to various touch events by subclassing `MapView` and overload related methods declared in `GestureLayout`
 
-This list isn't complete. A dedicated section will be added.
+This list isn't complete. You can explore the capabilities in the source of
+[GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt).
 
 ### <a name="TOC-MapViewConfiguration"></a> MapViewConfiguration
 
