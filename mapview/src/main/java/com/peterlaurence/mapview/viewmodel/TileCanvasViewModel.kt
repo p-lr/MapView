@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
+import kotlin.math.pow
 
 /**
  * The view-model which contains all the logic related to [Tile] management.
@@ -98,14 +99,19 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         return tileOptionsProvider.alphaTick
     }
 
-    fun setViewport(viewport: Viewport) = scope.launch {
-        /* It's important to set the idle flag to false before launching computations, so that
-         * tile eviction don't happen too quickly (can cause blinks) */
-        idle = false
-
-        lastViewport = viewport
+    fun setViewport(viewport: Viewport) {
+        /* Thread-confine the tileResolver to the main thread. */
         val visibleTiles = visibleTilesResolver.getVisibleTiles(viewport)
-        setVisibleTiles(visibleTiles)
+
+        scope.launch {
+            /* It's important to set the idle flag to false before launching computations, so that
+             * tile eviction don't happen too quickly (can cause blinks) */
+            idle = false
+
+            lastViewport = viewport
+
+            setVisibleTiles(visibleTiles)
+        }
     }
 
     private fun setVisibleTiles(visibleTiles: VisibleTiles) {
@@ -185,13 +191,40 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
     }
 
     private fun VisibleTiles.contains(tile: Tile): Boolean {
+        if (level != tile.zoom) return false
         val colRange = tileMatrix[tile.row] ?: return false
-        return level == tile.zoom && subSample == tile.subSample && tile.col in colRange
+        return subSample == tile.subSample && tile.col in colRange
     }
 
-    private fun VisibleTiles.overlaps(tile: Tile): Boolean {
-        val colRange = tileMatrix[tile.row] ?: return false
-        return level == tile.zoom && tile.col in colRange
+    private fun VisibleTiles.intersects(tile: Tile): Boolean {
+        return if (level == tile.zoom) {
+            val colRange = tileMatrix[tile.row] ?: return false
+            tile.col in colRange
+        } else {
+            val curMinRow = tileMatrix.keys.minOrNull() ?: return false
+            val curMaxRow = tileMatrix.keys.maxOrNull() ?: return false
+            val curMinCol = tileMatrix.entries.firstOrNull()?.value?.first ?: return false
+            val curMaxCol = tileMatrix.entries.firstOrNull()?.value?.last ?: return false
+
+            if (tile.zoom > level) { // User is zooming out
+                val dLevel = tile.zoom - level
+                val minRowAtLvl = curMinRow.minAtGreaterLevel(dLevel)
+                val maxRowAtLvl = curMaxRow.maxAtGreaterLevel(dLevel)
+
+                val minColAtLvl = curMinCol.minAtGreaterLevel(dLevel)
+                val maxColAtLvl = curMaxCol.maxAtGreaterLevel(dLevel)
+                return tile.row in minRowAtLvl..maxRowAtLvl && tile.col in minColAtLvl..maxColAtLvl
+            } else { // User is zooming in
+                val dLevel = level - tile.zoom
+                val minRowAtLvl = tile.row.minAtGreaterLevel(dLevel)
+                val maxRowAtLvl = tile.row.maxAtGreaterLevel(dLevel)
+
+                val minColAtLvl = tile.col.minAtGreaterLevel(dLevel)
+                val maxColAtLvl = tile.col.maxAtGreaterLevel(dLevel)
+                return curMinCol <= maxColAtLvl && minColAtLvl <= curMaxCol && curMinRow <= maxRowAtLvl &&
+                        minRowAtLvl <= curMaxRow
+            }
+        }
     }
 
     /**
@@ -225,47 +258,22 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
     private fun partialEviction(visibleTiles: VisibleTiles) {
         val currentLevel = visibleTiles.level
 
-        /* First, deal with tiles of other levels that aren't sub-sampled */
+        /* First, deal with tiles of other levels */
         val otherTilesNotSubSampled = tilesToRender.filter {
-            it.zoom != currentLevel && it.subSample == 0
+            it.zoom != currentLevel
         }
         val evictList = mutableListOf<Tile>()
         if (otherTilesNotSubSampled.isNotEmpty()) {
-            val byLevel = otherTilesNotSubSampled.groupBy { it.zoom }
-            byLevel.forEach { (level, tiles) ->
-                val visibleAtLevel = visibleTilesResolver.getVisibleTiles(lastViewport, level)
-                tiles.filter {
-                    !visibleAtLevel.overlaps(it)
-                }.let {
-                    evictList.addAll(it)
+            otherTilesNotSubSampled.forEach {
+                if (!visibleTiles.intersects(it)) {
+                    evictList.add(it)
                 }
             }
         }
 
-        /* Then, evict sub-sampled tiles that aren't visible anymore */
-        val subSampledTiles = tilesToRender.filter {
-            it.subSample > 0
-        }
-        if (subSampledTiles.isNotEmpty()) {
-            val visibleAtLowestLevel = visibleTilesResolver.getVisibleTiles(lastViewport, 0)
-            subSampledTiles.filter {
-                !visibleAtLowestLevel.overlaps(it)
-            }.let {
-                evictList.addAll(it)
-            }
-        }
-
-        val iterator = tilesToRender.iterator()
-        while (iterator.hasNext()) {
-            val tile = iterator.next()
-            evictList.any {
-                it.samePositionAs(tile)
-            }.let {
-                if (it) {
-                    iterator.remove()
-                    tile.recycle()
-                }
-            }
+        for (tile in evictList) {
+            tilesToRender.remove(tile)
+            tile.recycle()
         }
     }
 
@@ -285,7 +293,7 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         }
 
         val otherTilesNotSubSampled = tilesToRender.filter {
-            it.zoom != currentLevel
+            it.zoom != currentLevel && it.subSample == 0
         }
 
         val subSampledTiles = tilesToRender.filter {
@@ -331,5 +339,13 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
             it.colorFilter = null
             paintPool.put(it)
         }
+    }
+
+    private fun Int.minAtGreaterLevel(n: Int): Int {
+        return this * 2.0.pow(n).toInt()
+    }
+
+    private fun Int.maxAtGreaterLevel(n: Int): Int {
+        return (this + 1) * 2.0.pow(n).toInt() - 1
     }
 }

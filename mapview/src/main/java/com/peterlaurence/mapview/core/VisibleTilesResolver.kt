@@ -5,7 +5,9 @@ import com.peterlaurence.mapview.util.rotateY
 import kotlin.math.*
 
 /**
- * Resolves the visible tiles
+ * Resolves the visible tiles.
+ * This class isn't thread-safe, and public methods should be invoked from the same thread to ensure
+ * consistency.
  *
  * @param levelCount Number of levels
  * @param fullWidth Width of the map at scale 1.0f
@@ -18,8 +20,8 @@ import kotlin.math.*
  * @author peterLaurence on 25/05/2019
  */
 internal class VisibleTilesResolver(private val levelCount: Int, private val fullWidth: Int,
-                           private val fullHeight: Int, private val tileSize: Int = 256,
-                           private val magnifyingFactor: Int = 0) {
+                                    private val fullHeight: Int, private val tileSize: Int = 256,
+                                    private val magnifyingFactor: Int = 0) {
 
     private var scale: Float = 1.0f
     var currentLevel = levelCount - 1
@@ -30,14 +32,14 @@ internal class VisibleTilesResolver(private val levelCount: Int, private val ful
     /**
      * Last level is at scale 1.0f, others are at scale 1.0 / power_of_2
      */
-    private val scaleForLevel = (0 until levelCount).associateWith {
-        (1.0 / 2.0.pow((levelCount - it - 1).toDouble())).toFloat()
+    private val scaleForLevel: Map<Int, Double> = (0 until levelCount).associateWith {
+        (1.0 / 2.0.pow((levelCount - it - 1)))
     }
 
     fun setScale(scale: Float) {
         this.scale = scale
 
-        this.subSample = if (scale < scaleForLevel[0] ?: Float.MIN_VALUE) {
+        this.subSample = if (scale < scaleForLevel[0]?.toFloat() ?: Float.MIN_VALUE) {
             ceil(ln((scaleForLevel[0] ?: error("")).toDouble() / scale) / ln(2.0)).toInt()
         } else {
             0
@@ -52,7 +54,7 @@ internal class VisibleTilesResolver(private val levelCount: Int, private val ful
      * @return the scale or null if no such level was configured.
      */
     fun getScaleForLevel(level: Int): Float? {
-        return scaleForLevel[level]
+        return scaleForLevel[level]?.toFloat()
     }
 
     /**
@@ -81,8 +83,8 @@ internal class VisibleTilesResolver(private val levelCount: Int, private val ful
         val relativeScale = scale / scaleAtLevel
 
         /* At the current level, row and col index have maximum values */
-        val maxCol = max(0.0, ceil(fullWidth * scaleAtLevel.toDouble() / tileSize) - 1).toInt()
-        val maxRow = max(0.0, ceil(fullHeight * scaleAtLevel.toDouble() / tileSize) - 1).toInt()
+        val maxCol = max(0.0, ceil(fullWidth * scaleAtLevel / tileSize) - 1).toInt()
+        val maxRow = max(0.0, ceil(fullHeight * scaleAtLevel / tileSize) - 1).toInt()
 
         fun Int.lowerThan(limit: Int): Int {
             return if (this <= limit) this else limit
