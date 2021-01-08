@@ -24,7 +24,7 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
                                    private val visibleTilesResolver: VisibleTilesResolver,
                                    tileStreamProvider: TileStreamProvider,
                                    private val tileOptionsProvider: TileOptionsProvider,
-                                   workerCount: Int) {
+                                   workerCount: Int, highFidelityColors: Boolean) {
 
     /* This view-model uses a background thread for its computations */
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -56,7 +56,13 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         val bitmap = bitmapPool.get()
         emit(bitmap)
     }.flowOn(singleThreadDispatcher).map {
-        it ?: Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.RGB_565)
+        it ?: Bitmap.createBitmap(tileSize, tileSize, bitmapConfig)
+    }
+
+    private val bitmapConfig = if (highFidelityColors) {
+        Bitmap.Config.ARGB_8888
+    } else {
+        Bitmap.Config.RGB_565
     }
 
     private lateinit var lastViewport: Viewport
@@ -81,7 +87,7 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         }
 
         /* Launch the TileCollector */
-        with(TileCollector(workerCount.coerceAtLeast(1))) {
+        with(TileCollector(workerCount.coerceAtLeast(1), bitmapConfig)) {
             scope.collectTiles(visibleTileLocationsChannel, tilesOutput, tileStreamProvider, bitmapFlow)
         }
 

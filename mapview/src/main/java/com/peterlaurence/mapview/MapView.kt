@@ -105,7 +105,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
                 config.tileSize, magnifyingFactor = config.magnifyingFactor)
         this.visibleTilesResolver = visibleTilesResolver
         val tileCanvasViewModel = TileCanvasViewModel(scope, config.tileSize, visibleTilesResolver,
-                config.tileStreamProvider, config.tileOptionsProvider, config.workerCount)
+                config.tileStreamProvider, config.tileOptionsProvider, config.workerCount,
+                config.highFidelityColors)
         this.tileCanvasViewModel = tileCanvasViewModel
         this.tileSize = config.tileSize
         gestureController.rotationEnabled = config.rotationEnabled
@@ -408,6 +409,9 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
     var tileOptionsProvider: TileOptionsProvider = object : TileOptionsProvider {}
         private set
 
+    var highFidelityColors: Boolean = false
+        private set
+
     /**
      * Define the size of the thread pool that will handle tile decoding. In some situations, a pool
      * of several times the numbers of cores is suitable. Whereas sometimes we want to limit to just
@@ -494,6 +498,11 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
      */
     fun setTileOptionsProvider(tileOptionsProvider: TileOptionsProvider): MapViewConfiguration {
         this.tileOptionsProvider = tileOptionsProvider
+        return this
+    }
+
+    fun highFidelityColors(): MapViewConfiguration {
+        highFidelityColors = true
         return this
     }
 }

@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author peterLaurence on 22/06/19
  */
-class TileCollector(private val workerCount: Int) {
+class TileCollector(private val workerCount: Int, private val bitmapConfig: Bitmap.Config) {
 
     /**
      * Sets up the tile collector machinery. The architecture is inspired from
@@ -75,7 +75,7 @@ class TileCollector(private val workerCount: Int) {
                                       bitmapFlow: Flow<Bitmap>) = launch(dispatcher) {
 
         val bitmapLoadingOptions = BitmapFactory.Options()
-        bitmapLoadingOptions.inPreferredConfig = Bitmap.Config.RGB_565
+        bitmapLoadingOptions.inPreferredConfig = bitmapConfig
 
         for (spec in tilesToDownload) {
             val i = tileStreamProvider.getTileStream(spec.row, spec.col, spec.zoom)

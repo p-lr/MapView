@@ -91,7 +91,7 @@ class TileCollectorTest {
         }
 
         val job = launch {
-            with(TileCollector(1)) {
+            with(TileCollector(1, Bitmap.Config.RGB_565)) {
                 collectTiles(visibleTileLocationsChannel, tilesOutput, mapViewTileStreamProvider, bitmapFlow)
                 consumeTiles(tilesOutput)
             }
