@@ -5,8 +5,8 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import com.peterlaurence.mapview.MapView
-import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.ReferentialData
+import com.peterlaurence.mapview.ReferentialOwner
 import com.peterlaurence.mapview.util.rotateCenteredX
 import com.peterlaurence.mapview.util.rotateCenteredY
 import com.peterlaurence.mapview.util.toRad
@@ -28,6 +28,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
         }
     private var markerTapListener: MarkerTapListener? = null
     private val calloutViewList = mutableListOf<View>()
+    private val markersByTag = mutableMapOf<String, View>()
 
     init {
         clipChildren = false
@@ -99,7 +100,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
 
     fun addMarker(view: View, left: Int, top: Int, relativeAnchorLeft: Float = -0.5f,
                   relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
-                  absoluteAnchorTop: Float = 0f) {
+                  absoluteAnchorTop: Float = 0f, tag: String? = null) {
         val layoutParams = MarkerLayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT,
@@ -107,6 +108,11 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
                 relativeAnchorLeft, relativeAnchorTop,
                 absoluteAnchorLeft, absoluteAnchorTop)
         addView(view, layoutParams)
+        if (tag != null) markersByTag[tag] = view
+    }
+
+    fun getMarkerByTag(tag: String): View? {
+        return markersByTag[tag]
     }
 
     fun addCallout(view: View, left: Int, top: Int, relativeAnchorLeft: Float = -0.5f,
@@ -120,6 +126,16 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
     fun removeMarker(view: View) {
         if (view.parent === this) {
             removeView(view)
+        }
+
+        /* If the marker was added by tag, remove it now */
+        val it = markersByTag.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            if (entry.value == view) {
+                it.remove()
+                break
+            }
         }
     }
 
@@ -171,8 +187,8 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
 }
 
 internal class MarkerLayoutParams(width: Int, height: Int, var x: Int, var y: Int,
-                                 var relativeAnchorX: Float, var relativeAnchorY: Float,
-                                 var absoluteAnchorX: Float, var absoluteAnchorY: Float) : ViewGroup.LayoutParams(width, height) {
+                                  var relativeAnchorX: Float, var relativeAnchorY: Float,
+                                  var absoluteAnchorX: Float, var absoluteAnchorY: Float) : ViewGroup.LayoutParams(width, height) {
 
     var top: Int = 0
     var left: Int = 0

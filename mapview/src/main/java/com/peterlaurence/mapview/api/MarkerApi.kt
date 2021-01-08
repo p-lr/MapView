@@ -20,17 +20,26 @@ import kotlin.math.min
  * @param relativeAnchorTop  The y-axis position of a marker will be offset by a number equal to the height of the marker multiplied by this value.
  * @param absoluteAnchorLeft The x-axis position of a marker will be offset by this value.
  * @param absoluteAnchorTop  The y-axis position of a marker will be offset by this value.
+ * @param tag  An optional tag, to later retrieve the marker using [getMarkerByTag].
  */
 fun MapView.addMarker(view: View, x: Double, y: Double, relativeAnchorLeft: Float = -0.5f,
                       relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
-                      absoluteAnchorTop: Float = 0f) {
+                      absoluteAnchorTop: Float = 0f, tag: String? = null) {
 
     markerLayout?.addMarker(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y),
             relativeAnchorLeft, relativeAnchorTop,
-            absoluteAnchorLeft, absoluteAnchorTop
+            absoluteAnchorLeft, absoluteAnchorTop,
+            tag
     )
+}
+
+/**
+ * If a marker was added with a tag, it can be retrieved with this method.
+ */
+fun MapView.getMarkerByTag(tag: String): View? {
+    return markerLayout?.getMarkerByTag(tag)
 }
 
 /**
