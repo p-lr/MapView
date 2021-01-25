@@ -41,19 +41,18 @@ class RotatingMapFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_layout, container, false).also {
+        return inflater.inflate(R.layout.fragment, container, false).also {
             parentView = it as ViewGroup
-            makeMapView()?.addToFragment()
+            configureMapView(it)
         }
     }
 
-    private fun makeMapView(): MapView? {
-        val context = context ?: return null
-        val mapView = MapView(context)
+    private fun configureMapView(view: View) {
+        val mapView = view.findViewById<MapView>(R.id.mapview) ?: return
 
         val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
             try {
-                context.assets.open("tiles/esp/$zoomLvl/$row/$col.jpg")
+                mapView.context.assets.open("tiles/esp/$zoomLvl/$row/$col.jpg")
             } catch (e: Exception) {
                 null
             }
@@ -106,7 +105,7 @@ class RotatingMapFragment : Fragment() {
                         val randomAngle = (0..360).random().toFloat()
                         refOwner.angleDegree = randomAngle
                     } else {
-                        val callout = MarkerCallout(context)
+                        val callout = MarkerCallout(mapView.context)
                         callout.setTitle(view.name)
                         callout.setSubTitle("position: ${view.x} , ${view.y}")
                         mapView.addCallout(callout, view.x, view.y, -0.5f, -1.2f, 0f, 0f)
@@ -116,7 +115,7 @@ class RotatingMapFragment : Fragment() {
             }
         })
 
-        val pathView = PathView(context)
+        val pathView = PathView(mapView.context)
         mapView.addPathView(pathView)
 
         val pathList = listOfNotNull(
@@ -139,17 +138,6 @@ class RotatingMapFragment : Fragment() {
         }
 
         pathView.updatePaths(pathList)
-        return mapView
-    }
-
-    /**
-     * Assign an id the the [MapView] (it's necessary to enable state save/restore).
-     */
-    private fun MapView.addToFragment() = apply {
-        id = R.id.mapview_id
-        isSaveEnabled = true
-
-        parentView.addView(this, 0)
     }
 
     private fun MapView.addNewMarker(x: Double, y: Double, name: String) {

@@ -1,6 +1,5 @@
 package com.peterlaurence.mapview.demo.fragments
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,35 +29,24 @@ class MapConstrainedFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_btn_layout, container, false).also {
+        return inflater.inflate(R.layout.fragment_map_constrained, container, false).also {
             parentView = it as ViewGroup
             button = it.findViewById(R.id.button)
             button.text = getString(R.string.change_area)
-            context?.let { ctx ->
-                makeMapView(ctx)?.addToFragment()
-            }
+            configureMapView(it)
         }
-    }
-
-    /**
-     * Assign an id the the [MapView] (it's necessary to enable state save/restore).
-     */
-    private fun MapView.addToFragment() {
-        id = R.id.mapview_id
-        isSaveEnabled = true
-
-        parentView.addView(this, 0)
     }
 
     /**
      * In this example, the configuration is done **immediately** after the [MapView] is added to
      * the view hierarchy, in [onCreateView].
-     * But it's not mandatory, it could have been done later on. But beware to configure only once.
+     * But it's not mandatory, it could have been done later on. However, beware to configure only once.
      */
-    private fun makeMapView(context: Context): MapView? {
+    private fun configureMapView(view: View) {
+        val mapView = view.findViewById<MapView>(R.id.mapview) ?: return
         val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
             try {
-                context.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
+                mapView.context.assets?.open("tiles/esp/$zoomLvl/$row/$col.jpg")
             } catch (e: Exception) {
                 null
             }
@@ -68,7 +56,7 @@ class MapConstrainedFragment : Fragment() {
                 5, 8192, 8192, tileSize, tileStreamProvider
         ).setMaxScale(2f)
 
-        return MapView(context).apply {
+        mapView.apply {
             configure(config)
             defineBounds(0.0, 0.0, 1.0, 1.0)
 

@@ -16,4 +16,13 @@
     <string name="map_rotating">Rotating map demo</string>
 
     <string name="change_area">Change area</string>
+
+    <!-- Fragment ids -->
+    <string name="fragment_map_alone" translatable="false">MapAloneFragment</string>
+    <string name="fragment_map_markers" translatable="false">MapMarkersFragment</string>
+    <string name="fragment_map_constrained" translatable="false">MapConstrainedFragment</string>
+    <string name="fragment_map_path" translatable="false">MapPathFragment</string>
+    <string name="fragment_remote_http" translatable="false">RemoteHttpFragment</string>
+    <string name="fragment_deferred" translatable="false">DeferredFragment</string>
+    <string name="fragment_rotating" translatable="false">RotatingFragment</string>
 </resources>

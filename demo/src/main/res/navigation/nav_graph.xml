@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    app:startDestination="@id/mapAloneFragment">
+
+    <fragment
+        android:id="@+id/mapAloneFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.MapAloneFragment"
+        android:label="@string/fragment_map_alone" />
+    <fragment
+        android:id="@+id/mapMarkersFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.MapMarkersFragment"
+        android:label="@string/fragment_map_markers" />
+    <fragment
+        android:id="@+id/remoteHttpFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.RemoteHttpFragment"
+        android:label="@string/fragment_remote_http" /><action android:id="@+id/action_global_remoteHttpFragment" app:destination="@id/remoteHttpFragment"/><action android:id="@+id/action_global_mapMarkersFragment" app:destination="@id/mapMarkersFragment"/><action android:id="@+id/action_global_mapAloneFragment" app:destination="@id/mapAloneFragment"/>
+    <fragment
+        android:id="@+id/mapConstrainedFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.MapConstrainedFragment"
+        android:label="@string/fragment_map_constrained" />
+    <action android:id="@+id/action_global_mapConstrainedFragment" app:destination="@id/mapConstrainedFragment" />
+    <fragment
+        android:id="@+id/mapPathFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.MapPathFragment"
+        android:label="@string/fragment_map_path" />
+    <action android:id="@+id/action_global_mapPathFragment" app:destination="@id/mapPathFragment" />
+    <fragment
+        android:id="@+id/deferredFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.DeferredFragment"
+        android:label="@string/fragment_deferred" />
+    <action android:id="@+id/action_global_deferredFragment" app:destination="@id/deferredFragment" />
+    <fragment
+        android:id="@+id/rotatingMapFragment"
+        android:name="com.peterlaurence.mapview.demo.fragments.RotatingMapFragment"
+        android:label="@string/fragment_rotating" />
+    <action android:id="@+id/action_global_rotatingMapFragment" app:destination="@id/rotatingMapFragment" />
+</navigation>

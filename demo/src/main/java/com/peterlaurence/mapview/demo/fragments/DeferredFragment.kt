@@ -12,7 +12,6 @@ import com.peterlaurence.mapview.MapViewConfiguration
 import com.peterlaurence.mapview.core.TileStreamProvider
 import com.peterlaurence.mapview.demo.R
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * An example showing deferred configuration of [MapView]. In this example, a [MapView] is first
@@ -27,21 +26,21 @@ class DeferredFragment : Fragment() {
 
     private lateinit var mapView: MapView
     private lateinit var parentView: ViewGroup
-    private var isConfigured = false
 
     /**
      * The [MapView] should always be added inside [onCreateView], to ensure state save/restore.
      */
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_layout, container, false).also {
+        return inflater.inflate(R.layout.fragment_deferred, container, false).also {
             parentView = it as ViewGroup
             context?.let { ctx ->
                 MapView(ctx).addToFragment()
             }
+            deferredConfigure()
         }
     }
 
@@ -60,16 +59,13 @@ class DeferredFragment : Fragment() {
 
     /**
      * In this example, the configuration isn't done **immediately** after the [MapView] is added to
-     * the view hierarchy, in [onCreateView]. It's done in [onStart].
-     * But it's not mandatory, it could have been done right after the [MapView] creation. Beware
-     * though to configure the [MapView] only once. Or, call [MapView.destroy] on the existing
+     * the view hierarchy, in [onCreateView]. It's done after a delay.
+     * Beware to configure the [MapView] only once. Or, call [MapView.destroy] on the existing
      * instance then create and configure a new instance.
      */
-    override fun onStart() {
-        super.onStart()
-
-        /* Safeguard, to prevent a re-configuration of an already configured instance */
-        if (isConfigured) return
+    private fun deferredConfigure() = lifecycleScope.launchWhenStarted {
+        // simulate delay
+        delay(500)
 
         val tileStreamProvider = TileStreamProvider { row, col, zoomLvl ->
             try {
@@ -80,13 +76,9 @@ class DeferredFragment : Fragment() {
         }
         val tileSize = 256
         val config = MapViewConfiguration(
-            5, 8192, 8192, tileSize, tileStreamProvider
+                5, 8192, 8192, tileSize, tileStreamProvider
         ).setMaxScale(2f).setPadding(tileSize * 2)
 
-        lifecycleScope.launch {
-            delay(500) // simulate delay
-            mapView.configure(config)
-        }
-        isConfigured = true
+        mapView.configure(config)
     }
 }
