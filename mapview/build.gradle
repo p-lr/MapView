@@ -2,14 +2,11 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlinx-serialization'
 
 def versionTag = "2.1.4"
-
-androidExtensions {
-    experimental = true
-}
 
 buildscript {
     repositories {

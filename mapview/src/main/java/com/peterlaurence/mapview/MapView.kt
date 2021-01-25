@@ -16,7 +16,7 @@ import com.peterlaurence.mapview.util.AngleDegree
 import com.peterlaurence.mapview.util.toRad
 import com.peterlaurence.mapview.view.TileCanvasView
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
