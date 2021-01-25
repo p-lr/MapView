@@ -6,7 +6,7 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlinx-serialization'
 
-def versionTag = "2.1.4"
+def versionTag = "2.1.5"
 
 buildscript {
     repositories {

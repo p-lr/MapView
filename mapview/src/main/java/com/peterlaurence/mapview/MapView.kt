@@ -238,12 +238,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
+    /**
+     * Don't use the [changed] parameter as a decision criteria to trigger [renderVisibleTilesThrottled],
+     * as this boolean is false when navigating back to a fragment containing a MapView, and we're
+     * throttling tile rendering anyway.
+     */
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
 
-        if (changed) {
-            renderVisibleTilesThrottled()
-        }
+        renderVisibleTilesThrottled()
     }
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
