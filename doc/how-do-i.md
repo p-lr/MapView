@@ -68,3 +68,35 @@ kotlinOptions {
     freeCompilerArgs = ['-Xjvm-default=compatibility']
 }
 ```
+
+## Reload tiles using a different `TileStreamProvider`
+
+By design, you can only provide a `TileStreamProvider` while configuring a MapView. This allows for a robust model and avoids side effects.
+However, you can still produce a similar visual effect by:
+
+1. Destroying the existing MapView while remembering current zoom and scroll,
+2. Create and add a new MapView _using the same id_,
+3. Restore the zoom and scroll from remembered values
+
+Here's what such a code would look like:
+
+```kotlin
+/* Remove the existing the MapView, while remembering scale and scroll */
+removeMapView()
+val previousScale = mapView?.scale
+val previousScrollX = mapView?.scrollX
+val previousScrollY = mapView?.scrollY
+mapView?.destroy()
+
+/* Create and configure a new MapView */
+setMapView(MapView(requireContext()))
+checkThenConfigureMapView()
+
+/* Restore the scale and scroll */
+if (previousScale != null && previousScrollX != null && previousScrollY != null) {
+   mapView?.scale = previousScale
+   mapView?.scrollTo(previousScrollX, previousScrollY)
+}
+```
+
+Do note that the above code should be called while the fragent is in RESUMED state.
