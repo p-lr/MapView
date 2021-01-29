@@ -339,7 +339,16 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         post {
             gestureController.scale = stateSnapshot.scale
             gestureController.angle = stateSnapshot.referentialData.angle
-            scrollToAndCenter(stateSnapshot.centerX, stateSnapshot.centerY)
+
+            /* If we're trying to restore from a former greater scale, adapt scroll */
+            if (stateSnapshot.scale > gestureController.scale) {
+                val ratio = gestureController.scale / stateSnapshot.scale
+                val centerX = (stateSnapshot.centerX * ratio).toInt()
+                val centerY = (stateSnapshot.centerY * ratio).toInt()
+                scrollToAndCenter(centerX, centerY)
+            } else {
+                scrollToAndCenter(stateSnapshot.centerX, stateSnapshot.centerY)
+            }
         }
     }
 }
