@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.1.5) ](https://bintray.com/peterlaurence/maven/mapview/2.1.5/link)
+[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.1.6) ](https://bintray.com/peterlaurence/maven/mapview/2.1.6/link)
 
 # MapView
 
@@ -63,7 +63,7 @@ There's an example of usage inside the `RotatingMapFragment` demo.
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.1.5'
+implementation 'com.peterlaurence:mapview:2.1.6'
 ```
 
 Also, for each module that uses MapView, update the module's build.gradle file, as shown below:
@@ -91,8 +91,8 @@ As a long time contributor to [TileView](https://github.com/moagrius/TileView), 
 performance we would get using idiomatic Kotlin (coroutines, flows). The result was beyond my 
 expectations. The overall design can be seen 
 [here](https://github.com/peterLaurence/MapView/wiki/TileCollector-design).
-The focus has been on efficiency (No thread contention thanks to non-blocking algorithm. Therefore,
-the load on the main thread is low enough to get high fps).
+Special attention has been given to efficiency (using non-blocking algorithm to avoiding thread 
+contention). We get smooth animations and high fps.
 
 Thanks for Mike (@moagrius), as this library wouldn't exist without his first contributions.
 
