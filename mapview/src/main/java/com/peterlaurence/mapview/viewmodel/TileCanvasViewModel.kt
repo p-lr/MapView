@@ -132,6 +132,15 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         renderThrottled()
     }
 
+    fun clearVisibleTiles() = scope.launch {
+        tilesToRender.clear()
+
+        /**
+         * Reset the [visibleTilesFlow] state so that any new [VisibleTiles] value will trigger and
+         * update. */
+        visibleTilesFlow.value = null
+    }
+
     /**
      * Consumes incoming visible tiles from [visibleTilesFlow] and sends [TileSpec] instances to the
      * [TileCollector].

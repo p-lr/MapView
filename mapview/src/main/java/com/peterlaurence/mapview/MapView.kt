@@ -16,11 +16,11 @@ import com.peterlaurence.mapview.util.AngleDegree
 import com.peterlaurence.mapview.util.toRad
 import com.peterlaurence.mapview.view.TileCanvasView
 import com.peterlaurence.mapview.viewmodel.TileCanvasViewModel
-import kotlinx.parcelize.Parcelize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.parcelize.Parcelize
 
 /**
  * The [MapView] is a subclass of [GestureLayout], specialized for displaying
@@ -173,7 +173,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
      */
     @Suppress("unused")
     fun redrawTiles() {
-        renderVisibleTilesThrottled()
+        tileCanvasViewModel?.clearVisibleTiles()?.invokeOnCompletion {
+            renderVisibleTiles()
+        }
     }
 
     /**
@@ -222,9 +224,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private fun startInternals() {
         throttledTask = scope.throttle(wait = 18) {
-            val viewport = updateViewport()
-            tileCanvasViewModel?.setViewport(viewport)
+            renderVisibleTiles()
         }
+    }
+
+    private fun renderVisibleTiles() {
+        val viewport = updateViewport()
+        tileCanvasViewModel?.setViewport(viewport)
     }
 
     private fun updateViewport(): Viewport {
