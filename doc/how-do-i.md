@@ -69,6 +69,10 @@ kotlinOptions {
 }
 ```
 
+## Reload tiles while keeping the same `TileStreamProvider`
+
+Starting from `MapView` v.2.1.6, you can use `MapView.reloadTiles()`.
+
 ## Reload tiles using a different `TileStreamProvider`
 
 By design, you can only provide a `TileStreamProvider` while configuring a MapView. This allows for a robust model and avoids side effects.

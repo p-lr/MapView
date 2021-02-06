@@ -199,9 +199,10 @@ The MapView will request tiles using the convention that each levels has its til
 <img src="doc/readme-files/tilematrix.png">
 </p>
 
-However, MapView isn't opinionated about that. This is one of the purpose of this `TileStreamProvider`:
+MapView isn't opinionated about the origination of tiles. This is the purpose of the `TileStreamProvider`:
+
 ```kotlin
-interface TileStreamProvider {
+fun interface TileStreamProvider {
     fun getTileStream(row: Int, col: Int, zoomLvl: Int): InputStream?
 }
 ```
