@@ -39,6 +39,7 @@ fun MapView.setAngle(angle: AngleDegree) {
 fun MapView.constrainScroll(relativeMinX: Double, relativeMinY: Double, relativeMaxX: Double,
                             relativeMaxY: Double) {
     gestureController.setMinimumScaleMode(MinimumScaleMode.FILL)
+    val coordinateTranslater = coordinateTranslater ?: return
     gestureController.setScrollLimits(
             coordinateTranslater.translateX(relativeMinX),
             coordinateTranslater.translateY(relativeMinY),
@@ -74,7 +75,8 @@ fun MapView.disableRotation(freezeAngle: AngleDegree? = null) {
 /**
  * Given a relative coordinate in X, get the constrained value in the bounds of the [MapView].
  */
-fun MapView.getConstrainedX(x: Double): Double {
+fun MapView.getConstrainedX(x: Double): Double? {
+    val coordinateTranslater = coordinateTranslater ?: return null
     val l = coordinateTranslater.left
     val r = coordinateTranslater.right
     return x.coerceIn(min(l, r), max(l, r))
@@ -83,7 +85,8 @@ fun MapView.getConstrainedX(x: Double): Double {
 /**
  * Given a relative coordinate in Y, get the constrained value in the bounds of the [MapView].
  */
-fun MapView.getConstrainedY(y: Double): Double {
+fun MapView.getConstrainedY(y: Double): Double? {
+    val coordinateTranslater = coordinateTranslater ?: return null
     val t = coordinateTranslater.top
     val b = coordinateTranslater.bottom
     return y.coerceIn(min(b, t), max(b, t))

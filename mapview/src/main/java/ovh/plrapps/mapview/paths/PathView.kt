@@ -165,15 +165,16 @@ fun List<PathPoint>.toFloatArray(mapView: MapView): FloatArray? {
 
     var i = 0
     var init = true
+    val coordinateTranslater = mapView.coordinateTranslater ?: return null
     for (point in this) {
         if (init) {
-            lines[i] = mapView.coordinateTranslater.translateX(point.x).toFloat()
-            lines[i + 1] = mapView.coordinateTranslater.translateY(point.y).toFloat()
+            lines[i] = coordinateTranslater.translateX(point.x).toFloat()
+            lines[i + 1] = coordinateTranslater.translateY(point.y).toFloat()
             init = false
             i += 2
         } else {
-            lines[i] = mapView.coordinateTranslater.translateX(point.x).toFloat()
-            lines[i + 1] = mapView.coordinateTranslater.translateY(point.y).toFloat()
+            lines[i] = coordinateTranslater.translateX(point.x).toFloat()
+            lines[i + 1] = coordinateTranslater.translateY(point.y).toFloat()
             if (i + 2 >= size) break
             lines[i + 2] = lines[i]
             lines[i + 3] = lines[i + 1]

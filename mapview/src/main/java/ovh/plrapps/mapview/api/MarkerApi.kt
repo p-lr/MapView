@@ -26,6 +26,7 @@ fun MapView.addMarker(view: View, x: Double, y: Double, relativeAnchorLeft: Floa
                       relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
                       absoluteAnchorTop: Float = 0f, tag: String? = null) {
 
+    val coordinateTranslater = coordinateTranslater ?: return
     markerLayout?.addMarker(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y),
@@ -60,6 +61,7 @@ fun MapView.setMarkerTapListener(markerTapListener: MarkerTapListener) {
  * @param y    Relative y position the View instance should be positioned at.
  */
 fun MapView.moveMarker(view: View, x: Double, y: Double) {
+    val coordinateTranslater = coordinateTranslater ?: return
     markerLayout?.moveMarker(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y))
@@ -75,6 +77,7 @@ fun MapView.moveMarker(view: View, x: Double, y: Double) {
  */
 fun MapView.moveMarkerConstrained(view: View, x: Double, y: Double) {
     val markerLayout = markerLayout ?: return
+    val coordinateTranslater = coordinateTranslater ?: return
 
     val l = coordinateTranslater.left
     val r = coordinateTranslater.right
@@ -96,6 +99,7 @@ fun MapView.moveMarkerConstrained(view: View, x: Double, y: Double) {
  * @param y    Relative y position the View instance should be positioned at.
  */
 fun MapView.getMarkerFromPosition(x: Double, y: Double): View? {
+    val coordinateTranslater = coordinateTranslater ?: return null
     val xPixel = coordinateTranslater.translateAndScaleX(x, scale)
     val yPixel = coordinateTranslater.translateAndScaleY(y, scale)
     return markerLayout?.getViewFromTap(xPixel, yPixel)
@@ -169,6 +173,7 @@ fun MapView.removeMarker(view: View) {
 fun MapView.addCallout(view: View, x: Double, y: Double, relativeAnchorLeft: Float = -0.5f,
                        relativeAnchorTop: Float = -1f, absoluteAnchorLeft: Float = 0f,
                        absoluteAnchorTop: Float = 0f) {
+    val coordinateTranslater = coordinateTranslater ?: return
     markerLayout?.addCallout(view,
             coordinateTranslater.translateX(x),
             coordinateTranslater.translateY(y),

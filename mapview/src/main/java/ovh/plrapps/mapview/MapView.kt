@@ -59,7 +59,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private var tileCanvasViewModel: TileCanvasViewModel? = null
     var markerLayout: MarkerLayout? = null
         private set
-    lateinit var coordinateTranslater: CoordinateTranslater
+    var coordinateTranslater: CoordinateTranslater? = null
         private set
 
     internal lateinit var configuration: MapViewConfiguration

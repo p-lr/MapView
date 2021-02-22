@@ -33,7 +33,7 @@ To test the demo, just clone the repo and launch the demo app from Android Studi
 
 To be consistent with previous versions, this is disabled by default.
 To enable it, use `MapViewConfiguration.enableRotation()`. You will find a code example inside the demo
-[RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).
+[RotatingMapFragment](demo/src/main/java/ovh/plrapps/mapview/demo/fragments/RotatingMapFragment.kt).
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/15638794/85233196-d420a700-b404-11ea-8193-2fd98ed340b3.gif">
