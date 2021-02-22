@@ -65,7 +65,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     internal lateinit var configuration: MapViewConfiguration
 
     private var throttledTask: SendChannel<Unit>? = null
-    private val refOwnerList = mutableListOf<ReferentialOwner>()
+    private val refListenerList = mutableListOf<ReferentialListener>()
     private var savedState: SavedState? = null
     private var isConfigured = false
     internal val viewport = Viewport()
@@ -154,18 +154,18 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     /**
-     * Add a [ReferentialOwner] to the MapView. This [ReferentialOwner] will be notified of any
+     * Add a [ReferentialListener] to the MapView. This [ReferentialListener] will be notified of any
      * change of scale, rotation angle, or rotation pivot point.
-     * Using this API, the MapView holds a reference on the provided [ReferentialOwner] instance.
+     * Using this API, the MapView holds a reference on the provided [ReferentialListener] instance.
      * Don't forget to remove it when it's no longer needed, using [removeReferentialOwner].
      */
-    fun addReferentialOwner(referentialOwner: ReferentialOwner) {
-        referentialOwner.referentialData = referentialData
-        refOwnerList.add(referentialOwner)
+    fun addReferentialListener(listener: ReferentialListener) {
+        listener.onReferentialChanged(referentialData)
+        refListenerList.add(listener)
     }
 
-    fun removeReferentialOwner(referentialOwner: ReferentialOwner) {
-        refOwnerList.remove(referentialOwner)
+    fun removeReferentialOwner(referentialListener: ReferentialListener) {
+        refListenerList.remove(referentialListener)
     }
 
     /**
@@ -184,7 +184,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
      * from all view trees.
      */
     fun destroy() {
-        refOwnerList.clear()
+        refListenerList.clear()
         scope.cancel()
     }
 
@@ -273,7 +273,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
      * * angle
      * * scroll
      * Any of those properties change requires an update of the [MapView] and its child views.
-     * Also, [ReferentialOwner]s registered as listeners of [ReferentialData] are notified as well.
+     * Also, [ReferentialListener]s registered as listeners of [ReferentialData] are notified as well.
      */
     override fun onReferentialChanged(angle: AngleDegree, scale: Float, centerX: Double, centerY: Double) {
         /* Update our own reference of ReferentialData */
@@ -291,8 +291,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         tileCanvasView?.referentialData = this.referentialData
         markerLayout?.referentialData = this.referentialData
 
-        refOwnerList.forEach {
-            it.referentialData = this.referentialData
+        refListenerList.forEach {
+            it.onReferentialChanged(this.referentialData)
         }
     }
 
@@ -361,8 +361,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 /**
  * This data class holds information about the current state of the [MapView].
- * An object can receive updated values of [ReferentialData] by implementing the [ReferentialOwner]
- * interface and should be registered with [MapView.addReferentialOwner].
+ * An object can receive updated values of [ReferentialData] by implementing the [ReferentialListener]
+ * interface and should be registered with [MapView.addReferentialListener].
  *
  * @param rotationEnabled Whether the rotation is enabled or not
  * @param angle The current angle in decimal degrees of the MapView's rotation
@@ -529,6 +529,6 @@ data class MapViewConfiguration(val levelCount: Int, val fullWidth: Int, val ful
 internal data class SavedState(val parcelable: Parcelable, val scale: Float, val centerX: Int, val centerY: Int,
                                val referentialData: ReferentialData) : View.BaseSavedState(parcelable)
 
-interface ReferentialOwner {
-    var referentialData: ReferentialData
+fun interface ReferentialListener {
+    fun onReferentialChanged(refData: ReferentialData)
 }

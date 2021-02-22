@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import ovh.plrapps.mapview.MapView
 import ovh.plrapps.mapview.MapViewConfiguration
 import ovh.plrapps.mapview.ReferentialData
-import ovh.plrapps.mapview.ReferentialOwner
+import ovh.plrapps.mapview.ReferentialListener
 import ovh.plrapps.mapview.api.addCallout
 import ovh.plrapps.mapview.api.addMarker
 import ovh.plrapps.mapview.api.setMarkerTapListener
@@ -72,14 +72,16 @@ class RotatingMapFragment : Fragment() {
 
         val positionMarker = mapView.addPositionMarker(0.7, 0.7)
 
-        /* A ReferentialOwner is an observer which will be notified by the MapView if anything changes.
+        /* A referential owner holds a ReferentialData and is notified by the MapView of referential
+         * changes.
          * Here, we want to rotate the positionMarker so that it turns along with the map. */
-        val refOwner = object : ReferentialOwner {
-            override var referentialData: ReferentialData = ReferentialData(false, 0f, 1f, 0.0, 0.0)
-                set(value) {
-                    field = value
-                    rotateMaker()
-                }
+        val refOwner = object : ReferentialListener {
+            var referentialData: ReferentialData? = null
+
+            override fun onReferentialChanged(refData: ReferentialData) {
+                referentialData = refData
+                rotateMaker()
+            }
 
             /* Add an offset, which we'll change dynamically by taping the marker */
             var angleDegree: AngleDegree = 0f
@@ -89,12 +91,13 @@ class RotatingMapFragment : Fragment() {
                 }
 
             private fun rotateMaker() {
-                positionMarker.rotation = angleDegree + referentialData.angle
+                val refData = referentialData ?: return
+                positionMarker.rotation = angleDegree + refData.angle
             }
         }
 
-        /* Register the ReferentialOwner */
-        mapView.addReferentialOwner(refOwner)
+        /* Register the ReferentialListener */
+        mapView.addReferentialListener(refOwner)
 
         /* When a marker is tapped, we want to show a callout view */
         mapView.setMarkerTapListener(object : MarkerTapListener {

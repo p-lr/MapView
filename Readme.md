@@ -29,10 +29,9 @@ rotating. It's also possible to add markers and paths.
 This project holds the source code of this library, plus a demo app (which is useful to get started).
 To test the demo, just clone the repo and launch the demo app from Android Studio.
 
-## MapView 2.x.x is out!
+## MapView supports map rotation
 
-This new major version brings performance improvements and a brand new feature: _map rotation_. To be 
-consistent with previous versions, this is disabled by default.
+To be consistent with previous versions, this is disabled by default.
 To enable it, use `MapViewConfiguration.enableRotation()`. You will find a code example inside the demo
 [RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).
 
@@ -53,10 +52,15 @@ has a new API `setAngle`:
 fun MapView.setAngle(angle: AngleDegree)
 ```
 
-**Migrating from 1.x.x**
+**Migrating from 2.x.x**
 
-There are some breaking changes, although most of them are just package refactoring. The interface 
-`ScaleChangeListener` has been removed. If you relied on this, have a look at `ReferentialOwner`interface. 
+3.x.x introduced the following breaking changes:
+
+* The package of the library has changed to `ovh.plrapps`.
+* The interface `ReferentialOwner` has been replaced by `ReferentialListener`. Instead of expecting
+`ReferentialOwner`s to supply a default value for `ReferentialData`, `ReferentialListener` only has
+a `onReferentialChanged(refData: ReferentialData)` method. Migrating to this new interface should
+be straightforward.
 There's an example of usage inside the `RotatingMapFragment` demo.
 
 ## Installation

@@ -22,8 +22,8 @@ private fun animateMapViewToNorth() {
      }
 }
 ```
-Here, we assume that `animateMapViewToNorth` is part of a class which implements the `ReferentialOwner`
-interface.
+Here, we assume that `animateMapViewToNorth` is part of a class which implements the `ReferentialListener`
+interface and has a `referentialData` property (with initial values).
 
 ## Disable fade-in effect for tiles
 

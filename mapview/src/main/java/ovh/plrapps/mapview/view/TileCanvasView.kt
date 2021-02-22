@@ -5,14 +5,14 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
-import ovh.plrapps.mapview.ReferentialData
-import ovh.plrapps.mapview.ReferentialOwner
-import ovh.plrapps.mapview.core.Tile
-import ovh.plrapps.mapview.core.VisibleTilesResolver
-import ovh.plrapps.mapview.viewmodel.TileCanvasViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import ovh.plrapps.mapview.ReferentialData
+import ovh.plrapps.mapview.ReferentialListener
+import ovh.plrapps.mapview.core.Tile
+import ovh.plrapps.mapview.core.VisibleTilesResolver
+import ovh.plrapps.mapview.viewmodel.TileCanvasViewModel
 import kotlin.math.min
 
 /**
@@ -24,8 +24,8 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                               private val tileSize: Int,
                               private val visibleTilesResolver: VisibleTilesResolver,
                               scope: CoroutineScope
-) : View(ctx), ReferentialOwner {
-    override var referentialData = ReferentialData(false)
+) : View(ctx), ReferentialListener {
+    var referentialData = ReferentialData(false)
         set(value) {
             field = value
             invalidate()
@@ -44,6 +44,10 @@ internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                 invalidate()
             }
         }
+    }
+
+    override fun onReferentialChanged(refData: ReferentialData) {
+        referentialData = refData
     }
 
     override fun onDraw(canvas: Canvas) {

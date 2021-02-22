@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import ovh.plrapps.mapview.MapView
 import ovh.plrapps.mapview.ReferentialData
-import ovh.plrapps.mapview.ReferentialOwner
+import ovh.plrapps.mapview.ReferentialListener
 import ovh.plrapps.mapview.util.rotateCenteredX
 import ovh.plrapps.mapview.util.rotateCenteredY
 import ovh.plrapps.mapview.util.toRad
@@ -18,9 +18,9 @@ import ovh.plrapps.mapview.util.toRad
  *
  * @author peterLaurence on 18/06/2019
  */
-open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner {
+open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialListener {
 
-    override var referentialData = ReferentialData(false)
+    var referentialData = ReferentialData(false)
         set(value) {
             field = value
             requestLayout()
@@ -32,6 +32,10 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialOwner
 
     init {
         clipChildren = false
+    }
+
+    override fun onReferentialChanged(refData: ReferentialData) {
+        referentialData = refData
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

@@ -8,8 +8,8 @@ import android.graphics.Path
 import android.util.TypedValue
 import android.view.View
 import ovh.plrapps.mapview.MapView
-import ovh.plrapps.mapview.ReferentialOwner
 import ovh.plrapps.mapview.ReferentialData
+import ovh.plrapps.mapview.ReferentialListener
 
 /**
  * This is a custom view that uses [Canvas.drawLines] to draw a path.
@@ -18,10 +18,10 @@ import ovh.plrapps.mapview.ReferentialData
  *
  * @author peterLaurence on 19/02/17 -- Converted to Kotlin on 26/07/19
  */
-class PathView(context: Context) : View(context), ReferentialOwner {
+class PathView(context: Context) : View(context), ReferentialListener {
     private val strokeWidthDefault: Float
 
-    override var referentialData = ReferentialData(false)
+    private var referentialData = ReferentialData(false)
         set(value) {
             field = value
             invalidate()
@@ -57,6 +57,10 @@ class PathView(context: Context) : View(context), ReferentialOwner {
         //        mDefaultPaint.setAntiAlias(true);
         //        mDefaultPaint.setStrokeJoin(Paint.Join.ROUND);
         //        mDefaultPaint.setStrokeCap(Paint.Cap.ROUND);
+    }
+
+    override fun onReferentialChanged(refData: ReferentialData) {
+        referentialData = refData
     }
 
     fun updatePaths(pathList: List<DrawablePath>) {
@@ -105,14 +109,17 @@ class PathView(context: Context) : View(context), ReferentialOwner {
          * Whether or not this path should be drawn
          */
         val visible: Boolean
+
         /**
          * The path. See [Canvas.drawLines].
          */
         var path: FloatArray
+
         /**
          * The paint to be used for this path.
          */
         var paint: Paint?
+
         /**
          * The width of the path
          */
@@ -182,7 +189,7 @@ fun List<PathPoint>.toFloatArray(mapView: MapView): FloatArray? {
  */
 fun MapView.addPathView(pathView: PathView) {
     addView(pathView, 1)
-    addReferentialOwner(pathView)
+    addReferentialListener(pathView)
 }
 
 /**
