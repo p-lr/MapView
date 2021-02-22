@@ -44,9 +44,9 @@ fun MapView.getMarkerByTag(tag: String): View? {
 }
 
 /**
- * Set a MarkerTapListener for the MapView instance (rather than on a single marker view).
- * Unlike standard touch events attached to marker View's (e.g., View.OnClickListener),
- * MarkerTapListener.onMarkerTapEvent does not consume the touch event, so will not interfere
+ * Set a [MarkerTapListener] to the MapView (rather than on a single marker view).
+ * Unlike standard touch events attached to marker View's (e.g., [View.OnClickListener]),
+ * [MarkerTapListener.onMarkerTap] does not consume the touch event, so will not interfere
  * with scrolling.
  */
 fun MapView.setMarkerTapListener(markerTapListener: MarkerTapListener) {
@@ -106,7 +106,7 @@ fun MapView.getMarkerFromPosition(x: Double, y: Double): View? {
 }
 
 /**
- * Scrolls the MapView so that the View passed is centered in the viewport.
+ * Scrolls the MapView so that the passed View is centered in the viewport.
  * The scale remains constant.
  *
  * The scroll position is animated if [shouldAnimate] is set to `true`.
@@ -150,7 +150,7 @@ fun MapView.moveToMarker(view: View, destinationScale: Float, shouldAnimate: Boo
 }
 
 /**
- * Removes a marker from the MapView's view tree.
+ * Removes a marker from MapView's view hierarchy.
  *
  * @param view The marker to be removed.
  */
@@ -159,7 +159,7 @@ fun MapView.removeMarker(view: View) {
 }
 
 /**
- * Add a callout to the the MapView. The callout can be any View.
+ * Add a callout to the MapView. The callout can be any View.
  * No LayoutParams are required; the View will be laid out using WRAP_CONTENT for both width and height, and positioned based on the parameters.
  *
  * @param view    View instance to be added to the MapView.
@@ -183,10 +183,17 @@ fun MapView.addCallout(view: View, x: Double, y: Double, relativeAnchorLeft: Flo
 }
 
 /**
- * Removes a callout View from the MapView's view tree.
+ * Removes a callout View from MapView's view hierarchy.
  *
  * @param view The callout View to be removed.
  */
 fun MapView.removeCallout(view: View) {
     markerLayout?.removeCallout(view)
+}
+
+/**
+ * Removes all callouts from MapView's view hierarchy.
+ */
+fun MapView.removeAllCallouts() {
+    markerLayout?.removeAllCallout()
 }
