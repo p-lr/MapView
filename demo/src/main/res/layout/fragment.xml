@@ -8,9 +8,9 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/app_bar_main"
-        tools:context=".MainActivity">
+        tools:context="ovh.plrapps.mapview.demo.MainActivity">
 
-    <com.peterlaurence.mapview.MapView
+    <ovh.plrapps.mapview.MapView
         android:id="@+id/mapview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

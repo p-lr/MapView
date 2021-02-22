@@ -63,7 +63,7 @@ There's an example of usage inside the `RotatingMapFragment` demo.
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'com.peterlaurence:mapview:2.1.6'
+implementation 'ovh.plrapps:mapview:2.1.6'
 ```
 
 Also, for each module that uses MapView, update the module's build.gradle file, as shown below:

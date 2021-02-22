@@ -5,7 +5,7 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 android {
     compileSdkVersion 30
     defaultConfig {
-        applicationId "com.peterlaurence.mapview.demo"
+        applicationId "ovh.plrapps.mapview.demo"
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
