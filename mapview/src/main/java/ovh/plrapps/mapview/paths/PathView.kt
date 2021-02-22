@@ -197,5 +197,5 @@ fun MapView.addPathView(pathView: PathView) {
  */
 fun MapView.removePathView(pathView: PathView) {
     removeView(pathView)
-    removeReferentialOwner(pathView)
+    removeReferentialListener(pathView)
 }

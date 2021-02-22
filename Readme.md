@@ -57,7 +57,7 @@ fun MapView.setAngle(angle: AngleDegree)
 3.x.x introduced the following breaking changes:
 
 * The package of the library has changed to `ovh.plrapps`.
-* The interface `ReferentialOwner` has been replaced by `ReferentialListener`. Instead of expecting
+* The interface `ReferentialOwner` has been replaced with `ReferentialListener`. Instead of expecting
 `ReferentialOwner`s to supply a default value for `ReferentialData`, `ReferentialListener` only has
 a `onReferentialChanged(refData: ReferentialData)` method. Migrating to this new interface should
 be straightforward.
@@ -219,15 +219,15 @@ The MapView leverages bitmap pooling to reduce the pressure on the garbage colle
 there's no tile caching by default - this is an implementation detail of the supplied 
 `TileStreamProvider`.
 
-### <a name="TOC-ReferentialOwner"></a> ReferentialOwner
+### <a name="TOC-ReferentialListener"></a> ReferentialListener
 
 When the scale and/or the rotation of the MapView change, some of the child views might have to change
-accordingly. For that purpose, you can register a `ReferentialOwner` to the MapView.
+accordingly. For that purpose, you can register a `ReferentialListener` to the MapView.
 
-A `ReferentialOwner` is an interface:
+A `ReferentialListener` is an interface:
 ```kotlin
-interface ReferentialOwner {
-    var referentialData: ReferentialData
+fun interface ReferentialListener {
+    fun onReferentialChanged(refData: ReferentialData)
 }
 ```
 And `ReferentialData` holds several useful properties:
@@ -238,13 +238,13 @@ data class ReferentialData(var rotationEnabled: Boolean = true,
                            var centerX: Double = 0.0,
                            var centerY: Double = 0.0) : Parcelable
 ```
-A `ReferentialOwner` should be registered to the MapView:
+A `ReferentialListener` should be registered to the MapView:
 ```kotlin
-mapView.addReferentialOwner(refOwner)
+mapView.addReferentialListener(refOwner)
 // If you need to unregister it:
-mapView.removeReferentialOwner(refOwner)
+mapView.removeReferentialListener(refOwner)
 ```
-From inside your `ReferentialOwner` implementation, you can have any logic you want. You can rotate
+From inside your `ReferentialListener` implementation, you can have any logic you want. You can rotate
 some markers, rotate complex views taking into account the `centerX` and `centerY` properties, etc.
 
 There's an example of usage at [RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).

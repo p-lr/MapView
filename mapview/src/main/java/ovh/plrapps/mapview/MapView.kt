@@ -164,8 +164,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
         refListenerList.add(listener)
     }
 
-    fun removeReferentialOwner(referentialListener: ReferentialListener) {
-        refListenerList.remove(referentialListener)
+    fun removeReferentialListener(listener: ReferentialListener) {
+        refListenerList.remove(listener)
     }
 
     /**
