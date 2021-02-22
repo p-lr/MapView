@@ -67,7 +67,7 @@ There's an example of usage inside the `RotatingMapFragment` demo.
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'ovh.plrapps:mapview:2.1.6'
+implementation 'ovh.plrapps:mapview:3.0.0'
 ```
 
 Also, for each module that uses MapView, update the module's build.gradle file, as shown below:
@@ -132,7 +132,7 @@ val mapView = MapView(context)
 mapView.configure(config)
 ```
 
-For more insight, you can have a look at the source of the various [demos](demo/src/main/java/com/peterlaurence/mapview/demo/fragments).
+For more insight, you can have a look at the source of the various [demos](demo/src/main/java/ovh/plrapps/mapview/demo/fragments).
 
 ### Convention
 
@@ -146,7 +146,7 @@ This convention allows for a simple configuration.
 
 The MapView needs to be configured - more on that below. Once configured, you can do a lot of things
 with your `MapView` instance. `MapView` is a subclass of
-[GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt), which
+[GestureLayout](mapview/src/main/java/ovh/plrapps/mapview/layout/GestureLayout.kt), which
 has many features. You can:
 
 * add listeners to events like pan, fling, zoom..
@@ -154,7 +154,7 @@ has many features. You can:
 * respond to various touch events by subclassing `MapView` and overload related methods declared in `GestureLayout`
 
 This list isn't complete. You can explore the capabilities in the source of
-[GestureLayout](mapview/src/main/java/com/peterlaurence/mapview/layout/GestureLayout.kt).
+[GestureLayout](mapview/src/main/java/ovh/plrapps/mapview/layout/GestureLayout.kt).
 
 ### <a name="TOC-MapViewConfiguration"></a> MapViewConfiguration
 
@@ -247,7 +247,7 @@ mapView.removeReferentialListener(refOwner)
 From inside your `ReferentialListener` implementation, you can have any logic you want. You can rotate
 some markers, rotate complex views taking into account the `centerX` and `centerY` properties, etc.
 
-There's an example of usage at [RotatingMapFragment](demo/src/main/java/com/peterlaurence/mapview/demo/fragments/RotatingMapFragment.kt).
+There's an example of usage at [RotatingMapFragment](demo/src/main/java/ovh/plrapps/mapview/demo/fragments/RotatingMapFragment.kt).
 
 ## Create a deep-zoom map
 
