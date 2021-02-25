@@ -1,19 +1,19 @@
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
-def versionTag = "2.1.6"
+version = VERSION_NAME
+group = GROUP
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
     }
 }
 
@@ -56,47 +56,66 @@ dependencies {
 }
 repositories {
     mavenCentral()
-    maven { url "https://kotlin.bintray.com/kotlinx" }
 }
 
-afterEvaluate {
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set("sources")
+    from android.sourceSets.main.java.source
+}
+
+afterEvaluate { project ->
     publishing {
         publications {
-            // Creates a Maven publication called "release".
             release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
 
-                // You can then customize attributes of the publication as shown below.
-                groupId = 'ovh.plrapps'
+                groupId = GROUP
                 artifactId = 'mapview'
-                version = versionTag
+                version = VERSION_NAME
+
+                artifact bundleReleaseAar
+                artifact androidSourcesJar
+
+                pom {
+                    name = POM_NAME
+                    packaging = POM_PACKAGING
+                    description = POM_DESCRIPTION
+                    url = POM_URL
+
+                    scm {
+                        url = POM_SCM_URL
+                        connection = POM_SCM_CONNECTION
+                        developerConnection = POM_SCM_DEV_CONNECTION
+                    }
+
+                    licenses {
+                        license {
+                            name = POM_LICENCE_NAME
+                            url = POM_LICENCE_URL
+                            distribution = POM_LICENCE_DIST
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = POM_DEVELOPER_ID
+                            name = POM_DEVELOPER_NAME
+                            url = POM_DEVELOPER_URL
+                        }
+                    }
+                }
             }
         }
-    }
 
-    bintray {
-        try {
-            user = System.getenv("bintrayUser")
-            key = System.getenv("bintrayApikey")
-            dryRun = System.getenv("dryRun").toBoolean()
-        } catch (Exception e) {
-        }
+        repositories {
+            maven {
+                def releasesRepoUrl = System.getenv('releaseRepositoryUrl')
+                def snapshotsRepoUrl = System.getenv('snapshotrepositoryUrl')
+                url = !VERSION_NAME.contains("SNAPSHOT") ? releasesRepoUrl : snapshotsRepoUrl
 
-        publications = ['release']
-        pkg {
-            repo = 'maven'
-            name = 'mapview'
-            desc = 'Android Kotlin library to display tiled maps, with support of markers and paths'
-            websiteUrl = 'https://github.com/peterLaurence/MapView'
-            vcsUrl = 'https://github.com/peterLaurence/MapView.git'
-            licenses = ["Apache-2.0"]
-            publish = true
-            publicDownloadNumbers = true
-            version {
-                name = versionTag
-                vcsTag = versionTag
-                released = new Date()
+                credentials(PasswordCredentials) {
+                    username = System.getenv('NEXUS_USERNAME')
+                    password = System.getenv('NEXUS_PASSWORD')
+                }
             }
         }
     }

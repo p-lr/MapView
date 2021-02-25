@@ -13,4 +13,5 @@
 .idea
 .externalNativeBuild
 publish.sh
+publish-mavenCentral.sh
 /publishErrors.txt
