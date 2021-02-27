@@ -1,4 +1,5 @@
-![](https://img.shields.io/maven-central/v/ovh.plrapps/mapview)
+[![Maven Central](https://img.shields.io/maven-central/v/ovh.plrapps/mapview)](https://mvnrepository.com/artifact/ovh.plrapps/mapview)
+[![GitHub License](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # MapView
 
@@ -56,7 +57,8 @@ fun MapView.setAngle(angle: AngleDegree)
 
 3.x.x introduced the following breaking changes:
 
-* The package of the library has changed to `ovh.plrapps`.
+* The domain name of the library was changed to `ovh.plrapps`. MapView is now published on mavenCentral
+instead of jcenter. 
 * The interface `ReferentialOwner` has been replaced with `ReferentialListener`. Instead of expecting
 `ReferentialOwner`s to supply a default value for `ReferentialData`, `ReferentialListener` only has
 a `onReferentialChanged(refData: ReferentialData)` method. Migrating to this new interface should
@@ -70,7 +72,7 @@ Add this to your module's build.gradle
 implementation 'ovh.plrapps:mapview:3.0.0'
 ```
 
-Also, for each module that uses MapView, update the module's build.gradle file, as shown below:
+In addition, update the module's build.gradle file (for each module that uses MapView), as shown below:
 
 ```groovy
 android {
@@ -170,7 +172,7 @@ val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight 
                                   .setMaxScale(2f)
 ```
 
-See documentation [here](https://github.com/peterLaurence/MapView/blob/b9e89f8f179f109b1c0843b19d53c8f9c7f2689c/mapview/src/main/java/com/peterlaurence/mapview/MapView.kt#L340). 
+See documentation [here](https://github.com/peterLaurence/MapView/blob/79de39ff54cd59e2ceac0247a79f372180a11aa4/mapview/src/main/java/ovh/plrapps/mapview/MapView.kt#L393). 
 Below is a description of mandatory parameters:
 
 **`levelCount`**
