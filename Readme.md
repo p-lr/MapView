@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/peterlaurence/maven/mapview/images/download.svg?version=2.1.6) ](https://bintray.com/peterlaurence/maven/mapview/2.1.6/link)
+![](https://img.shields.io/maven-central/v/ovh.plrapps/mapview)
 
 # MapView
 
