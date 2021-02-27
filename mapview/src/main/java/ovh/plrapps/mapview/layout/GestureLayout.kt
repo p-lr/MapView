@@ -39,12 +39,19 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
 
     /**
      * Handle on the scale property.
-     * Delegates to underlying controller.
+     * If the view isn't laid-out by the time this property is set, the scale will be set on the
+     * next layout pass.
      */
     var scale: Float
         get() = gestureController.scale
         set(value) {
-            gestureController.scale = value
+            if (isLaidOut) {
+                gestureController.scale = value
+            } else {
+                post {
+                    gestureController.scale = value
+                }
+            }
         }
 
     /**
@@ -325,9 +332,23 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         return gestureIntercept || scaleIntercept || touchIntercept || super.onTouchEvent(event) || rotationIntercept
     }
 
+    /**
+     * Set the scroll location in pixels.
+     * If the view isn't laid-out by the time this method is invoked, the scroll location will be
+     * set on the next layout pass.
+     */
     override fun scrollTo(x: Int, y: Int) {
-        val (constrainedX, constrainedY) = gestureController.setConstrainedScroll(x, y)
-        super.scrollTo(constrainedX, constrainedY)
+        val scrollAction = {
+            val (constrainedX, constrainedY) = gestureController.setConstrainedScroll(x, y)
+            super.scrollTo(constrainedX, constrainedY)
+        }
+        if (isLaidOut) {
+            scrollAction()
+        } else {
+            post {
+                scrollAction()
+            }
+        }
     }
 
     override fun computeScroll() {
