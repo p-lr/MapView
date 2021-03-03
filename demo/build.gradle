@@ -29,7 +29,7 @@ android {
 }
 
 dependencies {
-    def coroutine_version = '1.4.1'
+    def coroutine_version = '1.4.3'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"

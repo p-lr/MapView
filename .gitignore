@@ -12,6 +12,6 @@
 /captures
 .idea
 .externalNativeBuild
-publish.sh
+publish-jcenter.sh
 publish-mavenCentral.sh
 /publishErrors.txt
