@@ -57,8 +57,8 @@ fun MapView.setAngle(angle: AngleDegree)
 
 3.x.x introduced the following breaking changes:
 
-* The domain name of the library was changed to `ovh.plrapps`. MapView is now published on mavenCentral
-instead of jcenter. 
+* The domain name of the library was changed to `ovh.plrapps`. MapView is now directly published on 
+mavenCentral.
 * The interface `ReferentialOwner` has been replaced with `ReferentialListener`. Instead of expecting
 `ReferentialOwner`s to supply a default value for `ReferentialData`, `ReferentialListener` only has
 a `onReferentialChanged(refData: ReferentialData)` method. Migrating to this new interface should
