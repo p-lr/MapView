@@ -5,8 +5,9 @@
 
 MapView is a Fast, memory efficient Android library to display tiled maps with minimal effort.
 
-  ![output0](https://user-images.githubusercontent.com/15638794/85230007-8d738280-b3ed-11ea-8493-9965a8982294.gif)
-  ![output1](https://user-images.githubusercontent.com/15638794/85230084-fc50db80-b3ed-11ea-8ec0-9f03a14ffba4.gif)
+  <p align="center">
+  <img src="https://user-images.githubusercontent.com/15638794/110203419-72a74800-7e6e-11eb-8e5b-a4476f930c18.gif">
+  </p>
 
 An example of setting up:
 
