@@ -219,7 +219,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun renderVisibleTilesThrottled() {
-        throttledTask?.offer(Unit)
+        throttledTask?.trySend(Unit)
     }
 
     private fun startInternals() {

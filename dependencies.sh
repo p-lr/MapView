@@ -1,0 +1,1 @@
+./gradlew mapview:dependencies --configuration releaseRuntimeClasspath
