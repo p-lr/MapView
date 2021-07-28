@@ -1,6 +1,8 @@
 [![Maven Central](https://img.shields.io/maven-central/v/ovh.plrapps/mapview)](https://mvnrepository.com/artifact/ovh.plrapps/mapview)
 [![GitHub License](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 
+Looking for the Compose version? Check [this](https://github.com/peterLaurence/MapCompose) out.
+
 # MapView
 
 MapView is a Fast, memory efficient Android library to display tiled maps with minimal effort.
