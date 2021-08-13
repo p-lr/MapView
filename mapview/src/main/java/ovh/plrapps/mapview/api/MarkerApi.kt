@@ -155,6 +155,7 @@ fun MapView.moveToMarker(view: View, destinationScale: Float, shouldAnimate: Boo
  * @param view The marker to be removed.
  */
 fun MapView.removeMarker(view: View) {
+    view.clearAnimation()
     markerLayout?.removeMarker(view)
 }
 
@@ -188,6 +189,7 @@ fun MapView.addCallout(view: View, x: Double, y: Double, relativeAnchorLeft: Flo
  * @param view The callout View to be removed.
  */
 fun MapView.removeCallout(view: View) {
+    view.clearAnimation()
     markerLayout?.removeCallout(view)
 }
 
