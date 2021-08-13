@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import ovh.plrapps.mapview.MapView
 import ovh.plrapps.mapview.MapViewConfiguration
 import ovh.plrapps.mapview.api.addCallout
 import ovh.plrapps.mapview.api.addMarker
+import ovh.plrapps.mapview.api.removeMarker
 import ovh.plrapps.mapview.api.setMarkerTapListener
 import ovh.plrapps.mapview.core.TileStreamProvider
 import ovh.plrapps.mapview.demo.R
@@ -33,7 +36,7 @@ class MapMarkersFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment, container, false).also {
+        return inflater.inflate(R.layout.fragment_map_markers, container, false).also {
             parentView = it as ViewGroup
             configureMapView(it)
         }
@@ -58,9 +61,10 @@ class MapMarkersFragment : Fragment() {
 
         mapView.defineBounds(0.0, 0.0, 1.0, 1.0)
 
-        mapView.addNewMarker(0.5, 0.5, "marker #1")
-        mapView.addNewMarker(0.4, 0.3, "marker #2")
-        mapView.addNewMarker(0.6, 0.4, "marker #3")
+        addNewMarker(mapView, 0.5, 0.5, "marker #1")
+        addNewMarker(mapView, 0.4, 0.3, "marker #2")
+
+        var specialMarker = addSpecialMarker(mapView)
 
 
         /* When a marker is tapped, we want to show a callout view */
@@ -75,14 +79,47 @@ class MapMarkersFragment : Fragment() {
                 }
             }
         })
+
+        /* Below is the configuration of the button to add/remove the special marker */
+        val button = view.findViewById<AppCompatButton>(R.id.add_remove_button)
+        button.text = REMOVE_MARKER
+        button.setOnClickListener(object : View.OnClickListener {
+            var added = true
+            override fun onClick(v: View?) {
+                added = !added
+                if (!added) {
+                    mapView.removeMarker(specialMarker)
+                } else {
+                    specialMarker = addSpecialMarker(mapView)
+                }
+                button.text = if (added) REMOVE_MARKER else ADD_MARKER
+            }
+        })
     }
 
-    private fun MapView.addNewMarker(x: Double, y: Double, name: String) {
-        val marker = MapMarker(context, x, y, name).apply {
+    private fun addNewMarker(mapView: MapView, x: Double, y: Double, name: String) {
+        val marker = MapMarker(requireContext(), x, y, name).apply {
             setImageResource(R.drawable.map_marker)
         }
 
-        addMarker(marker, x, y)
+        mapView.addMarker(marker, x, y)
+    }
+
+    private fun addSpecialMarker(mapView: MapView): MapMarker {
+        val x = 0.6
+        val y = 0.4
+        val marker = MapMarker(requireContext(), x, y, "special marker").apply {
+            setColorFilter(ContextCompat.getColor(this.context, R.color.colorAccent))
+            setImageResource(R.drawable.map_marker_circle)
+        }
+
+        /* Since the marker is circular, we want to center it on the position. So we use 0.5f as
+         * relative anchors */
+        mapView.addMarker(marker, x, y, relativeAnchorLeft = -0.5f, relativeAnchorTop = -0.5f)
+        return marker
     }
 }
+
+private const val ADD_MARKER = "Add marker"
+private const val REMOVE_MARKER = "Remove marker"
 
