@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showMapAlone() {
         if (getString(R.string.fragment_map_alone) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalMapAloneFragment()
             navController.navigate(action)
         }
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showMapConstrained() {
         if (getString(R.string.fragment_map_constrained) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalMapConstrainedFragment()
             navController.navigate(action)
         }
@@ -66,6 +68,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showMapMarkers() {
         if (getString(R.string.fragment_map_markers) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalMapMarkersFragment()
             navController.navigate(action)
         }
@@ -73,6 +76,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showMapPath() {
         if (getString(R.string.fragment_map_path) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalMapPathFragment()
             navController.navigate(action)
         }
@@ -80,6 +84,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showRemoteHttp() {
         if (getString(R.string.fragment_remote_http) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalRemoteHttpFragment()
             navController.navigate(action)
         }
@@ -87,6 +92,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showDeferred() {
         if (getString(R.string.fragment_deferred) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalDeferredFragment()
             navController.navigate(action)
         }
@@ -94,6 +100,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showRotating() {
         if (getString(R.string.fragment_rotating) != navController.currentDestination?.label) {
+            navController.popBackStack()
             val action = NavGraphDirections.actionGlobalRotatingMapFragment()
             navController.navigate(action)
         }
