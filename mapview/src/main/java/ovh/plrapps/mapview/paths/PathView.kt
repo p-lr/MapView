@@ -18,7 +18,7 @@ import ovh.plrapps.mapview.ReferentialListener
  * This method is much more efficient as it's hardware accelerated under some circumstances, although the result is not
  * as neat as the output of [Path].
  *
- * @author peterLaurence on 19/02/17 -- Converted to Kotlin on 26/07/19
+ * @author p-lr on 19/02/17 -- Converted to Kotlin on 26/07/19
  */
 class PathView(context: Context) : View(context), ReferentialListener {
     private val strokeWidthDefault: Float

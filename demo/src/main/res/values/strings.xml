@@ -3,7 +3,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">MapView</string>
-    <string name="nav_header_subtitle">https://github.com/peterLaurence</string>
+    <string name="nav_header_subtitle">https://github.com/p-lr</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="welcome">Welcome to MapView demo.\nUse the lateral menu to select between available demo.</string>
 

@@ -17,7 +17,7 @@ import kotlin.math.*
  * [magnifyingFactor] of 0. The value 1 will result in picking the current level at a given scale,
  * which will be at a relative scale between 1.0 and 2.0
  *
- * @author peterLaurence on 25/05/2019
+ * @author p-lr on 25/05/2019
  */
 internal class VisibleTilesResolver(private val levelCount: Int, private val fullWidth: Int,
                                     private val fullHeight: Int, private val tileSize: Int = 256,

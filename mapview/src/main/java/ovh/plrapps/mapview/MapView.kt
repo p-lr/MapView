@@ -47,7 +47,7 @@ import ovh.plrapps.mapview.core.*
  * mapView.configure(config)
  * ```
  *
- * @author peterLaurence on 31/05/2019
+ * @author p-lr on 31/05/2019
  */
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         GestureLayout(context, attrs, defStyleAttr) {

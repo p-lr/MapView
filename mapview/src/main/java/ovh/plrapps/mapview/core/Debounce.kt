@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
  * executed until a time-span of [timeoutMillis] elapses.
  * When [block] is executed, it's provided with the last [T] value sent to the channel.
  *
- * @author peterLaurence
+ * @author p-lr
  */
 fun <T> CoroutineScope.debounce(
         timeoutMillis: Long,

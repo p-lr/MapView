@@ -16,7 +16,7 @@ import ovh.plrapps.mapview.util.toRad
  * All apis related to makers are implemented as extension functions on the [MapView], like for
  * example [MapView.addMarker].
  *
- * @author peterLaurence on 18/06/2019
+ * @author p-lr on 18/06/2019
  */
 open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialListener {
 

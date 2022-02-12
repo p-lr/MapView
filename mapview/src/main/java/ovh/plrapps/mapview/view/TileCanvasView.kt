@@ -18,7 +18,7 @@ import kotlin.math.min
 /**
  * This is the view where all tiles are drawn into.
  *
- * @author peterLaurence on 02/06/2019
+ * @author p-lr on 02/06/2019
  */
 internal class TileCanvasView(ctx: Context, viewModel: TileCanvasViewModel,
                               private val tileSize: Int,

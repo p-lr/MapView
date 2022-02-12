@@ -19,7 +19,7 @@ import kotlin.math.pow
  * All internal data manipulation are thread-confined to a single background thread. This is
  * guarantied by the [scope] and its custom dispatcher.
  *
- * @author peterLaurence on 04/06/2019
+ * @author p-lr on 04/06/2019
  */
 internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
                                    private val visibleTilesResolver: VisibleTilesResolver,

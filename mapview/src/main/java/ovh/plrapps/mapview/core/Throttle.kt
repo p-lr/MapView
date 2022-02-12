@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  *
  * @param wait The time in ms between each [block] call.
  *
- * @author peterLaurence
+ * @author p-lr
  */
 fun CoroutineScope.throttle(wait: Long, block: () -> Unit): SendChannel<Unit> {
 

@@ -1,11 +1,11 @@
 [![Maven Central](https://img.shields.io/maven-central/v/ovh.plrapps/mapview)](https://mvnrepository.com/artifact/ovh.plrapps/mapview)
 [![GitHub License](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 
-Looking for the Compose version? Check [this](https://github.com/peterLaurence/MapCompose) out.
+Looking for the Compose version? Check [this](https://github.com/p-lr/MapCompose) out.
 
 # MapView
 
-MapView is a Fast, memory efficient Android library to display tiled maps with minimal effort.
+MapView is a fast, memory efficient Android library to display tiled maps with minimal effort.
 
   <p align="center">
   <img src="https://user-images.githubusercontent.com/15638794/110203419-72a74800-7e6e-11eb-8e5b-a4476f930c18.gif">
@@ -72,7 +72,7 @@ There's an example of usage inside the `RotatingMapFragment` demo.
 
 Add this to your module's build.gradle
 ```groovy
-implementation 'ovh.plrapps:mapview:3.1.1'
+implementation 'ovh.plrapps:mapview:3.1.2'
 ```
 
 In addition, update the module's build.gradle file (for each module that uses MapView), as shown below:
@@ -100,7 +100,7 @@ android {
 As a long time contributor to [TileView](https://github.com/moagrius/TileView), I wanted to see the 
 performance we would get using idiomatic Kotlin (coroutines, flows). The result was beyond my 
 expectations. The overall design can be seen 
-[here](https://github.com/peterLaurence/MapView/wiki/TileCollector-design).
+[here](https://github.com/p-lr/MapView/wiki/TileCollector-design).
 Special attention has been given to efficiency (using non-blocking algorithm to avoiding thread 
 contention). We get smooth animations and high fps.
 
@@ -176,7 +176,7 @@ val config = MapViewConfiguration(levelCount = 7, fullWidth = 25000, fullHeight 
                                   .setMaxScale(2f)
 ```
 
-See documentation [here](https://github.com/peterLaurence/MapView/blob/79de39ff54cd59e2ceac0247a79f372180a11aa4/mapview/src/main/java/ovh/plrapps/mapview/MapView.kt#L393). 
+See documentation [here](https://github.com/p-lr/MapView/blob/79de39ff54cd59e2ceac0247a79f372180a11aa4/mapview/src/main/java/ovh/plrapps/mapview/MapView.kt#L393).
 Below is a description of mandatory parameters:
 
 **`levelCount`**
@@ -265,7 +265,7 @@ Follow this [cheat sheet](doc/how-do-i.md).
 
 ### API documentation
 
-API documentation has its own [wiki page](https://github.com/peterLaurence/MapView/wiki/MapView-API).
+API documentation has its own [wiki page](https://github.com/p-lr/MapView/wiki/MapView-API).
 
 
 

@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit
  * ```
  * This architecture is an example of Communicating Sequential Processes (CSP).
  *
- * @author peterLaurence on 22/06/19
+ * @author p-lr on 22/06/19
  */
 class TileCollector(private val workerCount: Int, private val bitmapConfig: Bitmap.Config) {
 
