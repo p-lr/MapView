@@ -203,6 +203,7 @@ internal class TileCanvasViewModel(parentScope: CoroutineScope, tileSize: Int,
         paint = (paintPool.get() ?: Paint()).also {
             it.alpha = 0
             it.colorFilter = tileOptionsProvider.getColorFilter(row, col, zoom)
+            it.isAntiAlias = false
         }
     }
 
