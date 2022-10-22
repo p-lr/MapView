@@ -2,7 +2,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlinx-serialization'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
@@ -18,11 +17,11 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 31
+        targetSdkVersion 33
     }
 
     buildTypes {
@@ -40,16 +39,15 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
         freeCompilerArgs = ['-Xjvm-default=all-compatibility']
     }
+    namespace 'ovh.plrapps.mapview'
 }
 
 dependencies {
-    def coroutine_version = '1.6.1'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.7.3'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
 }
 repositories {
