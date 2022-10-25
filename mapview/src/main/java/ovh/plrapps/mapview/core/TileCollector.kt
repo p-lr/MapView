@@ -90,20 +90,26 @@ class TileCollector(private val workerCount: Int, private val bitmapConfig: Bitm
                 bitmapLoadingOptions.inSampleSize = 0
             }
 
-            try {
-                val bitmap = BitmapFactory.decodeStream(i, null, bitmapLoadingOptions) ?: continue
-                val tile = Tile(spec.zoom, spec.row, spec.col, spec.subSample).apply {
-                    this.bitmap = bitmap
+            val bitmap = runCatching {
+                i.use {
+                    BitmapFactory.decodeStream(i, null, bitmapLoadingOptions)
                 }
-                tilesOutput.send(tile)
-            } catch (e: OutOfMemoryError) {
-                // no luck
-            } catch (e: Exception) {
-                // maybe retry
-            } finally {
-                tilesDownloaded.send(spec)
-                i?.close()
+            }.getOrNull() ?: runCatching {
+                /* Retry loading the image without using already allocated memory */
+                if (bitmapLoadingOptions.inBitmap != null) {
+                    bitmapLoadingOptions.inBitmap = null
+                    val retry = tileStreamProvider.getTileStream(spec.row, spec.col, spec.zoom)
+                    retry.use {
+                        BitmapFactory.decodeStream(retry, null, null)
+                    }
+                } else null
+            }.getOrNull() ?: continue
+
+            val tile = Tile(spec.zoom, spec.row, spec.col, spec.subSample).apply {
+                this.bitmap = bitmap
             }
+            tilesOutput.send(tile)
+            tilesDownloaded.send(spec)
         }
     }
 
