@@ -152,6 +152,7 @@ open class MarkerLayout(context: Context) : ViewGroup(context), ReferentialListe
         calloutViewList.forEach {
             removeViewInLayout(it)
         }
+        calloutViewList.clear()
         requestLayout()
         invalidate()
     }
