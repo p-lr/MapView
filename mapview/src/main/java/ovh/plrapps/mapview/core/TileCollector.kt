@@ -16,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import kotlin.math.pow
 
 
 /**
@@ -83,7 +84,7 @@ class TileCollector(private val workerCount: Int, private val bitmapConfig: Bitm
             if (spec.subSample > 0) {
                 bitmapLoadingOptions.inBitmap = null
                 bitmapLoadingOptions.inScaled = true
-                bitmapLoadingOptions.inSampleSize = spec.subSample
+                bitmapLoadingOptions.inSampleSize = (2.0.pow(spec.subSample)).toInt()
             } else {
                 bitmapLoadingOptions.inScaled = false
                 bitmapLoadingOptions.inBitmap = bitmapFlow.singleOrNull()
