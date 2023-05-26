@@ -39,6 +39,14 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
         freeCompilerArgs = ['-Xjvm-default=all-compatibility']
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+
     namespace 'ovh.plrapps.mapview'
 }
 
@@ -67,13 +75,11 @@ afterEvaluate { project ->
     publishing {
         publications {
             release(MavenPublication) {
+                from components.release
 
                 groupId = GROUP
                 artifactId = 'mapview'
                 version = VERSION_NAME
-
-                artifact bundleReleaseAar
-                artifact androidSourcesJar
 
                 pom {
                     name = POM_NAME
