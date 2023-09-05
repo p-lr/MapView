@@ -377,7 +377,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
         return true
     }
 
-    override fun onFling(event1: MotionEvent, event2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+    override fun onFling(event1: MotionEvent?, event2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         val c = gestureController
         if (gestureController.angle == 0f) { // fast path
             scroller.fling(scrollX, scrollY, (-velocityX).toInt(), (-velocityY).toInt(),
@@ -399,7 +399,7 @@ abstract class GestureLayout @JvmOverloads constructor(context: Context, attrs: 
 
     }
 
-    override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+    override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
         if (gestureController.angle == 0f) {  // fast path
             val scrollEndX = scrollX + distanceX.toInt()
             val scrollEndY = scrollY + distanceY.toInt()
