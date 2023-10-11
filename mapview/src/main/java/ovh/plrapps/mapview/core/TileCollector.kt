@@ -104,13 +104,16 @@ class TileCollector(private val workerCount: Int, private val bitmapConfig: Bitm
                         BitmapFactory.decodeStream(retry, null, null)
                     }
                 } else null
-            }.getOrNull() ?: continue
+            }.getOrNull()
+            tilesDownloaded.send(spec)
+            if (bitmap == null) {
+                continue
+            }
 
             val tile = Tile(spec.zoom, spec.row, spec.col, spec.subSample).apply {
                 this.bitmap = bitmap
             }
             tilesOutput.send(tile)
-            tilesDownloaded.send(spec)
         }
     }
 
